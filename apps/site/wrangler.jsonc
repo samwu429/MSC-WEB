@@ -46,9 +46,7 @@
     {
       "binding": "DB",
       "database_name": "msc-web",
-      // Replace with the id printed by `npx wrangler d1 create msc-web` before the first deploy.
-      // 首次部署前，替换为 `npx wrangler d1 create msc-web` 输出的 id。
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "309a917c-07f5-4894-9ee3-9ba98e6ee06d",
       "migrations_dir": "migrations"
     }
   ],

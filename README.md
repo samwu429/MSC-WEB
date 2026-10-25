@@ -62,21 +62,17 @@ On localhost the sign-in page offers a developer sign-in with `DEV_ADMIN_TOKEN`.
 
 在本机上，登录页提供使用 `DEV_ADMIN_TOKEN` 的开发者登录。修改后台界面时如需热更新，请保持 `npm run dev` 运行，并另外启动 `npm run dev:admin`（http://localhost:5174/admin/）。
 
-## First deployment
+## Deployment
 
-Run inside `apps/site` after `npx wrangler login` with the account that hosts the UTMMSC Workers:
+The D1 database `msc-web` and the R2 bucket `msc-web-media` exist in the account that hosts the UTMMSC Workers, and `apps/site/wrangler.jsonc` names them. To publish a change, run inside `apps/site` after `npx wrangler login` with that account:
 
 ```bash
-npx wrangler d1 create msc-web            # put the printed database_id into apps/site/wrangler.jsonc
-npx wrangler r2 bucket create msc-web-media
-npm run deploy                            # builds the admin app, applies migrations, deploys msc-web
+npm run deploy                            # builds the admin app, applies new migrations, deploys msc-web
 ```
 
-Then deploy the front door from the UTMMSC repository (`npm run deploy:site`). Its `WEB` service binding sends every path the member network does not use (`/`, `/events`, `/admin/` and so on) to `msc-web`; `/UTMMSC/`, `/api/` and `/download/` stay with the member network.
+Pushing to `main` only runs the checks; it does not publish. The front door is the UTMMSC repository's site Worker (`npm run deploy:site` there). Its `WEB` service binding sends every path the member network does not use (`/`, `/events`, `/admin/` and so on) to `msc-web`; `/UTMMSC/`, `/api/` and `/download/` stay with the member network. It only needs redeploying when its own code changes.
 
-然后在 UTMMSC 仓库中部署入口 Worker（`npm run deploy:site`）。它的 `WEB` 服务绑定会把成员网络不使用的所有路径（`/`、`/events`、`/admin/` 等）交给 `msc-web`；`/UTMMSC/`、`/api/` 与 `/download/` 仍属于成员网络。
-
-Later deployments only need `npm run deploy` in `apps/site`.
+推送到 `main` 只会运行检查，不会发布。入口是 UTMMSC 仓库中的网站 Worker（在该仓库运行 `npm run deploy:site`）。它的 `WEB` 服务绑定会把成员网络不使用的所有路径（`/`、`/events`、`/admin/` 等）交给 `msc-web`；`/UTMMSC/`、`/api/` 与 `/download/` 仍属于成员网络。只有入口自身的代码变化时才需要重新部署它。
 
 ## Scripts
 
