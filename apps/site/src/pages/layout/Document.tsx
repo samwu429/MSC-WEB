@@ -40,7 +40,7 @@ export function Document({ ctx, meta, children }: { ctx: PageContext; meta: Page
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <meta name="theme-color" content="#3C165F" />
+        <meta name="theme-color" content="#FFFFFF" />
         <title>{title}</title>
         <meta name="description" content={meta.description} />
         {meta.noindex && <meta name="robots" content="noindex" />}

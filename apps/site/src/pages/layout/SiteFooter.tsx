@@ -33,7 +33,7 @@ export function SiteFooter({ ctx }: { ctx: PageContext }) {
         <div class="footer-grid">
           <div class="footer-brand">
             <a class="brand" href={localePath(locale, '/')}>
-              <BookMark class="brand__mark" light />
+              <BookMark class="brand__mark" />
               <span class="brand__text">
                 <span class="brand__name">UTMMSC</span>
                 <span class="brand__sub">{t(COMMON, 'siteName', locale)}</span>
