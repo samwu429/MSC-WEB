@@ -1,0 +1,65 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "msc-web",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-06-01",
+  "workers_dev": true,
+  "observability": { "enabled": true },
+
+  // Static files: the site's own images and styles from ./static, and the admin build under /admin/. Staged into
+  // ./public by scripts/stage.mjs. The Worker runs first so it can route pages, media and the admin API itself.
+  // 静态文件：./static 中的网站图片与样式，以及 /admin/ 下的后台构建产物，由 scripts/stage.mjs 组装到 ./public。
+  // Worker 优先运行，自行处理页面、媒体文件与后台接口的路由。
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "html_handling": "none",
+    "not_found_handling": "none",
+    "run_worker_first": true
+  },
+
+  // No routes here: utmmsc.com belongs to the member network's front-door Worker (utmmsc-site), which forwards every
+  // public path to this Worker through a service binding and keeps /UTMMSC/, /api/ and /download/ for itself.
+  // 此处不配置路由：utmmsc.com 属于成员网络的入口 Worker（utmmsc-site），它通过服务绑定把所有公开路径转发给本 Worker，
+  // 自己保留 /UTMMSC/、/api/ 与 /download/。
+
+  "vars": {
+    // Canonical origin for links in sitemap.xml and social previews.
+    // sitemap.xml 与社交分享预览中链接所用的规范源。
+    "PUBLIC_ORIGIN": "https://utmmsc.com",
+    // The member network, linked from "Join us" and the header.
+    // 成员网络，"加入我们" 与页眉中的链接指向这里。
+    "MEMBER_APP_URL": "/UTMMSC/",
+    "ANDROID_DOWNLOAD_URL": "/download/android",
+    // Used only when the MEMBER_API binding is missing, such as in local development.
+    // 仅在缺少 MEMBER_API 绑定时使用，例如本地开发。
+    "MEMBER_API_ORIGIN": "https://utmmsc-api.utmmsc.workers.dev"
+  },
+
+  // The member network API verifies admin sign-ins. Its sessions and roles decide who may edit the site.
+  // 成员网络接口负责验证后台登录。由它的会话与身份决定谁可以编辑网站。
+  "services": [
+    { "binding": "MEMBER_API", "service": "utmmsc-api" }
+  ],
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "msc-web",
+      // Replace with the id printed by `npx wrangler d1 create msc-web` before the first deploy.
+      // 首次部署前，替换为 `npx wrangler d1 create msc-web` 输出的 id。
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  // A bucket of its own, so this Worker can never read the member network's private files.
+  // 使用独立的存储桶，本 Worker 因此永远无法读取成员网络的私有文件。
+  "r2_buckets": [
+    { "binding": "MEDIA", "bucket_name": "msc-web-media" }
+  ],
+
+  // Daily at 07:17 UTC: remove uploads that were never attached to anything.
+  // 每天 UTC 07:17：删除从未被任何内容使用的上传文件。
+  "triggers": { "crons": ["17 7 * * *"] }
+}

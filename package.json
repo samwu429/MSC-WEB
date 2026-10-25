@@ -1,0 +1,22 @@
+{
+  "name": "msc-web",
+  "private": true,
+  "version": "0.1.0",
+  "description": "UTMMSC public website at utmmsc.com: home, events, test reviews, our people, and an editing backend.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace apps/site",
+    "dev:admin": "npm run dev --workspace apps/admin",
+    "build": "npm run build --workspace apps/admin && npm run stage --workspace apps/site",
+    "deploy": "npm run deploy --workspace apps/site",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=22.5"
+  }
+}

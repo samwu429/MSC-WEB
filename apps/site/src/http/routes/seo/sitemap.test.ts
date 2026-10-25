@@ -1,0 +1,67 @@
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { app } from '../../app';
+import { createTestEnv, type TestEnv } from '../../testing/test-env';
+import { sqlite } from '../../../infrastructure/d1/testing/sqlite-d1';
+import { seedCourse, seedEvent, seedSession } from '../../../infrastructure/d1/public/testing/seed';
+import { sitemapXml } from './sitemap';
+
+describe.skipIf(!sqlite)('sitemap.xml', () => {
+  let test: TestEnv;
+
+  beforeEach(() => {
+    test = createTestEnv();
+  });
+
+  afterEach(() => test.close());
+
+  function locs(xml: string): string[] {
+    return [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((match) => match[1] ?? '');
+  }
+
+  it('lists every section, the Our People pages, published events and reviewed courses in both languages', async () => {
+    seedEvent(test.d1, { slug: '2026-10-mid-autumn', startsAt: '2026-10-03T18:00', updatedAt: '2026-10-04T08:00:00.000Z' });
+    seedEvent(test.d1, { slug: 'secret-plan', startsAt: '2026-11-01T18:00', status: 'draft' });
+    const csc = seedCourse(test.d1, { code: 'CSC108H5', updatedAt: '2026-09-01T00:00:00.000Z' });
+    seedSession(test.d1, { courseId: csc, term: '2026-fall', updatedAt: '2026-10-12T00:00:00.000Z' });
+    seedSession(test.d1, { courseId: seedCourse(test.d1, { code: 'MAT135H5' }), term: '2026-fall', status: 'draft' });
+    seedSession(test.d1, { courseId: seedCourse(test.d1, { code: 'ECO101H5', visible: false }), term: '2026-fall' });
+
+    const response = await app.request('/sitemap.xml', {}, test.env);
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toContain('application/xml');
+    const xml = await response.text();
+    expect(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBe(true);
+    expect(locs(xml)).toEqual([
+      'https://utmmsc.com/',
+      'https://utmmsc.com/en',
+      'https://utmmsc.com/events',
+      'https://utmmsc.com/en/events',
+      'https://utmmsc.com/reviews',
+      'https://utmmsc.com/en/reviews',
+      'https://utmmsc.com/people',
+      'https://utmmsc.com/en/people',
+      'https://utmmsc.com/about',
+      'https://utmmsc.com/en/about',
+      'https://utmmsc.com/people/presidium',
+      'https://utmmsc.com/en/people/presidium',
+      'https://utmmsc.com/people/advisors',
+      'https://utmmsc.com/en/people/advisors',
+      'https://utmmsc.com/people/departments',
+      'https://utmmsc.com/en/people/departments',
+      'https://utmmsc.com/events/2026-10-mid-autumn',
+      'https://utmmsc.com/en/events/2026-10-mid-autumn',
+      'https://utmmsc.com/reviews/csc108h5',
+      'https://utmmsc.com/en/reviews/csc108h5',
+    ]);
+    expect(xml).toContain('<loc>https://utmmsc.com/events/2026-10-mid-autumn</loc>\n    <lastmod>2026-10-04T08:00:00.000Z</lastmod>');
+    expect(xml).toContain('<loc>https://utmmsc.com/reviews/csc108h5</loc>\n    <lastmod>2026-10-12T00:00:00.000Z</lastmod>');
+    expect(xml).toContain('<xhtml:link rel="alternate" hreflang="en" href="https://utmmsc.com/en/reviews/csc108h5"/>');
+    expect(xml.match(/<lastmod>/g)).toHaveLength(4);
+  });
+
+  it('builds absolute addresses from the configured origin and escapes them', async () => {
+    const xml = await sitemapXml({ ...test.env, PUBLIC_ORIGIN: 'https://preview.example.com/a&b/' });
+    expect(locs(xml)[0]).toBe('https://preview.example.com/a&amp;b/');
+    expect(xml).not.toMatch(/&(?!amp;|lt;|gt;|quot;|apos;)/);
+  });
+});

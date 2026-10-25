@@ -1,0 +1,7 @@
+# Copy to apps/site/.dev.vars for local development. .dev.vars is ignored by git; never put real values here.
+# 复制为 apps/site/.dev.vars 用于本地开发。.dev.vars 不进入 git；不要在此文件中填写真实值。
+
+# Signs in to http://localhost:8787/admin/ as a developer with every permission. At least 24 characters.
+# Accepted only for requests to localhost; never set it as a production secret.
+# 以拥有全部权限的开发者身份登录 http://localhost:8787/admin/。至少 24 个字符。只对发往 localhost 的请求有效；绝不要设置为生产环境密钥。
+DEV_ADMIN_TOKEN=
