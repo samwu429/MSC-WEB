@@ -81,7 +81,7 @@ describe('withSection', () => {
   });
 
   it('always yields a placement the shared validator accepts', () => {
-    const named = { ...head, name: { zh: '李四', en: '' } };
+    const named = { ...head, name: { zh: '', en: 'Si Li' } };
     for (const section of ['presidium', 'department', 'advisor'] as const) {
       expect(validatePersonInput(withSection(named, section)).ok).toBe(true);
     }

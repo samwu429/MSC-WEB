@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { mediaUrl, pickText, type Person } from '@msc-web/content';
+import { mediaUrl, type Person } from '@msc-web/content';
 import { LinkButton } from '../../../shared/ui/Button';
 import { Badge } from '../../../shared/ui/feedback';
 import { personTitle, photoPlaceholder } from './people-board';
@@ -16,16 +16,12 @@ function PersonThumbnail({ person }: { person: Person }) {
 }
 
 function PersonRow({ person }: { person: Person }) {
-  const primary = pickText(person.name, 'zh') || '未填写姓名';
-  const secondary = primary === person.name.en ? '' : person.name.en;
+  const primary = person.name.en.trim() || '未填写英文姓名';
   return (
     <Link to={`/people/${person.id}`} className="flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-brand-50">
       <PersonThumbnail person={person} />
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-semibold text-ink">
-          {primary}
-          {secondary && <span className="ml-2 font-normal text-ink-muted">{secondary}</span>}
-        </span>
+        <span className={`block truncate text-sm font-semibold ${person.name.en.trim() ? 'text-ink' : 'text-red-700'}`}>{primary}</span>
         <span className="block truncate text-xs text-ink-muted">{personTitle(person)}</span>
       </span>
       {!person.visible && <Badge>已隐藏</Badge>}

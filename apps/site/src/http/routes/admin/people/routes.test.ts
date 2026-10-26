@@ -109,7 +109,7 @@ describe.skipIf(!sqlite)('admin people API', () => {
     expect(next.name.zh).toBe('李华');
     expect(next.updatedAt > person.updatedAt).toBe(true);
 
-    const late = await update(person.id, personBody({ name: { zh: '张三', en: '' } }), person.updatedAt);
+    const late = await update(person.id, personBody({ name: { zh: '张三', en: 'San Zhang' } }), person.updatedAt);
     expect(late.status).toBe(409);
     expect((await errorOf(late)).code).toBe('stale');
     const stored = ((await (await send(`/${person.id}`, asOfficer(TEST_TOKENS.president))).json()) as PersonResponse).person;
@@ -163,7 +163,7 @@ describe.skipIf(!sqlite)('admin people API', () => {
     await created(VICE_HEAD);
     await created({ ...VICE_HEAD, name: { zh: '李华', en: 'Hua Li' } });
     await created(ADVISOR);
-    await created({ ...ADVISOR, name: { zh: '张三', en: '' } });
+    await created({ ...ADVISOR, name: { zh: '张三', en: 'San Zhang' } });
     const { people } = (await (await send('', asOfficer(TEST_TOKENS.president))).json()) as PeopleResponse;
     expect(people).toHaveLength(4);
   });
@@ -180,7 +180,7 @@ describe.skipIf(!sqlite)('admin people API', () => {
     expect(response.status).toBe(400);
     const error = await errorOf(response);
     expect(error.code).toBe('invalid');
-    expect(error.issues?.map((issue) => issue.field).sort()).toEqual(['department', 'email', 'linkUrl', 'name.zh', 'photoKey', 'position']);
+    expect(error.issues?.map((issue) => issue.field).sort()).toEqual(['department', 'email', 'linkUrl', 'name.en', 'photoKey', 'position']);
     expect(test.d1.rows('SELECT id FROM people')).toEqual([]);
   });
 

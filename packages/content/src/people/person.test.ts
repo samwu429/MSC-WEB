@@ -21,6 +21,13 @@ describe('validatePersonInput', () => {
     if (result.ok) expect(result.value.department).toBe('academic');
   });
 
+  it('requires the English name, which is the one Our People shows', () => {
+    const chineseOnly = validatePersonInput({ ...base, name: { zh: '张三', en: '' }, section: 'advisor', position: 'advisor' });
+    expect(chineseOnly.ok).toBe(false);
+    if (!chineseOnly.ok) expect(chineseOnly.issues).toEqual([{ field: 'name.en', message: '请填写英文姓名' }]);
+    expect(validatePersonInput({ ...base, name: { zh: '', en: 'San Zhang' }, section: 'advisor', position: 'advisor' }).ok).toBe(true);
+  });
+
   it('requires a department for department positions', () => {
     const result = validatePersonInput({ ...base, section: 'department', position: 'head' });
     expect(result.ok).toBe(false);

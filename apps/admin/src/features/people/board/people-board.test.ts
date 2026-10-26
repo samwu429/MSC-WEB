@@ -66,27 +66,27 @@ describe('buildPeopleBoard', () => {
 
 describe('personTitle', () => {
   it('falls back to the office title when no custom title is set', () => {
-    expect(personTitle(person({ section: 'department', position: 'head', department: 'academic' }))).toBe('学术部部长');
-    expect(personTitle(person({ section: 'advisor', position: 'advisor' }))).toBe('荣誉顾问');
+    expect(personTitle(person({ section: 'department', position: 'head', department: 'academic' }))).toBe('Head of Academic');
+    expect(personTitle(person({ section: 'advisor', position: 'advisor' }))).toBe('Honorary Advisor');
   });
 
-  it('prefers the custom title, using the English side when the Chinese one is empty', () => {
-    expect(personTitle(person({ title: { zh: '创始主席', en: 'Founding President' } }))).toBe('创始主席');
+  it('prefers the custom title in English, as the site shows it', () => {
+    expect(personTitle(person({ title: { zh: '创始主席', en: 'Founding President' } }))).toBe('Founding President');
     expect(personTitle(person({ title: { zh: '', en: 'Founding President' } }))).toBe('Founding President');
   });
 });
 
 describe('photoPlaceholder', () => {
-  it('uses the first character of the Chinese name', () => {
-    expect(photoPlaceholder({ zh: '王小明', en: 'Xiaoming Wang' })).toBe('王');
+  it('uses the English initials, as the site shows them', () => {
+    expect(photoPlaceholder({ zh: '王小明', en: 'Xiaoming Wang' })).toBe('XW');
   });
 
-  it('uses up to two English initials when there is no Chinese name', () => {
+  it('uses up to two English initials', () => {
     expect(photoPlaceholder({ zh: '', en: 'yihang sam wu' })).toBe('YS');
     expect(photoPlaceholder({ zh: '  ', en: 'Ada' })).toBe('A');
   });
 
-  it('matches the Chinese public page when the Chinese field holds a Latin name', () => {
+  it('falls back to the Chinese field when no English name was written', () => {
     expect(photoPlaceholder({ zh: 'Ada Lin', en: '' })).toBe('AL');
   });
 

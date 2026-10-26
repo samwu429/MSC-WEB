@@ -77,7 +77,7 @@ export function PersonForm(props: { person: Person | null; defaults: PersonInput
 
   async function remove() {
     if (!saved) return;
-    const name = pickText(saved.name, 'zh') || '这位成员';
+    const name = pickText(saved.name, 'en') || '这位成员';
     const confirmed = await confirm({
       title: `删除「${name}」？`,
       message: '删除后无法恢复。如果只是卸任，可以改为取消勾选「在网站上显示」。',
@@ -153,7 +153,7 @@ export function PersonForm(props: { person: Person | null; defaults: PersonInput
           <Checkbox label="在网站上显示" checked={value.visible} onChange={(visible) => change({ visible })} hint="隐藏的成员只保留在后台，不会出现在网站上。" />
         </Panel>
 
-        <Panel title="姓名与介绍" description="「我们的团队」在网站上只显示英文，请务必填写英文；中文只用于后台识别。">
+        <Panel title="姓名与介绍" description="「我们的团队」在网站上只显示英文，这里的内容都用英文填写。">
           <LocalizedInput
             label="姓名"
             value={value.name}
@@ -161,6 +161,7 @@ export function PersonForm(props: { person: Person | null; defaults: PersonInput
             issues={issues}
             field="name"
             required
+            englishOnly
             maxLength={PERSON_LIMITS.name}
           />
           <LocalizedInput
@@ -169,8 +170,9 @@ export function PersonForm(props: { person: Person | null; defaults: PersonInput
             onChange={(title) => change({ title })}
             issues={issues}
             field="title"
+            englishOnly
             maxLength={PERSON_LIMITS.title}
-            hint={`留空时显示职位名称：${fallbackTitle.zh} / ${fallbackTitle.en}`}
+            hint={`留空时显示职位名称：${fallbackTitle.en}`}
           />
           <LocalizedInput
             label="专业或单位"
@@ -178,8 +180,9 @@ export function PersonForm(props: { person: Person | null; defaults: PersonInput
             onChange={(affiliation) => change({ affiliation })}
             issues={issues}
             field="affiliation"
+            englishOnly
             maxLength={PERSON_LIMITS.affiliation}
-            hint="学生填写专业与年级，荣誉顾问填写职位与单位。"
+            hint="学生填写专业与年级（如 Computer Science, Year 3），荣誉顾问填写职位与单位。"
           />
           <LocalizedInput
             label="简介"
@@ -187,6 +190,7 @@ export function PersonForm(props: { person: Person | null; defaults: PersonInput
             onChange={(bio) => change({ bio })}
             issues={issues}
             field="bio"
+            englishOnly
             multiline
             rows={5}
             maxLength={PERSON_LIMITS.bio}

@@ -77,7 +77,7 @@ export function validatePersonInput(raw: unknown): ValidationResult<PersonInput>
     section,
     position,
     department,
-    name: readLocalizedText(issues, body.name, 'name', { label: '姓名', max: PERSON_LIMITS.name, required: true }),
+    name: readLocalizedText(issues, body.name, 'name', { label: '姓名', max: PERSON_LIMITS.name }),
     title: readLocalizedText(issues, body.title, 'title', { label: '头衔', max: PERSON_LIMITS.title }),
     affiliation: readLocalizedText(issues, body.affiliation, 'affiliation', { label: '专业或单位', max: PERSON_LIMITS.affiliation }),
     bio: readLocalizedText(issues, body.bio, 'bio', { label: '简介', max: PERSON_LIMITS.bio, multiline: true }),
@@ -87,6 +87,9 @@ export function validatePersonInput(raw: unknown): ValidationResult<PersonInput>
     sortOrder: readInteger(issues, body.sortOrder, 'sortOrder', { label: '排序', min: 0, max: 9999, fallback: 0 }),
     visible: readBoolean(issues, body.visible, 'visible', '是否显示', true),
   };
+  // Our People shows English only, so the English name is the one that must be there.
+  // "我们的团队" 只显示英文，因此必须填写的是英文姓名。
+  if (!value.name.en) issues.add('name.en', '请填写英文姓名');
   return issues.result(value);
 }
 

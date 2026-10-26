@@ -172,6 +172,9 @@ export function LocalizedInput(props: {
   multiline?: boolean;
   rows?: number;
   maxLength?: number;
+  /** Show only the English, for text the site shows in English alone (Our People). */
+  /** 只显示英文输入框，用于网站只显示英文的内容（"我们的团队"）。 */
+  englishOnly?: boolean;
 }) {
   const zhId = useId();
   const enId = useId();
@@ -192,6 +195,25 @@ export function LocalizedInput(props: {
       <input {...common} type="text" onChange={(event) => props.onChange({ ...props.value, [lang]: event.target.value })} />
     );
   };
+  if (props.englishOnly) {
+    const error = enError ?? zhError;
+    return (
+      <div>
+        <label htmlFor={enId} className="mb-1.5 block text-sm font-semibold text-ink">
+          {props.label}
+          {props.required && <span className="ml-1 text-red-600">*</span>}
+          <span className="ml-2 text-xs font-normal text-ink-muted">英文</span>
+        </label>
+        {control(enId, 'en', error)}
+        {error && (
+          <p className="mt-1.5 text-xs font-medium text-red-700" role="alert">
+            {error}
+          </p>
+        )}
+        {props.hint && <p className="mt-1.5 text-xs text-ink-muted">{props.hint}</p>}
+      </div>
+    );
+  }
   return (
     <fieldset>
       <legend className="mb-1.5 text-sm font-semibold text-ink">

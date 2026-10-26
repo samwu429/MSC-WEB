@@ -41,14 +41,14 @@ export function buildPeopleBoard(people: readonly Person[]): PeopleBoard {
   };
 }
 
-/** The title the Chinese site shows. */
-/** 中文网站显示的头衔。 */
+/** The title the site shows, in English. */
+/** 网站显示的头衔（英文）。 */
 export function personTitle(person: Person): string {
-  return pickText(personDisplayTitle(person), 'zh');
+  return pickText(personDisplayTitle(person), 'en');
 }
 
-/** The placeholder for a missing photo, the same initials the Chinese site shows, or "?" for an empty name. */
-/** 没有照片时的占位文字，与中文网站显示的首字相同；姓名为空时为 "?"。 */
+/** The placeholder for a missing photo, the same initials the site shows, or "?" for an empty name. */
+/** 没有照片时的占位文字，与网站显示的首字母相同；姓名为空时为 "?"。 */
 export function photoPlaceholder(name: LocalizedText): string {
-  return personInitials(pickText(name, 'zh')) || '?';
+  return personInitials(pickText(name, 'en')) || '?';
 }
