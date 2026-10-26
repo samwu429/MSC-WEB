@@ -1,6 +1,6 @@
 import { termOfDate, torontoWallTime, wallDateOf } from '@msc-web/content';
 import { listUpcomingEvents } from '../../../../infrastructure/d1/public/events';
-import { countHomeStats, listHighlightPhotos } from '../../../../infrastructure/d1/public/home';
+import { countHomeStats } from '../../../../infrastructure/d1/public/home';
 import { listVisiblePeople } from '../../../../infrastructure/d1/public/people';
 import { listTermCourseReviews } from '../../../../infrastructure/d1/public/reviews';
 import { txt } from '../../../../pages/components/common';
@@ -13,7 +13,6 @@ import type { PageHandler } from '../page-handler';
 
 const UPCOMING_EVENT_LIMIT = 3;
 const TERM_COURSE_LIMIT = 4;
-const HIGHLIGHT_PHOTO_LIMIT = 6;
 
 /**
  * The home page. One instant drives both the page context and the queries, so "upcoming" and "this term" agree with
@@ -25,13 +24,12 @@ export const homePage: PageHandler = async (c, locale) => {
   const now = new Date();
   const wallNow = torontoWallTime(now);
   const term = termOfDate(wallDateOf(wallNow));
-  const [ctx, stats, upcomingEvents, termCourses, presidium, photos] = await Promise.all([
+  const [ctx, stats, upcomingEvents, termCourses, presidium] = await Promise.all([
     loadPageContext(c, locale, now),
     countHomeStats(db),
     listUpcomingEvents(db, wallNow, { limit: UPCOMING_EVENT_LIMIT }),
     listTermCourseReviews(db, term),
     listVisiblePeople(db, 'presidium'),
-    listHighlightPhotos(db, HIGHLIGHT_PHOTO_LIMIT),
   ]);
   return renderPage(
     c,
@@ -45,7 +43,6 @@ export const homePage: PageHandler = async (c, locale) => {
         term,
         termCourses: termCourses.slice(0, TERM_COURSE_LIMIT),
         presidium: buildRoster(presidium).presidium,
-        photos,
       }}
     />,
   );

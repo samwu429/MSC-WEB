@@ -109,14 +109,13 @@ describe.skipIf(!sqlite)('home page', () => {
     expect(occurrences(html, 'class="empty"')).toBe(2);
     expect(html).toContain(`<div class="eyebrow">${term}</div>`);
     expect(occurrences(html, 'class="person person--vacant"')).toBe(4);
-    expect(html).toContain('src="/static/photos/review-session.jpg"');
-    expect(html).toContain('src="/static/photos/community.jpg"');
+    expect(html).not.toContain('class="gallery');
     expect(html).toContain(`href="${events}?type=academic"`);
     expect(html).not.toContain('github.com');
     expect(html).toContain('class="cta-band"');
   });
 
-  it('shows the next three events, published reviews of this term, the Presidium and recent photos', async () => {
+  it('shows the next three events, published reviews of this term, and the Presidium, without a photo gallery', async () => {
     await seed();
     const html = await render('/');
 
@@ -142,20 +141,19 @@ describe.skipIf(!sqlite)('home page', () => {
     expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
     expect(occurrences(html, 'class="person person--vacant"')).toBe(2);
 
-    expect(html).toContain(`<a href="/events/2026-10-next-social"><img src="${mediaUrl(PHOTO_KEY)}" alt="近期联谊"`);
-    expect(html).not.toContain('/static/photos/review-session.jpg');
+    expect(html).not.toContain('class="gallery');
+    expect(html).not.toContain('alt="近期联谊"');
 
     expect(html).toContain(`class="hero__photo" src="${mediaUrl(PHOTO_KEY)}"`);
     expect(html).toContain(`<meta property="og:image" content="https://utmmsc.com${mediaUrl(PHOTO_KEY)}"/>`);
     expect(html).toContain('href="https://github.com/utmmsc" rel="noopener noreferrer" target="_blank"');
   });
 
-  it('links photos and actions to the English pages on /en', async () => {
+  it('links events and actions to the English pages on /en', async () => {
     await seed();
     const html = await render('/en');
     expect(html).toContain('Ongoing Talk');
-    expect(html).toContain('<a href="/en/events/2026-10-next-social"><img');
-    expect(html).toContain('alt="Next Social"');
+    expect(html).toContain('<a class="card__link" href="/en/events/2026-10-next-social">Next Social</a>');
     expect(html).toContain('href="/en/reviews"');
     expect(html).toContain('href="/en/people"');
     expect(html).toContain('href="/en/people/presidium"');
@@ -189,12 +187,10 @@ describe.skipIf(!sqlite)('home page', () => {
     expect(english).toContain('<p class="hero__tagline" lang="zh-CN">一起学习，一起成长</p>');
     expect(english).toContain('<p lang="zh-CN">一起学习，一起成长</p>');
     expect(english).toContain('<div class="prose hero__intro"><p>A home for Mandarin learners.</p></div>');
-    expect(english).toContain('<figure class="gallery__item" lang="zh-CN"><a href="/en/events/2026-10-next-social">');
     expect(english).toContain('<h3 class="card__title" lang="zh-CN"><a class="card__link" href="/en/events/2026-10-next-social">近期联谊</a></h3>');
 
     const chinese = await render('/');
     expect(chinese).toContain('<p class="hero__tagline">一起学习，一起成长</p>');
     expect(chinese).toContain('<div class="prose hero__intro" lang="en-CA"><p>A home for Mandarin learners.</p></div>');
-    expect(chinese).toContain('<figure class="gallery__item"><a href="/events/2026-10-next-social">');
   });
 });

@@ -1,4 +1,4 @@
-import type { LocalizedText, PublishStatus } from '@msc-web/content';
+import type { PublishStatus } from '@msc-web/content';
 
 /**
  * Read queries only the home page needs; its event and review lists reuse the queries of those pages. Only
@@ -39,31 +39,3 @@ export async function countHomeStats(db: D1Database): Promise<HomeStats> {
   };
 }
 
-export interface HighlightPhoto {
-  mediaKey: string;
-  eventSlug: string;
-  eventTitle: LocalizedText;
-}
-
-interface HighlightPhotoRow {
-  media_key: string;
-  slug: string;
-  title_zh: string;
-  title_en: string;
-}
-
-/** The most recently added photos of published events, with the event each one links to. */
-/** 已发布活动中最近添加的照片，以及每张照片所链接的活动。 */
-export async function listHighlightPhotos(db: D1Database, limit: number): Promise<HighlightPhoto[]> {
-  const { results } = await db
-    .prepare(
-      `SELECT p.media_key, e.slug, e.title_zh, e.title_en
-       FROM event_photos p JOIN events e ON e.id = p.event_id
-       WHERE e.status = ?
-       ORDER BY p.created_at DESC, p.sort_order, p.id
-       LIMIT ?`,
-    )
-    .bind(PUBLISHED, limit)
-    .all<HighlightPhotoRow>();
-  return results.map((row) => ({ mediaKey: row.media_key, eventSlug: row.slug, eventTitle: { zh: row.title_zh, en: row.title_en } }));
-}

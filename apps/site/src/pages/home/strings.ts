@@ -62,12 +62,6 @@ export const HOME = {
   presidiumEyebrow: { zh: '我们的团队', en: 'Our people' },
   presidiumLink: { zh: '认识我们的团队', en: 'Meet our people' },
 
-  galleryEyebrow: { zh: '活动剪影', en: 'Highlights' },
-  galleryTitle: { zh: '活动照片', en: 'Photo highlights' },
-  galleryAcademicTalk: { zh: '学术讲座', en: 'An academic talk' },
-  galleryReviewSession: { zh: '考前复习', en: 'A test review session' },
-  galleryCommunity: { zh: '社区活动', en: 'A community gathering' },
-
   memberAppEyebrow: { zh: '成员网络', en: 'Member Network' },
   memberAppTitle: { zh: '随时和联盟保持联系', en: 'Stay connected with UTMMSC' },
   memberAppLead: {
