@@ -59,8 +59,8 @@ export const HOME = {
   reviewsEmptyTitle: { zh: '本学期的复习安排即将公布', en: "This term's reviews will be announced soon" },
   reviewsEmptyText: { zh: '往期复习资料可以在考前复习页面查看。', en: 'Materials from earlier terms are on the test reviews page.' },
 
-  presidiumEyebrow: { zh: '我们的团队', en: 'Our people' },
-  presidiumLink: { zh: '认识我们的团队', en: 'Meet our people' },
+  advisorsEyebrow: { zh: '我们的团队', en: 'Our people' },
+  advisorsLink: { zh: '全部荣誉顾问', en: 'All Honorary Advisors' },
 
   memberAppEyebrow: { zh: '成员网络', en: 'Member Network' },
   memberAppTitle: { zh: '随时和联盟保持联系', en: 'Stay connected with UTMMSC' },

@@ -1,13 +1,12 @@
-import type { SiteEvent, TermKey } from '@msc-web/content';
+import type { Person, SiteEvent, TermKey } from '@msc-web/content';
 import type { HomeStats } from '../../infrastructure/d1/public/home';
 import type { CourseReviews } from '../../infrastructure/d1/public/reviews';
 import type { PageContext } from '../context';
-import type { PeopleRoster } from '../people/roster';
+import { AdvisorsPreviewSection } from './sections/AdvisorsPreviewSection';
 import { HeroSection } from './sections/HeroSection';
 import { JoinBandSection } from './sections/JoinBandSection';
 import { MemberAppSection } from './sections/MemberAppSection';
 import { PillarsSection } from './sections/PillarsSection';
-import { PresidiumPreviewSection } from './sections/PresidiumPreviewSection';
 import { StatsSection } from './sections/StatsSection';
 import { TermReviewsSection } from './sections/TermReviewsSection';
 import { UpcomingEventsSection } from './sections/UpcomingEventsSection';
@@ -17,7 +16,7 @@ export interface HomeData {
   upcomingEvents: SiteEvent[];
   term: TermKey;
   termCourses: CourseReviews[];
-  presidium: PeopleRoster['presidium'];
+  advisors: Person[];
 }
 
 export function HomePage({ ctx, data }: { ctx: PageContext; data: HomeData }) {
@@ -29,7 +28,7 @@ export function HomePage({ ctx, data }: { ctx: PageContext; data: HomeData }) {
       <PillarsSection ctx={ctx} />
       <UpcomingEventsSection ctx={ctx} events={data.upcomingEvents} />
       <TermReviewsSection ctx={ctx} term={data.term} courses={data.termCourses} />
-      <PresidiumPreviewSection ctx={ctx} presidium={data.presidium} />
+      <AdvisorsPreviewSection ctx={ctx} advisors={data.advisors} />
       <JoinBandSection ctx={ctx} />
     </>
   );

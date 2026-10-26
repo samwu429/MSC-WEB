@@ -13,6 +13,7 @@ import type { PageHandler } from '../page-handler';
 
 const UPCOMING_EVENT_LIMIT = 3;
 const TERM_COURSE_LIMIT = 4;
+const ADVISOR_LIMIT = 4;
 
 /**
  * The home page. One instant drives both the page context and the queries, so "upcoming" and "this term" agree with
@@ -24,12 +25,12 @@ export const homePage: PageHandler = async (c, locale) => {
   const now = new Date();
   const wallNow = torontoWallTime(now);
   const term = termOfDate(wallDateOf(wallNow));
-  const [ctx, stats, upcomingEvents, termCourses, presidium] = await Promise.all([
+  const [ctx, stats, upcomingEvents, termCourses, advisors] = await Promise.all([
     loadPageContext(c, locale, now),
     countHomeStats(db),
     listUpcomingEvents(db, wallNow, { limit: UPCOMING_EVENT_LIMIT }),
     listTermCourseReviews(db, term),
-    listVisiblePeople(db, 'presidium'),
+    listVisiblePeople(db, 'advisor'),
   ]);
   return renderPage(
     c,
@@ -42,7 +43,7 @@ export const homePage: PageHandler = async (c, locale) => {
         upcomingEvents,
         term,
         termCourses: termCourses.slice(0, TERM_COURSE_LIMIT),
-        presidium: buildRoster(presidium).presidium,
+        advisors: buildRoster(advisors).advisors.slice(0, ADVISOR_LIMIT),
       }}
     />,
   );

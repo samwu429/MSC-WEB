@@ -87,7 +87,10 @@ describe.skipIf(!sqlite)('home page', () => {
       INSERT INTO people (id, section, position, name_zh, name_en, bio_zh, bio_en, visible, created_at, updated_at) VALUES
         ('president', 'presidium', 'president', '王会长', 'Wang Hui', '主席简介', 'President bio', 1, '${AT}', '${AT}'),
         ('secretary', 'presidium', 'secretary_general', '隐藏秘书', 'Hidden Secretary', '', '', 0, '${AT}', '${AT}'),
-        ('finance', 'presidium', 'vp_finance', '<script>alert(1)</script>', '', '', '', 1, '${AT}', '${AT}');
+        ('finance', 'presidium', 'vp_finance', '财务部长', 'Finance VP', '', '', 1, '${AT}', '${AT}'),
+        ('advisor', 'advisor', 'advisor', '陈教授', 'Prof. Chen', '顾问简介', 'Advisor bio', 1, '${AT}', '${AT}'),
+        ('advisor-script', 'advisor', 'advisor', '<script>alert(1)</script>', '', '', '', 1, '${AT}', '${AT}'),
+        ('advisor-hidden', 'advisor', 'advisor', '隐藏顾问', 'Hidden Advisor', '', '', 0, '${AT}', '${AT}');
     `);
   }
 
@@ -106,16 +109,16 @@ describe.skipIf(!sqlite)('home page', () => {
     expect(occurrences(html, 'class="stat"')).toBe(1);
     expect(html).toContain('<div class="stat__value">$0</div>');
 
-    expect(occurrences(html, 'class="empty"')).toBe(2);
+    expect(occurrences(html, 'class="empty"')).toBe(3);
     expect(html).toContain(`<div class="eyebrow">${term}</div>`);
-    expect(occurrences(html, 'class="person person--vacant"')).toBe(4);
+    expect(html).not.toContain('class="person');
     expect(html).not.toContain('class="gallery');
     expect(html).toContain(`href="${events}?type=academic"`);
     expect(html).not.toContain('github.com');
     expect(html).toContain('class="cta-band"');
   });
 
-  it('shows the next three events, published reviews of this term, and the Presidium, without a photo gallery', async () => {
+  it('shows the next three events, published reviews of this term, and the Honorary Advisors, without a photo gallery', async () => {
     await seed();
     const html = await render('/');
 
@@ -135,11 +138,13 @@ describe.skipIf(!sqlite)('home page', () => {
     expect(html).toContain('<div class="stat__value">5</div><div class="stat__label">活动</div>');
     expect(html).toContain('<div class="stat__value">2</div><div class="stat__label">开设复习的课程</div>');
 
-    expect(html).toContain('王会长');
-    expect(html).not.toContain('主席简介');
-    expect(html).not.toContain('隐藏秘书');
+    expect(html).toContain('陈教授');
+    expect(html).not.toContain('顾问简介');
+    expect(html).not.toContain('隐藏顾问');
     expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
-    expect(occurrences(html, 'class="person person--vacant"')).toBe(2);
+    expect(html).not.toContain('王会长');
+    expect(html).not.toContain('person--vacant');
+    expect(html).toContain('<a class="section-link link-arrow" href="/people/advisors">');
 
     expect(html).not.toContain('class="gallery');
     expect(html).not.toContain('alt="近期联谊"');
@@ -156,7 +161,8 @@ describe.skipIf(!sqlite)('home page', () => {
     expect(html).toContain('<a class="card__link" href="/en/events/2026-10-next-social">Next Social</a>');
     expect(html).toContain('href="/en/reviews"');
     expect(html).toContain('href="/en/people"');
-    expect(html).toContain('href="/en/people/presidium"');
+    expect(html).toContain('<a class="section-link link-arrow" href="/en/people/advisors">');
+    expect(html).toContain('Prof. Chen');
     expect(html).toContain('<div class="stat__label">Courses with reviews</div>');
   });
 
