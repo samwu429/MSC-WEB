@@ -1,8 +1,9 @@
 import { LOCALES, courseSlug, type Locale } from '@msc-web/content';
 import type { Env } from '../../../env';
 import { listPublishedEventLinks } from '../../../infrastructure/d1/public/events';
+import { listVisiblePeople } from '../../../infrastructure/d1/public/people';
 import { listReviewedCourseLinks } from '../../../infrastructure/d1/public/reviews';
-import { NAV_SECTIONS, PEOPLE_PAGES, PEOPLE_PAGE_PATHS, SECTION_PATHS, localePath } from '../../../pages/routing/paths';
+import { NAV_SECTIONS, PEOPLE_PAGES, PEOPLE_PAGE_PATHS, SECTION_PATHS, localePath, personPath } from '../../../pages/routing/paths';
 
 interface SitemapPage {
   /** Locale-neutral path, such as "/events/2026-10-mid-autumn". */
@@ -37,14 +38,15 @@ function urlEntry(origin: string, page: SitemapPage, locale: Locale): string {
   ].join('\n');
 }
 
-/** The sitemap of every public page in both languages: the sections, the Our People pages, every published event and every reviewed course. */
-/** 包含两种语言全部公开页面的站点地图：各板块、"我们的团队" 各页面、每个已发布的活动以及每门有复习的课程。 */
+/** The sitemap of every public page in both languages: the sections, the Our People pages, every visible person, every published event and every reviewed course. */
+/** 包含两种语言全部公开页面的站点地图：各板块、"我们的团队" 各页面、每位正在显示的成员、每个已发布的活动以及每门有复习的课程。 */
 export async function sitemapXml(env: Env): Promise<string> {
   const origin = env.PUBLIC_ORIGIN.replace(/\/+$/, '');
-  const [events, courses] = await Promise.all([listPublishedEventLinks(env.DB), listReviewedCourseLinks(env.DB)]);
+  const [people, events, courses] = await Promise.all([listVisiblePeople(env.DB), listPublishedEventLinks(env.DB), listReviewedCourseLinks(env.DB)]);
   const pages: SitemapPage[] = [
     ...NAV_SECTIONS.map((section) => ({ path: SECTION_PATHS[section] })),
     ...PEOPLE_PAGES.map((page) => ({ path: PEOPLE_PAGE_PATHS[page] })),
+    ...people.map((person) => ({ path: personPath(person.id), lastmod: person.updatedAt })),
     ...events.map((event) => ({ path: `/events/${event.slug}`, lastmod: event.updatedAt })),
     ...courses.map((course) => ({ path: `/reviews/${courseSlug(course.code)}`, lastmod: course.updatedAt })),
   ];

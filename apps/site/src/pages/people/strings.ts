@@ -29,4 +29,6 @@ export const PEOPLE = {
   advisorsEmptyTitle: { zh: '荣誉顾问名单即将公布', en: 'Our Honorary Advisors will be announced soon' },
   advisorsEmptyText: { zh: '欢迎关注联盟的讲座与活动。', en: 'Follow our talks and events in the meantime.' },
   profileLink: { zh: '个人主页', en: 'Profile' },
+  viewProfile: { zh: '查看简介', en: 'View profile' },
+  contactTitle: { zh: '联系方式', en: 'Contact' },
 } satisfies Record<string, LocalizedText>;

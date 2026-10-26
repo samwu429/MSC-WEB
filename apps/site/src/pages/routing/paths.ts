@@ -64,6 +64,18 @@ export const PEOPLE_PAGE_PATHS: Record<PeoplePageKey, string> = {
   departments: '/people/departments',
 };
 
+/** A person's own page, such as /people/per_0123…; the id never changes, so the address stays valid after edits. */
+/** 成员的个人页面，例如 /people/per_0123…；编号不会改变，因此修改资料后地址依然有效。 */
+export function personPath(id: string): string {
+  return `/people/${id}`;
+}
+
+/** Ids as the database makes them (per_ and 32 hex digits) and as sample data writes them. */
+/** 数据库生成的编号（per_ 加 32 位十六进制数字），以及示例数据中的写法。 */
+export function isPersonId(value: string | undefined): value is string {
+  return value !== undefined && /^[A-Za-z0-9_-]{1,64}$/.test(value);
+}
+
 export function sectionOfPath(path: string): NavSection | null {
   if (path === '/') return 'home';
   for (const section of NAV_SECTIONS) {

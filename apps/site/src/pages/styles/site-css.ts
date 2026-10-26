@@ -24,7 +24,8 @@
  *   Stats       .stats__title .stats .stat .stat__icon .stat__value .stat__label
  *   Pillars     .pillars .pillar .pillar__icon .pillar__title .pillar__text
  *   Partners    .partner-group .partner-group__title .partner-grid .partner .partner__logo .partner__mark .partner__name
- *   People      .people-grid .person .person--vacant .person__photo .person__monogram .person__body .person__name .person__title .person__affiliation .person__bio .person__links
+ *   People      .people-grid .person .person--link .person--vacant .person__link .person__more .person__photo .person__monogram .person__body .person__name .person__title .person__affiliation .person__bio .person__links
+ *   Profile     .profile .profile__photo .profile__body .profile__affiliation .profile__bio .profile__contact .profile__contact-title
  *   Department  .dept .dept__head .dept__name .dept__text .dept__people
  *   Reviews     .course .course__head .course__code .course__title .course__text .course__sessions .session-row .session-row__main .session-row__label .session-row__when .session-row__actions .materials .material
  *   Tabs        .tabs .tab (aria-current="page" marks the active tab)
@@ -296,9 +297,26 @@ a.partner:hover { border-color: var(--purple-700); color: var(--purple-700); }
 .person__links { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: auto; padding-top: 12px; }
 .person__links a { display: inline-flex; align-items: center; gap: 6px; font-size: 0.875rem; font-weight: 700; text-decoration: none; }
 .person__links svg { width: 16px; height: 16px; }
+.person--link { position: relative; transition: border-color 0.15s ease; }
+.person--link:hover { border-color: var(--purple-700); }
+.person__link { color: inherit; text-decoration: none; }
+.person__link::after { content: ""; position: absolute; inset: 0; }
+.person--link:hover .person__link { color: var(--purple-700); }
+.person__more { display: inline-flex; align-items: center; gap: 4px; margin-top: auto; padding-top: 10px; color: var(--purple-700); font-size: 0.85rem; font-weight: 700; }
+.person__more svg { width: 14px; height: 14px; transition: transform 0.15s ease; }
+.person--link:hover .person__more svg { transform: translateX(3px); }
 .person--vacant .person__monogram { background: var(--grey); }
 .person--vacant .person__body { border-top-color: var(--line-strong); }
 .person--vacant .person__name { color: var(--muted); font-size: 1rem; font-weight: 600; }
+
+.profile { display: grid; gap: 32px 48px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 760px) { .profile { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); } }
+.profile__photo { width: 100%; max-width: 360px; aspect-ratio: 4 / 5; object-fit: cover; background: var(--purple-100); border-bottom: 4px solid var(--purple-700); }
+.profile__body { display: grid; gap: 20px; align-content: start; max-width: 720px; }
+.profile__affiliation { color: var(--purple-700); font-size: 1.1rem; font-weight: 700; }
+.profile__bio { font-size: 1.05rem; line-height: 1.85; }
+.profile__contact { padding-top: 20px; border-top: 1px solid var(--line); }
+.profile__contact-title { margin-bottom: 12px; font-size: 1rem; }
 
 .dept { padding: 32px; background: var(--grey); }
 .dept + .dept { margin-top: 24px; }

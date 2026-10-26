@@ -8,9 +8,9 @@ import { PEOPLE } from '../../people/strings';
 import { HOME } from '../strings';
 
 /**
- * The Honorary Advisors on the home page, in the order the backend sets, as compact cards that leave out bios and
- * links; the full list is on /people/advisors. Until any advisor is shown the section says they will be announced.
- * 首页上的荣誉顾问，按后台设定的顺序显示为精简卡片，省略简介与链接；完整名单在 /people/advisors。
+ * The Honorary Advisors on the home page, in the order the backend sets, as the same cards the Our People pages use;
+ * the full list is on /people/advisors. Until any advisor is shown the section says they will be announced.
+ * 首页上的荣誉顾问，按后台设定的顺序显示，卡片与 "我们的团队" 页面相同；完整名单在 /people/advisors。
  * 在有荣誉顾问显示之前，板块说明名单即将公布。
  */
 export function AdvisorsPreviewSection({ ctx, advisors }: { ctx: PageContext; advisors: Person[] }) {
@@ -28,7 +28,7 @@ export function AdvisorsPreviewSection({ ctx, advisors }: { ctx: PageContext; ad
         {advisors.length > 0 ? (
           <div class="people-grid">
             {advisors.map((person) => (
-              <PersonCard person={person} locale={locale} compact />
+              <PersonCard person={person} locale={locale} />
             ))}
           </div>
         ) : (

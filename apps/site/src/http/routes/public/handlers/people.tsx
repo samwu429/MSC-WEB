@@ -1,7 +1,11 @@
-import { listVisiblePeople } from '../../../../infrastructure/d1/public/people';
+import { mediaUrl, personDisplayTitle } from '@msc-web/content';
+import { findVisiblePerson, listVisiblePeople } from '../../../../infrastructure/d1/public/people';
+import { txt } from '../../../../pages/components/common';
 import { loadPageContext } from '../../../../pages/context';
 import { COMMON, t } from '../../../../pages/i18n/strings';
 import { PEOPLE_PAGE_SECTIONS, peoplePageLabel } from '../../../../pages/layout/navigation';
+import { renderNotFound } from '../../../../pages/errors/ErrorPages';
+import { PersonPage } from '../../../../pages/people/detail/PersonPage';
 import { PeopleHubPage } from '../../../../pages/people/hub/PeopleHubPage';
 import { peoplePageLead } from '../../../../pages/people/layout/PeopleSectionHero';
 import { buildRoster } from '../../../../pages/people/roster';
@@ -10,7 +14,7 @@ import { DepartmentsPage } from '../../../../pages/people/sections/DepartmentsPa
 import { PresidiumPage } from '../../../../pages/people/sections/PresidiumPage';
 import { PEOPLE } from '../../../../pages/people/strings';
 import { renderPage } from '../../../../pages/render';
-import type { PeoplePageKey } from '../../../../pages/routing/paths';
+import { isPersonId, type PeoplePageKey } from '../../../../pages/routing/paths';
 import type { PageHandler } from '../page-handler';
 
 /** /people: the hub linking to the three Our People pages. */
@@ -44,3 +48,19 @@ function peopleGroupPage(page: PeoplePageKey): PageHandler {
 export const presidiumPage = peopleGroupPage('presidium');
 export const advisorsPage = peopleGroupPage('advisors');
 export const departmentsPage = peopleGroupPage('departments');
+
+/** /people/:id: one visible person's own page; a hidden person, an unknown id or a malformed one is not found. */
+/** /people/:id：一位正在显示的成员的个人页面；隐藏的成员、不存在或格式不正确的编号均返回未找到。 */
+export const personPage: PageHandler = async (c, locale) => {
+  const id = c.req.param('id');
+  if (!isPersonId(id)) return renderNotFound(c, locale);
+  const [ctx, person] = await Promise.all([loadPageContext(c, locale), findVisiblePerson(c.env.DB, id)]);
+  if (!person) return renderNotFound(c, locale);
+  const description = [txt(personDisplayTitle(person), locale), txt(person.affiliation, locale)].filter(Boolean).join(' · ');
+  return renderPage(
+    c,
+    ctx,
+    { title: txt(person.name, locale), description, image: person.photoKey ? mediaUrl(person.photoKey) : undefined },
+    <PersonPage ctx={ctx} person={person} />,
+  );
+};

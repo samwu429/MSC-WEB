@@ -1,8 +1,8 @@
-import { isSafeHttpUrl, localeTag, personDisplayTitle, personInitials, type Locale, type Person } from '@msc-web/content';
+import { localeTag, personDisplayTitle, personInitials, type Locale, type Person } from '@msc-web/content';
 import { Icon } from '../components/Icon';
 import { MediaImage, fallbackLang, txt } from '../components/common';
-import { RichText } from '../components/RichText';
 import { COMMON, t } from '../i18n/strings';
+import { localePath, personPath } from '../routing/paths';
 import { PEOPLE } from './strings';
 
 /**
@@ -12,32 +12,38 @@ import { PEOPLE } from './strings';
  */
 export type CardHeadingLevel = 2 | 3;
 
+/** The other language's name, shown under the main one when the two differ. */
+/** 另一种语言的姓名；两种语言的姓名不同时显示在主姓名下方。 */
+export function secondaryName(person: Person, locale: Locale): string {
+  const other: Locale = locale === 'zh' ? 'en' : 'zh';
+  const zh = person.name.zh.trim();
+  const en = person.name.en.trim();
+  return zh && en && zh !== en ? person.name[other] : '';
+}
+
 function headingTag(level: CardHeadingLevel): 'h2' | 'h3' {
   return level === 2 ? 'h2' : 'h3';
 }
 
 /**
- * One person: photo or monogram, office title, name in the visitor's language with the other one beneath, then
- * affiliation, bio and contact links. `compact` leaves out the bio and links for previews such as the home page.
- * 一位成员：照片或姓名首字、职位头衔、访问者语言的姓名（下方附另一种语言），然后是专业或单位、简介与联系链接。
- * `compact` 省略简介与链接，用于首页等预览场合。
+ * One person in a list: photo or monogram, office title, name in the visitor's language with the other one beneath,
+ * and affiliation. The name links to the person's own page, which has the bio and contact links, and the link
+ * stretches over the whole card.
+ * 列表中的一位成员：照片或姓名首字、职位头衔、访问者语言的姓名（下方附另一种语言）以及专业或单位。
+ * 姓名链接到该成员的个人页面（简介与联系方式在那里），链接覆盖整张卡片。
  */
-export function PersonCard(props: { person: Person; locale: Locale; headingLevel?: CardHeadingLevel; compact?: boolean }) {
+export function PersonCard(props: { person: Person; locale: Locale; headingLevel?: CardHeadingLevel }) {
   const { person, locale } = props;
   const Heading = headingTag(props.headingLevel ?? 3);
   const otherLocale: Locale = locale === 'zh' ? 'en' : 'zh';
   const name = txt(person.name, locale);
   const nameLang = fallbackLang(person.name, locale);
-  const zhName = person.name.zh.trim();
-  const enName = person.name.en.trim();
-  const secondaryName = zhName && enName && zhName !== enName ? person.name[otherLocale] : '';
+  const otherName = secondaryName(person, locale);
   const displayTitle = personDisplayTitle(person);
   const affiliation = txt(person.affiliation, locale);
-  const link = person.linkUrl && isSafeHttpUrl(person.linkUrl) ? person.linkUrl : null;
-  const showLinks = !props.compact && (person.email || link);
 
   return (
-    <article class="person">
+    <article class="person person--link">
       {person.photoKey ? (
         <MediaImage class="person__photo" mediaKey={person.photoKey} alt={name} lang={nameLang} />
       ) : (
@@ -50,11 +56,13 @@ export function PersonCard(props: { person: Person; locale: Locale; headingLevel
           {txt(displayTitle, locale)}
         </p>
         <Heading class="person__name" lang={nameLang}>
-          {name}
+          <a class="person__link" href={localePath(locale, personPath(person.id))}>
+            {name}
+          </a>
         </Heading>
-        {secondaryName && (
+        {otherName && (
           <p class="muted small" lang={localeTag(otherLocale)}>
-            {secondaryName}
+            {otherName}
           </p>
         )}
         {affiliation && (
@@ -62,23 +70,10 @@ export function PersonCard(props: { person: Person; locale: Locale; headingLevel
             {affiliation}
           </p>
         )}
-        {!props.compact && <RichText text={txt(person.bio, locale)} class="person__bio" lang={fallbackLang(person.bio, locale)} />}
-        {showLinks && (
-          <div class="person__links">
-            {person.email && (
-              <a href={`mailto:${person.email}`} aria-label={`${t(COMMON, 'email', locale)}: ${name}`}>
-                <Icon name="mail" />
-                {t(COMMON, 'email', locale)}
-              </a>
-            )}
-            {link && (
-              <a href={link} rel="noopener noreferrer" target="_blank" aria-label={`${t(PEOPLE, 'profileLink', locale)}: ${name}`}>
-                <Icon name="external" />
-                {t(PEOPLE, 'profileLink', locale)}
-              </a>
-            )}
-          </div>
-        )}
+        <span class="person__more" aria-hidden="true">
+          {t(PEOPLE, 'viewProfile', locale)}
+          <Icon name="arrow" />
+        </span>
       </div>
     </article>
   );

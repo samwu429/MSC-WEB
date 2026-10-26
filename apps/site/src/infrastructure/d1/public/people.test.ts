@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createTestEnv, type TestEnv } from '../../../testing/test-env';
 import { sqlite } from '../testing/sqlite-d1';
-import { listVisiblePeople } from './people';
+import { findVisiblePerson, listVisiblePeople } from './people';
 
 const AT = '2026-09-01T00:00:00.000Z';
 
@@ -34,6 +34,12 @@ describe.skipIf(!sqlite)('listVisiblePeople', () => {
   it('limits the list to one section', async () => {
     const people = await listVisiblePeople(test.d1.db, 'presidium');
     expect(people.map((person) => person.id)).toEqual(['president', 'audit']);
+  });
+
+  it('finds one visible person by id and never a hidden or unknown one', async () => {
+    expect((await findVisiblePerson(test.d1.db, 'audit'))?.name).toEqual({ zh: '审计', en: 'Audit' });
+    expect(await findVisiblePerson(test.d1.db, 'hidden')).toBeNull();
+    expect(await findVisiblePerson(test.d1.db, 'nobody')).toBeNull();
   });
 
   it('returns nothing from an empty table', async () => {

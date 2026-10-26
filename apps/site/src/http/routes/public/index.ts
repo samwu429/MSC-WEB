@@ -6,7 +6,7 @@ import { aboutPage } from './handlers/about';
 import { coursePage, reviewsPage } from './handlers/reviews';
 import { eventDetailPage, eventsPage } from './handlers/events';
 import { homePage } from './handlers/home';
-import { advisorsPage, departmentsPage, peoplePage, presidiumPage } from './handlers/people';
+import { advisorsPage, departmentsPage, peoplePage, personPage, presidiumPage } from './handlers/people';
 import type { PageHandler } from './page-handler';
 
 /** Every public page by its locale-neutral path. */
@@ -21,6 +21,9 @@ export const PUBLIC_PAGES: readonly { path: string; handler: PageHandler }[] = [
   { path: PEOPLE_PAGE_PATHS.presidium, handler: presidiumPage },
   { path: PEOPLE_PAGE_PATHS.advisors, handler: advisorsPage },
   { path: PEOPLE_PAGE_PATHS.departments, handler: departmentsPage },
+  // After the three group pages, so /people/presidium and the others never reach the person page.
+  // 位于三个团体页面之后，因此 /people/presidium 等路径永远不会进入个人页面。
+  { path: '/people/:id', handler: personPage },
   { path: '/about', handler: aboutPage },
 ];
 

@@ -13,3 +13,10 @@ export async function listVisiblePeople(db: D1Database, section?: PeopleSection)
   const { results } = await statement.all<PersonRow>();
   return results.map(toPerson).sort(comparePeople);
 }
+
+/** One visible person for their own page; a hidden or unknown id finds nobody. */
+/** 个人页面上的一位正在显示的成员；隐藏或不存在的编号找不到任何人。 */
+export async function findVisiblePerson(db: D1Database, id: string): Promise<Person | null> {
+  const row = await db.prepare('SELECT * FROM people WHERE id = ? AND visible = 1').bind(id).first<PersonRow>();
+  return row ? toPerson(row) : null;
+}

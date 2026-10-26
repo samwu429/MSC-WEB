@@ -14,6 +14,12 @@ export const PEOPLE_PAGE_SECTIONS: Record<PeoplePageKey, PeopleSection> = {
   departments: 'department',
 };
 
+/** The Our People page that lists a section's people, for the way back from a person's own page. */
+/** 列出某一分组成员的 "我们的团队" 页面，用于从个人页面返回。 */
+export function peoplePageOfSection(section: PeopleSection): PeoplePageKey {
+  return (Object.keys(PEOPLE_PAGE_SECTIONS) as PeoplePageKey[]).find((page) => PEOPLE_PAGE_SECTIONS[page] === section) ?? 'presidium';
+}
+
 export function peoplePageLabel(page: PeoplePageKey): LocalizedText {
   return PEOPLE_SECTION_LABELS[PEOPLE_PAGE_SECTIONS[page]];
 }

@@ -18,7 +18,12 @@ describe.skipIf(!sqlite)('sitemap.xml', () => {
     return [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((match) => match[1] ?? '');
   }
 
-  it('lists every section, the Our People pages, published events and reviewed courses in both languages', async () => {
+  it('lists every section, the Our People pages, visible people, published events and reviewed courses in both languages', async () => {
+    test.d1.exec(`
+      INSERT INTO people (id, section, position, name_zh, name_en, visible, created_at, updated_at) VALUES
+        ('per_wang', 'presidium', 'president', '王会长', 'Wang Hui', 1, '2026-09-01T00:00:00.000Z', '2026-09-05T00:00:00.000Z'),
+        ('per_hidden', 'presidium', 'secretary_general', '隐藏', 'Hidden', 0, '2026-09-01T00:00:00.000Z', '2026-09-01T00:00:00.000Z');
+    `);
     seedEvent(test.d1, { slug: '2026-10-mid-autumn', startsAt: '2026-10-03T18:00', updatedAt: '2026-10-04T08:00:00.000Z' });
     seedEvent(test.d1, { slug: 'secret-plan', startsAt: '2026-11-01T18:00', status: 'draft' });
     const csc = seedCourse(test.d1, { code: 'CSC108H5', updatedAt: '2026-09-01T00:00:00.000Z' });
@@ -48,6 +53,8 @@ describe.skipIf(!sqlite)('sitemap.xml', () => {
       'https://utmmsc.com/en/people/advisors',
       'https://utmmsc.com/people/departments',
       'https://utmmsc.com/en/people/departments',
+      'https://utmmsc.com/people/per_wang',
+      'https://utmmsc.com/en/people/per_wang',
       'https://utmmsc.com/events/2026-10-mid-autumn',
       'https://utmmsc.com/en/events/2026-10-mid-autumn',
       'https://utmmsc.com/reviews/csc108h5',
@@ -56,7 +63,8 @@ describe.skipIf(!sqlite)('sitemap.xml', () => {
     expect(xml).toContain('<loc>https://utmmsc.com/events/2026-10-mid-autumn</loc>\n    <lastmod>2026-10-04T08:00:00.000Z</lastmod>');
     expect(xml).toContain('<loc>https://utmmsc.com/reviews/csc108h5</loc>\n    <lastmod>2026-10-12T00:00:00.000Z</lastmod>');
     expect(xml).toContain('<xhtml:link rel="alternate" hreflang="en" href="https://utmmsc.com/en/reviews/csc108h5"/>');
-    expect(xml.match(/<lastmod>/g)).toHaveLength(4);
+    expect(xml).toContain('<loc>https://utmmsc.com/people/per_wang</loc>\n    <lastmod>2026-09-05T00:00:00.000Z</lastmod>');
+    expect(xml.match(/<lastmod>/g)).toHaveLength(6);
   });
 
   it('builds absolute addresses from the configured origin and escapes them', async () => {

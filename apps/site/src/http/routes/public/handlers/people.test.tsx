@@ -131,11 +131,15 @@ describe.skipIf(!sqlite)('Our People pages', () => {
       expect(occurrences(main, 'class="person person--vacant"')).toBe(2);
       expect(main.indexOf('王会长')).toBeLessThan(main.indexOf('&lt;script&gt;'));
       expect(main).toContain(`src="${mediaUrl(PHOTO_KEY)}" alt="王会长"`);
-      expect(main).toContain('<h2 class="person__name">王会长</h2>');
+      expect(main).toContain('<h2 class="person__name"><a class="person__link" href="/people/president">王会长</a></h2>');
       expect(main).toContain('<p class="muted small" lang="en-CA">Wang Hui</p>');
-      expect(main).toContain('<div class="person__bio"><p>第一段简介。</p><p>第二段简介。</p></div>');
-      expect(main).toContain('href="mailto:wang@example.com"');
-      expect(main).toContain('href="https://example.com/wang" rel="noopener noreferrer"');
+      expect(main).toContain('<p class="person__affiliation">计算机科学 三年级</p>');
+      // The bio and contact links are on the person's own page, not in the list.
+      // 简介与联系方式在个人页面上，不在列表中。
+      expect(main).not.toContain('第一段简介');
+      expect(main).not.toContain('mailto:');
+      expect(main).not.toContain('https://example.com/wang');
+      expect(occurrences(main, '<span class="person__more" aria-hidden="true">查看简介')).toBe(2);
     });
 
     it('escapes names as text and switches the name order in English', async () => {
@@ -143,7 +147,7 @@ describe.skipIf(!sqlite)('Our People pages', () => {
       const html = await render('/en/people/presidium');
       expect(html).not.toContain(SCRIPT_NAME);
       expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
-      expect(html).toContain('<h2 class="person__name">Wang Hui</h2>');
+      expect(html).toContain('<h2 class="person__name"><a class="person__link" href="/en/people/president">Wang Hui</a></h2>');
       expect(html).toContain('<p class="muted small" lang="zh-CN">王会长</p>');
       expect(html).toContain('Vice-President Finance');
     });
@@ -153,14 +157,14 @@ describe.skipIf(!sqlite)('Our People pages', () => {
       test.d1.exec("UPDATE people SET name_zh = '', name_en = 'Ada Lin' WHERE id = 'finance'");
       const chinese = mainOf(await render('/people/presidium'));
       expect(chinese).toContain('<div class="person__monogram" aria-hidden="true">AL</div>');
-      expect(chinese).toContain('<h2 class="person__name" lang="en-CA">Ada Lin</h2>');
-      expect(chinese).toContain('<h2 class="person__name">王会长</h2>');
+      expect(chinese).toContain('<h2 class="person__name" lang="en-CA"><a class="person__link" href="/people/finance">Ada Lin</a></h2>');
+      expect(chinese).toContain('<h2 class="person__name"><a class="person__link" href="/people/president">王会长</a></h2>');
       expect(chinese).toContain(`alt="王会长"`);
 
       test.d1.exec("UPDATE people SET name_zh = '赵敏', name_en = '' WHERE id = 'finance'");
       const english = mainOf(await render('/en/people/presidium'));
       expect(english).toContain('<div class="person__monogram" aria-hidden="true">赵</div>');
-      expect(english).toContain('<h2 class="person__name" lang="zh-CN">赵敏</h2>');
+      expect(english).toContain('<h2 class="person__name" lang="zh-CN"><a class="person__link" href="/en/people/finance">赵敏</a></h2>');
       expect(english).toContain('<p class="person__affiliation">Computer Science, Year 3</p>');
     });
   });
@@ -184,7 +188,7 @@ describe.skipIf(!sqlite)('Our People pages', () => {
       expect([...order].sort((a, b) => a - b)).toEqual(order);
       expect(main).toContain('学术部部长兼复习统筹');
       expect(main).toContain('学术部副部长');
-      expect(main).toContain('<h3 class="person__name">李部长</h3>');
+      expect(main).toContain('<h3 class="person__name"><a class="person__link" href="/people/head-academic">李部长</a></h3>');
       expect(occurrences(main, 'class="person person--vacant"')).toBe(4);
     });
   });
@@ -198,10 +202,64 @@ describe.skipIf(!sqlite)('Our People pages', () => {
     it('shows visible advisors only', async () => {
       await seedPeople();
       const main = mainOf(await render('/en/people/advisors'));
-      expect(main).toContain('<h2 class="person__name">Prof. Chen</h2>');
+      expect(main).toContain('<h2 class="person__name"><a class="person__link" href="/en/people/advisor">Prof. Chen</a></h2>');
       expect(main).toContain('University of Toronto');
       expect(main).not.toContain('Hidden Advisor');
       expect(main).not.toContain('Our Honorary Advisors will be announced soon');
+    });
+  });
+
+  describe('person page', () => {
+    async function status(path: string): Promise<number> {
+      const ctx = testExecutionContext();
+      const response = await app.request(path, {}, test.env, ctx);
+      await ctx.settle();
+      return response.status;
+    }
+
+    it('shows the bio, affiliation and contact links, with the way back to the Presidium', async () => {
+      await seedPeople();
+      const html = await render('/people/president');
+      const main = mainOf(html);
+      expect(main).toContain('<a class="backlink" href="/people/presidium">');
+      expect(main).toContain('<div class="eyebrow">主席</div>');
+      expect(main).toContain('<h1 class="page-hero__title">王会长</h1>');
+      expect(main).toContain('<p class="page-hero__lead" lang="en-CA">Wang Hui</p>');
+      expect(main).toContain(`<img class="profile__photo" src="${mediaUrl(PHOTO_KEY)}" alt="王会长"`);
+      expect(main).toContain('<p class="profile__affiliation">计算机科学 三年级</p>');
+      expect(main).toContain('<div class="prose profile__bio"><p>第一段简介。</p><p>第二段简介。</p></div>');
+      expect(main).toContain('href="mailto:wang@example.com"');
+      expect(main).toContain('href="https://example.com/wang" rel="noopener noreferrer" target="_blank"');
+      expect(html).toContain('<title>王会长 · UTMMSC 国语学者联盟</title>');
+      expect(html).toContain('<meta name="description" content="主席 · 计算机科学 三年级"/>');
+      expect(html).toContain(`<meta property="og:image" content="https://utmmsc.com${mediaUrl(PHOTO_KEY)}"/>`);
+    });
+
+    it('speaks the page language and leads back to the page that lists each group', async () => {
+      await seedPeople();
+      const president = mainOf(await render('/en/people/president'));
+      expect(president).toContain('<a class="backlink" href="/en/people/presidium">');
+      expect(president).toContain('<h1 class="page-hero__title">Wang Hui</h1>');
+      expect(president).toContain('<div class="prose profile__bio"><p>First paragraph.</p><p>Second paragraph.</p></div>');
+
+      const advisor = mainOf(await render('/people/advisor'));
+      expect(advisor).toContain('<a class="backlink" href="/people/advisors">');
+      expect(advisor).toContain('<p class="profile__affiliation">多伦多大学</p>');
+      expect(advisor).toContain('<div class="profile__photo person__monogram" aria-hidden="true">陈</div>');
+
+      const head = mainOf(await render('/people/head-academic'));
+      expect(head).toContain('<a class="backlink" href="/people/departments">');
+      expect(head).toContain('<div class="eyebrow">学术部部长兼复习统筹</div>');
+    });
+
+    it('escapes the name and finds nobody hidden, unknown or malformed', async () => {
+      await seedPeople();
+      const html = await render('/people/finance');
+      expect(html).not.toContain(SCRIPT_NAME);
+      expect(html).toContain('<h1 class="page-hero__title">&lt;script&gt;alert(1)&lt;/script&gt;</h1>');
+      expect(await status('/people/advisor-hidden')).toBe(404);
+      expect(await status('/people/nobody')).toBe(404);
+      expect(await status('/en/people/bad.id')).toBe(404);
     });
   });
 
