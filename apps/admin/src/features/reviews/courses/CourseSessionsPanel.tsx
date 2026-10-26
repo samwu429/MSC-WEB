@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { pickText, termLabel, type Course, type ReviewSessionDetail } from '@msc-web/content';
 import { LinkButton } from '../../../shared/ui/Button';
+import { Notice } from '../../../shared/ui/feedback';
 import { Panel } from '../../../shared/ui/layout';
 import { formatSchedule } from '../sessions/format-schedule';
 import { ExamBadge, StatusBadge } from '../sessions/SessionBadges';
@@ -42,6 +43,11 @@ export function CourseSessionsPanel({ course, sessions, className }: { course: C
       }
       className={className}
     >
+      {course.visible && !sessions.some((session) => session.status === 'published') && (
+        <Notice tone="warning" title="网站上还看不到这门课程">
+          考前复习页面按学期列出已发布的复习场次。新增一场复习并把状态设为「已发布」后，这门课程才会出现在网站上。
+        </Notice>
+      )}
       {groups.length === 0 ? (
         <p className="text-sm text-ink-muted">还没有复习场次。</p>
       ) : (

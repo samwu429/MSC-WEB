@@ -28,6 +28,7 @@ function CourseList({ courses, searching, emptyLabel }: { courses: readonly Cour
                 <span className="font-mono text-sm font-bold text-brand-800">{course.code}</span>
                 {!course.visible && <Badge>已隐藏</Badge>}
                 {course.archived && <Badge tone="red">已归档</Badge>}
+                {course.visible && course.publishedSessionCount === 0 && <Badge tone="gold">网站上还看不到</Badge>}
               </div>
               <p className="mt-0.5 break-words text-sm text-ink">{pickText(course.title, 'zh')}</p>
             </div>
