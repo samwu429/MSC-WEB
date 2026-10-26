@@ -98,9 +98,17 @@ export function SiteFooter({ ctx }: { ctx: PageContext }) {
         </div>
         <div class="footer-bottom">
           <p>{t(COMMON, 'footerDisclaimer', locale)}</p>
-          <p>
-            © {ctx.currentYear} UTMMSC · {t(COMMON, 'campus', locale)}
-          </p>
+          <div class="footer-bottom__row">
+            <p>
+              © {ctx.currentYear} UTMMSC · {t(COMMON, 'campus', locale)}
+            </p>
+            {/* The editing backend lives outside the /en tree and serves both languages itself. */}
+            {/* 编辑后台不在 /en 路径之下，自身同时提供两种语言。 */}
+            <a class="footer-admin" href="/admin/" rel="nofollow">
+              <Icon name="user" />
+              {t(COMMON, 'adminSignIn', locale)}
+            </a>
+          </div>
         </div>
       </div>
     </footer>

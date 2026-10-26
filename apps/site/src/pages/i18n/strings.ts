@@ -40,6 +40,7 @@ export const COMMON = {
   footerContact: { zh: '联系我们', en: 'Contact' },
   footerExplore: { zh: '浏览', en: 'Explore' },
   footerMembers: { zh: '成员', en: 'Members' },
+  adminSignIn: { zh: '干部登录', en: 'Officer sign-in' },
   androidApp: { zh: '安卓 App', en: 'Android app' },
   openMemberNetwork: { zh: '进入成员网络', en: 'Open the member network' },
   downloadAndroid: { zh: '下载安卓 App', en: 'Download the Android app' },

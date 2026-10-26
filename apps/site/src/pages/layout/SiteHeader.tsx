@@ -72,6 +72,19 @@ export function SiteHeader({ ctx }: { ctx: PageContext }) {
           </div>
         </div>
       )}
+      <div class="topbar">
+        <div class="container topbar__inner">
+          <span>{t(COMMON, 'campus', locale)}</span>
+          <div class="topbar__links">
+            <a href={ctx.links.android}>{t(COMMON, 'androidApp', locale)}</a>
+            <a href={siteHref(locale, ctx.settings.join.url)}>{t(COMMON, 'joinUs', locale)}</a>
+            <a class="lang-switch" href={switchHref} hreflang={switchLang} lang={switchLang}>
+              <Icon name="globe" />
+              {switchLabel}
+            </a>
+          </div>
+        </div>
+      </div>
       <header class="site-header">
         <div class="container site-header__inner">
           <a class="brand" href={localePath(locale, '/')} aria-label={`UTMMSC ${t(COMMON, 'siteName', locale)}`}>
@@ -87,10 +100,6 @@ export function SiteHeader({ ctx }: { ctx: PageContext }) {
             ))}
           </nav>
           <div class="header-actions">
-            <a class="lang-switch" href={switchHref} hreflang={switchLang} lang={switchLang}>
-              <Icon name="globe" />
-              {switchLabel}
-            </a>
             <a class="btn btn--primary btn--small" href={ctx.links.memberApp}>
               {t(COMMON, 'memberNetwork', locale)}
             </a>

@@ -106,6 +106,14 @@ describe.skipIf(!sqlite)('site shell', () => {
       expect(after).toContain(`<h2>${contact}</h2>`);
       expect(after).toContain('<a href="mailto:hello@utmmsc.com">hello@utmmsc.com</a>');
     });
+
+    it.each([
+      { path: '/', label: '干部登录' },
+      { path: '/en/events', label: 'Officer sign-in' },
+    ])('links $path to the editing backend at /admin/ in either language', async ({ path, label }) => {
+      const footer = footerOf((await get(path)).html);
+      expect(footer).toMatch(new RegExp(`<a class="footer-admin" href="/admin/" rel="nofollow"><svg[^]*?</svg>${label}</a>`));
+    });
   });
 
   describe('editor links', () => {
