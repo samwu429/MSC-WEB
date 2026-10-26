@@ -57,6 +57,7 @@ export const SITE_CSS = `
   --muted: #6c6775;
   --line: #e2e0e8;
   --line-strong: #cbc7d4;
+  --zh: #9a96a3;
   --font-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
   --container: 1200px;
@@ -108,14 +109,15 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 .prose { color: var(--ink-soft); }
 .prose p + p { margin-top: 1em; }
 
-.zh { display: block; margin-top: 0; color: var(--muted); font-size: max(10px, 0.42em); font-weight: 400; letter-spacing: 0.02em; line-height: 1.3; }
-.zh-text { margin-top: 2px; color: var(--muted); font-size: 0.78em; line-height: 1.5; }
+.zh { display: block; margin-top: 1px; color: var(--zh); font-size: 0.72rem; font-weight: 400; letter-spacing: 0.02em; line-height: 1.3; }
+.zh-text { margin-top: 2px; color: var(--zh); font-size: 0.75rem; font-weight: 400; line-height: 1.5; }
+:is(.hero__tagline, .lead, .section-lead, .page-hero__lead, .pillar__text, .card__text, .course__text, .dept__text, .prose).zh-text { color: var(--zh); font-size: 0.75rem; font-weight: 400; line-height: 1.5; }
 p + .zh-text, .prose + .zh-text { margin-top: 2px; }
 .section-lead.zh-text, .page-hero__lead.zh-text { margin-top: 2px; }
-.stat__label .zh, .footer-col h2 .zh, .partner__name .zh, .doc-item__meta .zh, .course__title .zh, .site-nav__menu-link .zh, .mobile-nav__panel .zh, .pillar__title .zh, .card__title .zh, .dept__name .zh { font-size: 0.68rem; }
-.empty .zh { font-size: 0.72rem; }
-.page-hero .zh, .page-hero .zh-text, .hero .zh, .hero .zh-text, .intro-band .zh-text, .announcement .zh-text { color: rgba(255, 255, 255, 0.72); }
-.cta-band .zh, .cta-band .zh-text { color: var(--purple-800); opacity: 0.8; }
+.stat__label .zh, .footer-col h2 .zh, .partner__name .zh, .doc-item__meta .zh, .course__title .zh, .site-nav__menu-link .zh, .mobile-nav__panel .zh, .pillar__title .zh, .card__title .zh, .dept__name .zh { font-size: 0.625rem; }
+.empty .zh { font-size: 0.68rem; }
+.page-hero .zh, .page-hero .zh-text, .hero .zh, .hero .zh-text, .intro-band .zh-text, .announcement .zh-text { color: rgba(255, 255, 255, 0.5); }
+.cta-band .zh, .cta-band .zh-text { color: rgba(29, 11, 51, 0.5); }
 .prose a { word-break: break-word; }
 
 .eyebrow { margin-bottom: 8px; color: var(--purple-600); font-size: 0.9rem; font-weight: 700; letter-spacing: 0.02em; }
@@ -186,7 +188,7 @@ p + .zh-text, .prose + .zh-text { margin-top: 2px; }
 .topbar__links a + a { border-left: 1px solid var(--line-strong); }
 .topbar__links a:last-child { padding-right: 0; }
 .topbar__links a:hover { color: var(--purple-700); text-decoration: underline; }
-.topbar__zh { margin-left: 6px; color: var(--muted); font-size: 0.9em; }
+.topbar__zh { margin-left: 6px; color: var(--zh); font-size: 0.9em; }
 .site-header { position: sticky; top: 0; z-index: 50; background: var(--white); border-bottom: 1px solid var(--line); box-shadow: 0 2px 0 rgba(43, 17, 73, 0.04); }
 .site-header__inner { display: flex; align-items: center; gap: 40px; min-height: 72px; }
 .brand { display: inline-flex; align-items: center; gap: 12px; color: var(--purple-900); text-decoration: none; }
@@ -195,7 +197,7 @@ p + .zh-text, .prose + .zh-text { margin-top: 2px; }
 .brand__text { display: flex; flex-direction: column; line-height: 1.15; }
 .brand__name { font-size: 1.2rem; font-weight: 800; letter-spacing: 0.02em; }
 .brand__sub { color: var(--purple-600); font-size: 0.75rem; font-weight: 600; }
-.brand__zh { display: block; font-size: 0.85em; font-weight: 400; line-height: 1.2; }
+.brand__zh { display: block; color: var(--zh); font-size: 0.85em; font-weight: 400; line-height: 1.2; }
 .site-nav { display: none; align-items: stretch; align-self: stretch; gap: 26px; }
 .site-nav__link { position: relative; display: inline-flex; align-items: center; height: 100%; color: var(--ink); font-size: 0.98rem; font-weight: 600; text-decoration: none; white-space: nowrap; }
 .site-nav__link:hover { color: var(--purple-700); }
@@ -204,7 +206,7 @@ p + .zh-text, .prose + .zh-text { margin-top: 2px; }
 .site-nav__item { position: relative; display: flex; }
 .site-nav__link--parent { gap: 3px; }
 .site-nav__label { display: inline-flex; flex-direction: column; line-height: 1.15; }
-.site-nav__label .zh { font-size: 0.62rem; }
+.site-nav__label .zh { font-size: 0.6rem; }
 .site-nav__link--parent svg { width: 15px; height: 15px; }
 .site-nav__menu { position: absolute; left: -18px; top: 100%; z-index: 60; min-width: 230px; visibility: hidden; opacity: 0; transition: opacity 0.12s ease, visibility 0.12s; }
 .site-nav__item:hover .site-nav__menu, .site-nav__item:focus-within .site-nav__menu { visibility: visible; opacity: 1; }
@@ -240,7 +242,7 @@ p + .zh-text, .prose + .zh-text { margin-top: 2px; }
 .hero__content { position: relative; z-index: 1; padding-top: 72px; padding-bottom: 64px; }
 .hero__eyebrow { color: var(--gold-500); font-size: 0.95rem; }
 .hero__title { color: #fff; font-size: clamp(2.6rem, 6.5vw, 4.4rem); font-weight: 800; line-height: 1.1; letter-spacing: 0.02em; }
-.hero__subtitle { margin-top: 4px; color: rgba(255, 255, 255, 0.8); font-size: clamp(0.85rem, 1.4vw, 1rem); font-weight: 500; letter-spacing: 0.04em; }
+.hero__subtitle { margin-top: 4px; color: rgba(255, 255, 255, 0.6); font-size: 0.85rem; font-weight: 400; letter-spacing: 0.06em; }
 .hero__tagline { margin-top: 20px; max-width: 620px; color: #fff; font-size: clamp(1.05rem, 1.8vw, 1.25rem); }
 .hero__actions { margin-top: 30px; }
 
@@ -249,7 +251,7 @@ p + .zh-text, .prose + .zh-text { margin-top: 2px; }
 .intro-band__mark { color: var(--gold-500); font-family: Georgia, serif; font-size: 6rem; font-weight: 700; line-height: 0.8; }
 .intro-band .hero__intro { max-width: 860px; color: #fff; font-size: clamp(1.1rem, 2vw, 1.35rem); font-weight: 600; line-height: 1.75; }
 .intro-band .hero__intro a { color: var(--gold-500); }
-.intro-band .hero__intro.zh-text { margin-top: 8px; color: rgba(255, 255, 255, 0.7); font-size: 0.85rem; font-weight: 400; line-height: 1.6; }
+.intro-band .hero__intro.zh-text { margin-top: 8px; color: rgba(255, 255, 255, 0.5); font-size: 0.78rem; font-weight: 400; line-height: 1.6; }
 
 .stats__title { margin-bottom: 36px; color: var(--purple-700); font-size: clamp(1.6rem, 3vw, 2.2rem); text-align: center; }
 .stats { display: grid; gap: 32px 24px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
