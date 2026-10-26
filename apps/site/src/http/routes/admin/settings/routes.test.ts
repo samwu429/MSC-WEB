@@ -123,6 +123,30 @@ describe.skipIf(!sqlite)('settings routes', () => {
     expect(((await response.json()) as ApiErrorBody).error.issues).toEqual([{ field: 'contact.wechatQrKey', message: '文件不存在，请重新上传' }]);
   });
 
+  it('saves partner logos, checks each one exists, and releases a logo that was removed', async () => {
+    await uploadImage(HERO_A);
+    const withLogos = (first: string | null, second: string | null): SiteSettings => ({
+      ...DEFAULT_SITE_SETTINGS,
+      partners: {
+        items: [
+          { id: 'p-1', kind: 'sponsor', name: { zh: '赞助商', en: '' }, logoKey: first, url: '' },
+          { id: 'p-2', kind: 'club', name: { zh: '', en: 'Club' }, logoKey: second, url: 'https://club.example' },
+        ],
+      },
+    });
+
+    const missing = await save(withLogos(HERO_A, QR), null);
+    expect(missing.status).toBe(400);
+    expect(((await missing.json()) as ApiErrorBody).error.issues).toEqual([{ field: 'partners.items.1.logoKey', message: '文件不存在，请重新上传' }]);
+
+    const saved = (await (await save(withLogos(HERO_A, null), null)).json()) as SettingsResponse;
+    expect(saved.settings.partners.items.map((partner) => partner.logoKey)).toEqual([HERO_A, null]);
+    expect(isStored(HERO_A)).toBe(true);
+
+    expect((await save(withLogos(null, null), saved.updatedAt)).status).toBe(200);
+    expect(isStored(HERO_A)).toBe(false);
+  });
+
   it('requires the version the form loaded', async () => {
     const response = await save(DEFAULT_SITE_SETTINGS, undefined);
     expect(response.status).toBe(400);

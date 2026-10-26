@@ -36,6 +36,7 @@ settingsRoutes.put('/', async (c) => {
   await requireMediaKeys(c.env.DB, [
     { field: 'hero.imageKey', key: settings.hero.imageKey, kind: 'image' },
     { field: 'contact.wechatQrKey', key: settings.contact.wechatQrKey, kind: 'image' },
+    ...settings.partners.items.map((partner, index) => ({ field: `partners.items.${index}.logoKey`, key: partner.logoKey, kind: 'image' as const })),
   ]);
 
   const saved = await saveSiteSettings(c.env.DB, c.get('identity'), settings, expectedUpdatedAt);

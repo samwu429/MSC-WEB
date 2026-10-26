@@ -59,6 +59,15 @@ export const HOME = {
   reviewsEmptyTitle: { zh: '本学期的复习安排即将公布', en: "This term's reviews will be announced soon" },
   reviewsEmptyText: { zh: '往期复习资料可以在考前复习页面查看。', en: 'Materials from earlier terms are on the test reviews page.' },
 
+  partnersEyebrow: { zh: '携手同行', en: 'Working together' },
+  partnersTitle: { zh: '赞助与合作', en: 'Sponsors and partners' },
+  partnersLead: {
+    zh: '感谢支持联盟活动的赞助商、合作商与联动社团。',
+    en: 'Thank you to the sponsors, partners and partner clubs who support our events.',
+  },
+  partnersEmptyTitle: { zh: '赞助与合作名单即将公布', en: 'Our sponsors and partners will be announced soon' },
+  partnersEmptyText: { zh: '有意赞助或合作，欢迎通过"关于我们"页面联系我们。', en: 'Interested in sponsoring or partnering with us? Get in touch through the About page.' },
+
   advisorsEyebrow: { zh: '我们的团队', en: 'Our people' },
   advisorsLink: { zh: '全部荣誉顾问', en: 'All Honorary Advisors' },
 

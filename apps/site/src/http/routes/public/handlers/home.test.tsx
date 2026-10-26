@@ -109,7 +109,9 @@ describe.skipIf(!sqlite)('home page', () => {
     expect(occurrences(html, 'class="stat"')).toBe(1);
     expect(html).toContain('<div class="stat__value">$0</div>');
 
-    expect(occurrences(html, 'class="empty"')).toBe(3);
+    expect(occurrences(html, 'class="empty"')).toBe(4);
+    expect(html).toContain('aria-labelledby="home-partners"');
+    expect(html).not.toContain('class="partner-group"');
     expect(html).toContain(`<div class="eyebrow">${term}</div>`);
     expect(html).not.toContain('class="person');
     expect(html).not.toContain('class="gallery');
@@ -179,6 +181,31 @@ describe.skipIf(!sqlite)('home page', () => {
     expect(section).toContain(download);
     expect(section).toContain(iphone);
     expect(main.indexOf('home-member-app')).toBeLessThan(main.indexOf('home-pillars'));
+  });
+
+  it('groups sponsors, partners and partner clubs above the advisors and links the ones with a website', async () => {
+    await seed();
+    const partners = [
+      { id: 'p-club', kind: 'club', name: { zh: '象棋社', en: 'Chess Club' }, logoKey: null, url: '' },
+      { id: 'p-sponsor', kind: 'sponsor', name: { zh: '示例赞助商', en: '' }, logoKey: PHOTO_KEY, url: 'https://sponsor.example' },
+      { id: 'p-sponsor-2', kind: 'sponsor', name: { zh: '第二赞助商', en: 'Second Sponsor' }, logoKey: null, url: '' },
+    ];
+    await test.d1.db.prepare("UPDATE settings SET value = ? WHERE key = 'site'").bind(JSON.stringify({ partners: { items: partners } })).run();
+
+    const html = await render('/en');
+    const main = html.slice(html.indexOf('<main'), html.indexOf('</main>'));
+    const section = main.slice(main.indexOf('aria-labelledby="home-partners"'), main.indexOf('aria-labelledby="home-advisors"'));
+    expect(main.indexOf('home-partners')).toBeGreaterThan(main.indexOf('home-reviews'));
+    expect(main.indexOf('home-partners')).toBeLessThan(main.indexOf('home-advisors'));
+
+    expect(occurrences(section, 'class="partner-group"')).toBe(2);
+    expect(section).not.toContain('>Partners</h3>');
+    expect(section.indexOf('>Sponsors</h3>')).toBeLessThan(section.indexOf('>Partner clubs</h3>'));
+    expect(section.indexOf('示例赞助商')).toBeLessThan(section.indexOf('Second Sponsor'));
+    expect(section).toContain(`<a class="partner" href="https://sponsor.example" rel="noopener noreferrer" target="_blank"><span class="partner__logo"><img src="${mediaUrl(PHOTO_KEY)}" alt=""`);
+    expect(section).toContain('<span class="partner__name" lang="zh-CN">示例赞助商</span>');
+    expect(section).toContain('<div class="partner"><span class="partner__logo"><span class="partner__mark" aria-hidden="true">Chess Club</span></span>');
+    expect(section).not.toContain('class="empty"');
   });
 
   it('marks editor text shown in the other language with its lang', async () => {

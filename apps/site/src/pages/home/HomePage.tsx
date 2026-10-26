@@ -6,6 +6,7 @@ import { AdvisorsPreviewSection } from './sections/AdvisorsPreviewSection';
 import { HeroSection } from './sections/HeroSection';
 import { JoinBandSection } from './sections/JoinBandSection';
 import { MemberAppSection } from './sections/MemberAppSection';
+import { PartnersSection } from './sections/PartnersSection';
 import { PillarsSection } from './sections/PillarsSection';
 import { StatsSection } from './sections/StatsSection';
 import { TermReviewsSection } from './sections/TermReviewsSection';
@@ -28,6 +29,7 @@ export function HomePage({ ctx, data }: { ctx: PageContext; data: HomeData }) {
       <PillarsSection ctx={ctx} />
       <UpcomingEventsSection ctx={ctx} events={data.upcomingEvents} />
       <TermReviewsSection ctx={ctx} term={data.term} courses={data.termCourses} />
+      <PartnersSection ctx={ctx} />
       <AdvisorsPreviewSection ctx={ctx} advisors={data.advisors} />
       <JoinBandSection ctx={ctx} />
     </>

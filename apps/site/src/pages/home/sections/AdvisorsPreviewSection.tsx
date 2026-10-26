@@ -16,7 +16,7 @@ import { HOME } from '../strings';
 export function AdvisorsPreviewSection({ ctx, advisors }: { ctx: PageContext; advisors: Person[] }) {
   const { locale } = ctx;
   return (
-    <section class="section section--alt" aria-labelledby="home-advisors">
+    <section class="section" aria-labelledby="home-advisors">
       <div class="container">
         <SectionHeading
           id="home-advisors"

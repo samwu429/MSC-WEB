@@ -23,6 +23,7 @@
  *   Hero        .hero .hero__content .hero__eyebrow .hero__title .hero__subtitle .hero__tagline .hero__actions .hero__photo .intro-band .intro-band__inner .intro-band__mark .hero__intro
  *   Stats       .stats__title .stats .stat .stat__icon .stat__value .stat__label
  *   Pillars     .pillars .pillar .pillar__icon .pillar__title .pillar__text
+ *   Partners    .partner-group .partner-group__title .partner-grid .partner .partner__logo .partner__mark .partner__name
  *   People      .people-grid .person .person--vacant .person__photo .person__monogram .person__body .person__name .person__title .person__affiliation .person__bio .person__links
  *   Department  .dept .dept__head .dept__name .dept__text .dept__people
  *   Reviews     .course .course__head .course__code .course__title .course__text .course__sessions .session-row .session-row__main .session-row__label .session-row__when .session-row__actions .materials .material
@@ -271,6 +272,17 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 .tab:hover { background: rgba(255, 255, 255, 0.2); color: #fff; }
 .tab[aria-current="page"] { background: var(--white); color: var(--purple-900); }
 
+.partner-group + .partner-group { margin-top: 40px; }
+.partner-group__title { margin-bottom: 16px; padding-left: 12px; border-left: 4px solid var(--purple-700); font-size: 1.1rem; }
+.partner-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr)); list-style: none; }
+.partner { display: flex; flex-direction: column; height: 100%; background: var(--white); border: 1px solid var(--line); border-radius: 4px; color: var(--ink); text-decoration: none; }
+.section--alt .partner { border-color: transparent; }
+a.partner:hover { border-color: var(--purple-700); color: var(--purple-700); }
+.partner__logo { display: grid; place-items: center; aspect-ratio: 3 / 2; padding: 18px; }
+.partner__logo img { width: 100%; height: 100%; object-fit: contain; }
+.partner__mark { color: var(--purple-700); font-size: 1.15rem; font-weight: 800; line-height: 1.3; text-align: center; overflow-wrap: anywhere; }
+.partner__name { padding: 10px 14px; border-top: 1px solid var(--line); font-size: 0.9rem; font-weight: 600; text-align: center; }
+
 .people-grid { display: grid; gap: 24px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); }
 .person { display: flex; flex-direction: column; overflow: hidden; background: var(--white); border: 1px solid var(--line); border-radius: 4px; }
 .section--alt .person { border-color: transparent; }
@@ -386,7 +398,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 
 @media (max-width: 640px) {
   .container { padding: 0 18px; }
-  .people-grid, .dept__people { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .people-grid, .dept__people, .partner-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .person__body { padding: 12px 12px 14px; }
   .person__name { font-size: 1.02rem; }
   .person__monogram { font-size: 2.4rem; }

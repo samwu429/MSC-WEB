@@ -1,14 +1,41 @@
 import type { LocalizedText } from '../locale/locale';
 import { IssueCollector, asRecord, type ValidationResult } from '../validation/issues';
-import { readBoolean, readLocalizedText, readOptionalEmail, readOptionalMediaKey, readOptionalUrl, readText } from '../validation/fields';
+import { readBoolean, readEnum, readLocalizedText, readOptionalEmail, readOptionalMediaKey, readOptionalUrl, readText } from '../validation/fields';
 
 /**
  * Site-wide copy and contact details that officers edit in one form: the home page hero, the mission statement,
- * how to join, contact links, and an optional announcement bar. Stored as one JSON document; fields missing from
+ * how to join, contact links, an optional announcement bar, and the sponsors, partners and partner clubs. Stored as one JSON document; fields missing from
  * an older stored copy take their defaults, so adding a field never needs a data migration.
- * 干部在一张表单中编辑的全站文案与联系方式：首页主视觉、宗旨、加入方式、联系链接以及可选的公告栏。以一个 JSON 文档保存；
+ * 干部在一张表单中编辑的全站文案与联系方式：首页主视觉、宗旨、加入方式、联系链接、可选的公告栏，以及赞助商、合作商与联动社团。以一个 JSON 文档保存；
  * 旧版本保存的数据缺少的字段使用默认值，因此新增字段无需数据迁移。
  */
+/** The three kinds of organization the home page lists, in the order it shows them. */
+/** 首页列出的三类组织，按首页显示的顺序排列。 */
+export const PARTNER_KINDS = ['sponsor', 'partner', 'club'] as const;
+
+export type PartnerKind = (typeof PARTNER_KINDS)[number];
+
+export const PARTNER_KIND_LABELS: Record<PartnerKind, LocalizedText> = {
+  sponsor: { zh: '赞助商', en: 'Sponsors' },
+  partner: { zh: '合作商', en: 'Partners' },
+  club: { zh: '联动社团', en: 'Partner clubs' },
+};
+
+/**
+ * A sponsor, partner or partner club. The id is made by the backend when the entry is added and never changes, so a
+ * logo upload that finishes after the list was reordered still lands on the right entry.
+ * 一个赞助商、合作商或联动社团。编号在后台添加条目时生成且不会改变，因此在列表重新排序之后才完成的 Logo 上传仍会落到正确的条目上。
+ */
+export interface Partner {
+  id: string;
+  kind: PartnerKind;
+  name: LocalizedText;
+  logoKey: string | null;
+  /** The organization's own site; empty for none. */
+  /** 该组织自己的网站；留空表示没有。 */
+  url: string;
+}
+
 export interface SiteSettings {
   hero: {
     tagline: LocalizedText;
@@ -40,6 +67,11 @@ export interface SiteSettings {
     text: LocalizedText;
     url: string;
   };
+  partners: {
+    /** In the order the home page shows them within each kind. */
+    /** 首页在每一类中按此顺序显示。 */
+    items: Partner[];
+  };
 }
 
 export const SETTINGS_LIMITS = {
@@ -49,6 +81,8 @@ export const SETTINGS_LIMITS = {
   joinText: 600,
   announcement: 200,
   wechatId: 60,
+  partnerName: 80,
+  partners: 60,
 } as const;
 
 /** Defaults drawn from Articles 2 and 3 of the constitution, so a fresh site already says the right things. */
@@ -100,7 +134,36 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     text: { zh: '', en: '' },
     url: '',
   },
+  partners: {
+    items: [],
+  },
 };
+
+const PARTNER_ID = /^[A-Za-z0-9_-]{1,40}$/;
+
+function readPartners(issues: IssueCollector, value: unknown): Partner[] {
+  if (value === undefined || value === null) return [];
+  if (!Array.isArray(value)) {
+    issues.add('partners.items', '赞助与合作名单格式不正确');
+    return [];
+  }
+  if (value.length > SETTINGS_LIMITS.partners) issues.add('partners.items', `最多添加 ${SETTINGS_LIMITS.partners} 个赞助商、合作商与联动社团`);
+  const seen = new Set<string>();
+  return value.slice(0, SETTINGS_LIMITS.partners).map((raw, index): Partner => {
+    const item = asRecord(raw);
+    const field = `partners.items.${index}`;
+    const id = typeof item.id === 'string' && PARTNER_ID.test(item.id) && !seen.has(item.id) ? item.id : '';
+    if (id) seen.add(id);
+    else issues.add(`${field}.id`, '条目编号无效，请刷新页面后重试');
+    return {
+      id,
+      kind: readEnum(issues, item.kind, `${field}.kind`, PARTNER_KINDS, '类别'),
+      name: readLocalizedText(issues, item.name, `${field}.name`, { label: '名称', max: SETTINGS_LIMITS.partnerName, required: true }),
+      logoKey: readOptionalMediaKey(issues, item.logoKey, `${field}.logoKey`, 'image', 'Logo'),
+      url: readOptionalUrl(issues, item.url, `${field}.url`, { label: '网站链接' }) ?? '',
+    };
+  });
+}
 
 export function validateSiteSettings(raw: unknown): ValidationResult<SiteSettings> {
   const issues = new IssueCollector();
@@ -110,6 +173,7 @@ export function validateSiteSettings(raw: unknown): ValidationResult<SiteSetting
   const join = asRecord(body.join);
   const contact = asRecord(body.contact);
   const announcement = asRecord(body.announcement);
+  const partners = asRecord(body.partners);
 
   const value: SiteSettings = {
     hero: {
@@ -138,6 +202,9 @@ export function validateSiteSettings(raw: unknown): ValidationResult<SiteSetting
       text: readLocalizedText(issues, announcement.text, 'announcement.text', { label: '公告内容', max: SETTINGS_LIMITS.announcement }),
       url: readOptionalUrl(issues, announcement.url, 'announcement.url', { label: '公告链接', allowSitePath: true }) ?? '',
     },
+    partners: {
+      items: readPartners(issues, partners.items),
+    },
   };
   if (value.announcement.enabled && !value.announcement.text.zh && !value.announcement.text.en) {
     issues.add('announcement.text.zh', '开启公告前请填写公告内容');
@@ -146,6 +213,7 @@ export function validateSiteSettings(raw: unknown): ValidationResult<SiteSetting
 }
 
 function mergeInto<T>(defaults: T, stored: unknown): T {
+  if (Array.isArray(defaults)) return (Array.isArray(stored) ? stored : defaults) as T;
   if (typeof defaults !== 'object' || defaults === null) {
     if (defaults === null) return (typeof stored === 'string' ? stored : null) as T;
     return (typeof stored === typeof defaults ? stored : defaults) as T;
@@ -160,8 +228,10 @@ function mergeInto<T>(defaults: T, stored: unknown): T {
 
 /**
  * Settings as stored, laid over the defaults field by field. Stored values were validated when saved, so only the
- * shape is checked here: a field of the wrong type, or one added after the copy was stored, takes its default.
+ * shape is checked here: a field of the wrong type, or one added after the copy was stored, takes its default. A list
+ * is kept as stored when it is a list at all.
  * 将已保存的设置逐字段覆盖到默认值上。保存时已经校验过，因此这里只检查结构：类型不符的字段，或在保存之后才新增的字段，使用默认值。
+ * 列表只要确实是列表，就按保存时的内容保留。
  */
 export function readStoredSettings(json: string | null): SiteSettings {
   if (!json) return DEFAULT_SITE_SETTINGS;
@@ -177,5 +247,7 @@ export function readStoredSettings(json: string | null): SiteSettings {
 /** Media keys a settings document refers to, so the uploads it uses are never cleaned up. */
 /** 设置文档引用的媒体键，确保其使用的上传文件不会被清理。 */
 export function settingsMediaKeys(settings: SiteSettings): string[] {
-  return [settings.hero.imageKey, settings.contact.wechatQrKey].filter((key): key is string => Boolean(key));
+  return [settings.hero.imageKey, settings.contact.wechatQrKey, ...settings.partners.items.map((partner) => partner.logoKey)].filter((key): key is string =>
+    Boolean(key),
+  );
 }

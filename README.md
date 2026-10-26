@@ -8,12 +8,12 @@ UTMMSC 国语学者联盟的公开网站（https://utmmsc.com/），附带供干
 
 | Page | Address | Content |
 | --- | --- | --- |
-| Home | `/` | Introduction, upcoming events, this term's test reviews, the Honorary Advisors, how to join |
+| Home | `/` | Introduction, upcoming events, this term's test reviews, sponsors, partners and partner clubs, the Honorary Advisors, how to join |
 | Events | `/events` | Academic and extracurricular activities, upcoming and past, each with details and a photo gallery |
 | Test Reviews | `/reviews` | Midterm and final reviews per course and term, with times, places, registration and materials |
 | Our People | `/people` | A hub with a header dropdown to three pages: Presidium (`/people/presidium`), Honorary Advisors (`/people/advisors`), and Department Leads, the Heads and Vice Heads of the five departments (`/people/departments`) |
 | About | `/about` | Mission, membership, structure, academic integrity, and the public records the constitution requires |
-| Backend | `/admin/` | Editing for all of the above, site copy, contact links and the announcement bar |
+| Backend | `/admin/` | Editing for all of the above, site copy, contact links, sponsors and partners, and the announcement bar |
 
 Every page exists in Chinese (default) and English (`/en/...`).
 
