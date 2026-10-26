@@ -1,7 +1,6 @@
 import type { PageContext } from '../../context';
-import { Bi, BiRichText } from '../../components/common';
+import { Bi, BiRichText, MobileOnlyNote } from '../../components/common';
 import { COMMON, t } from '../../i18n/strings';
-import { siteHref } from '../../routing/paths';
 import { HOME } from '../strings';
 
 export function JoinBandSection({ ctx }: { ctx: PageContext }) {
@@ -15,13 +14,11 @@ export function JoinBandSection({ ctx }: { ctx: PageContext }) {
           </h2>
           <BiRichText text={settings.join.text} class="section-lead" />
         </div>
-        <div class="btn-row">
-          <a class="btn btn--primary" href={siteHref(settings.join.url)}>
-            {t(COMMON, 'joinUs', locale)}
-          </a>
-          <a class="btn btn--ghost" href={ctx.links.memberApp}>
+        <div class="cta-band__action">
+          <a class="btn btn--primary" href={ctx.links.memberApp}>
             {t(COMMON, 'memberNetwork', locale)}
           </a>
+          <MobileOnlyNote />
         </div>
       </div>
     </section>

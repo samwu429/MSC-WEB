@@ -1,10 +1,10 @@
 import type { PageContext } from '../../context';
 import { Icon, type IconName } from '../../components/Icon';
-import { Bi, BiText, SectionHeading, type Copy } from '../../components/common';
+import { Bi, BiText, MobileOnlyNote, SectionHeading, type Copy } from '../../components/common';
 import { COMMON, t } from '../../i18n/strings';
 import { HOME } from '../strings';
 
-function AccessCard(props: { icon: IconName; title: Copy; text: Copy; href: string; action: string; actionIcon: IconName; primary?: boolean }) {
+function AccessCard(props: { icon: IconName; title: Copy; text: Copy; href: string; action: string; actionIcon: IconName; primary?: boolean; mobileOnly?: boolean }) {
   return (
     <article class="card">
       <div class="card__body">
@@ -21,6 +21,7 @@ function AccessCard(props: { icon: IconName; title: Copy; text: Copy; href: stri
             {props.action}
           </a>
         </div>
+        {props.mobileOnly && <MobileOnlyNote />}
       </div>
     </article>
   );
@@ -51,6 +52,7 @@ export function MemberAppSection({ ctx }: { ctx: PageContext }) {
             action={t(COMMON, 'openMemberNetwork', locale)}
             actionIcon="arrow"
             primary
+            mobileOnly
           />
           <AccessCard
             icon="phone"

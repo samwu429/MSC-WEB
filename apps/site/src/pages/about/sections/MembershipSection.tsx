@@ -1,8 +1,7 @@
 import type { PageContext } from '../../context';
 import { Icon, type IconName } from '../../components/Icon';
-import { Bi, BiText, SectionHeading } from '../../components/common';
+import { Bi, BiText, MobileOnlyNote, SectionHeading } from '../../components/common';
 import { COMMON, t } from '../../i18n/strings';
-import { siteHref } from '../../routing/paths';
 import { ABOUT } from '../strings';
 
 const FACTS: readonly { icon: IconName; title: keyof typeof ABOUT; text: keyof typeof ABOUT }[] = [
@@ -35,10 +34,7 @@ export function MembershipSection({ ctx }: { ctx: PageContext }) {
             ))}
           </div>
           <div class="btn-row">
-            <a class="btn btn--primary" href={siteHref(ctx.settings.join.url)}>
-              {t(COMMON, 'joinUs', locale)}
-            </a>
-            <a class="btn btn--ghost" href={ctx.links.memberApp}>
+            <a class="btn btn--primary" href={ctx.links.memberApp}>
               {t(COMMON, 'memberNetwork', locale)}
             </a>
             <a class="btn btn--ghost" href={ctx.links.android}>
@@ -46,6 +42,7 @@ export function MembershipSection({ ctx }: { ctx: PageContext }) {
               {t(COMMON, 'downloadAndroid', locale)}
             </a>
           </div>
+          <MobileOnlyNote />
         </div>
       </div>
     </section>

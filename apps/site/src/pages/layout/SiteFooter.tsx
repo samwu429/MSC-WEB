@@ -1,8 +1,8 @@
 import type { PageContext } from '../context';
 import { COMMON, t } from '../i18n/strings';
-import { SECTION_PATHS, sitePath, siteHref } from '../routing/paths';
+import { SECTION_PATHS, sitePath } from '../routing/paths';
 import { BookMark, Icon, type IconName } from '../components/Icon';
-import { Bi, BiText, MediaImage } from '../components/common';
+import { Bi, BiText, MediaImage, MobileOnlyNote } from '../components/common';
 import { hasContactDetails } from '../components/contact';
 
 /**
@@ -64,15 +64,13 @@ export function SiteFooter({ ctx }: { ctx: PageContext }) {
             </h2>
             <ul>
               <li>
-                <a href={siteHref(settings.join.url)}>{t(COMMON, 'joinUs', locale)}</a>
-              </li>
-              <li>
                 <a href={ctx.links.memberApp}>{t(COMMON, 'memberNetwork', locale)}</a>
               </li>
               <li>
                 <a href={ctx.links.android}>{t(COMMON, 'androidApp', locale)}</a>
               </li>
             </ul>
+            <MobileOnlyNote />
           </div>
           {hasContactDetails(contact) && (
             <div class="footer-col">

@@ -121,6 +121,12 @@ describe.skipIf(!sqlite)('home page', () => {
     expect(html).not.toContain('href="/en');
     expect(html).not.toContain('github.com');
     expect(html).toContain('class="cta-band"');
+    // The join band offers one way in, the member network, with the note that it is made for phones.
+    // 加入色带只提供一个入口，即成员网络，并注明其只适配手机端。
+    const band = html.slice(html.indexOf('class="cta-band"'), html.indexOf('</section>', html.indexOf('class="cta-band"')));
+    expect(band).toContain('<a class="btn btn--primary" href="/UTMMSC/">Member Network</a>');
+    expect(band).not.toContain('Join us');
+    expect(band).toContain('The Member Network is designed for phones only<span class="zh" lang="zh-CN">成员网络目前只适配手机端</span>');
   });
 
   it('shows the next three events, published reviews of this term, and the Honorary Advisors, without a photo gallery', async () => {
@@ -146,7 +152,7 @@ describe.skipIf(!sqlite)('home page', () => {
 
     // The advisors are people, so they show in English only.
     // 荣誉顾问属于人员内容，因此只显示英文。
-    const advisors = html.slice(html.indexOf('aria-labelledby="home-advisors"'), html.indexOf('class="cta-band"'));
+    const advisors = html.slice(html.indexOf('aria-labelledby="home-advisors"'), html.indexOf('aria-labelledby="home-partners"'));
     expect(advisors).toContain('Prof. Chen');
     expect(advisors).not.toContain('陈教授');
     expect(advisors).not.toContain('class="zh"');
@@ -187,7 +193,7 @@ describe.skipIf(!sqlite)('home page', () => {
     expect(main.indexOf('home-member-app')).toBeLessThan(main.indexOf('home-pillars'));
   });
 
-  it('groups sponsors, partners and partner clubs above the advisors and links the ones with a website', async () => {
+  it('groups sponsors, partners and partner clubs below the advisors and links the ones with a website', async () => {
     await seed();
     const partners = [
       { id: 'p-club', kind: 'club', name: { zh: '象棋社', en: 'Chess Club' }, logoKey: null, url: '' },
@@ -198,9 +204,10 @@ describe.skipIf(!sqlite)('home page', () => {
 
     const html = await render('/');
     const main = html.slice(html.indexOf('<main'), html.indexOf('</main>'));
-    const section = main.slice(main.indexOf('aria-labelledby="home-partners"'), main.indexOf('aria-labelledby="home-advisors"'));
-    expect(main.indexOf('home-partners')).toBeGreaterThan(main.indexOf('home-reviews'));
-    expect(main.indexOf('home-partners')).toBeLessThan(main.indexOf('home-advisors'));
+    const section = main.slice(main.indexOf('aria-labelledby="home-partners"'), main.indexOf('class="cta-band"'));
+    expect(main.indexOf('home-advisors')).toBeGreaterThan(main.indexOf('home-reviews'));
+    expect(main.indexOf('home-partners')).toBeGreaterThan(main.indexOf('home-advisors'));
+    expect(main.indexOf('home-partners')).toBeLessThan(main.indexOf('class="cta-band"'));
 
     expect(occurrences(section, 'class="partner-group"')).toBe(2);
     expect(section).not.toContain('>Partners<span');

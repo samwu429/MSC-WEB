@@ -85,8 +85,14 @@ export function SiteHeader({ ctx }: { ctx: PageContext }) {
             </span>
           </span>
           <div class="topbar__links">
+            <span class="topbar__note">
+              <Icon name="phone" />
+              {COMMON.memberNetworkMobileOnly.en}
+              <span class="topbar__zh" lang="zh-CN">
+                {COMMON.memberNetworkMobileOnly.zh}
+              </span>
+            </span>
             <a href={ctx.links.android}>{t(COMMON, 'androidApp', locale)}</a>
-            <a href={siteHref(ctx.settings.join.url)}>{t(COMMON, 'joinUs', locale)}</a>
           </div>
         </div>
       </div>

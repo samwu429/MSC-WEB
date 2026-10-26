@@ -142,9 +142,7 @@ describe.skipIf(!sqlite)('site shell', () => {
       });
       const { html } = await get('/reviews');
       expect(html).toContain('<a href="/events/2026-10-mid" class="link-arrow">');
-      expect(footerOf(html)).toContain('<a href="/about">Join us</a>');
       expect((await get('/')).html).toContain('<a class="btn btn--gold" href="/about">');
-      expect((await get('/about')).html).toContain('<a class="btn btn--primary" href="/about">');
     });
 
     it('points a link written for the old English pages at the page itself', async () => {
@@ -154,7 +152,6 @@ describe.skipIf(!sqlite)('site shell', () => {
       });
       const { html } = await get('/reviews');
       expect(html).toContain('<a href="/events/2026-10-mid" class="link-arrow">');
-      expect(footerOf(html)).toContain('<a href="/about">Join us</a>');
       const home = (await get('/')).html;
       expect(home).toContain('<a class="btn btn--gold" href="/about">');
       expect(home).not.toContain('href="/en/');
@@ -181,6 +178,19 @@ describe.skipIf(!sqlite)('site shell', () => {
     const { html } = await get('/');
     expect(html).toContain('<a href="https://forms.example.com/mid-autumn" class="link-arrow">');
     expect(html).toContain('<a class="btn btn--gold" href="/UTMMSC/">');
-    expect(footerOf(html)).toContain('<a href="/UTMMSC/">Join us</a>');
+  });
+
+  it('offers the member network once in the header, footer and join band, each time noting it is made for phones', async () => {
+    const { html } = await get('/');
+    const header = headerOf(html);
+    expect(header).not.toContain('Join us');
+    expect(header).toContain('The Member Network is designed for phones only');
+    const footer = footerOf(html);
+    expect(occurrences(footer, 'href="/UTMMSC/"')).toBe(1);
+    expect(footer).not.toContain('Join us');
+    expect(footer).toContain('<p class="mobile-note">');
+    const about = (await get('/about')).html;
+    expect(about).not.toContain('Join us');
+    expect(about).toContain('<a class="btn btn--primary" href="/UTMMSC/">Member Network</a>');
   });
 });

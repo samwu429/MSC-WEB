@@ -74,6 +74,19 @@ export function BiRichText({ text, class: className = 'prose' }: { text: Localiz
   );
 }
 
+/** The note shown beside links into the member network: it has been made for phone screens only. */
+/** 成员网络链接旁的说明：成员网络只适配了手机屏幕。 */
+export function MobileOnlyNote() {
+  return (
+    <p class="mobile-note">
+      <Icon name="phone" />
+      <span>
+        <Bi text={COMMON.memberNetworkMobileOnly} />
+      </span>
+    </p>
+  );
+}
+
 export function SectionHeading(props: { eyebrow?: string; title: Copy; lead?: Copy; link?: { href: string; label: string }; id?: string }) {
   return (
     <div class="section-head">

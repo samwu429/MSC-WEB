@@ -34,6 +34,7 @@
  *   Gallery     .gallery .gallery__item
  *   Documents   .doc-group .doc-list .doc-item .doc-item__icon .doc-item__body .doc-item__title .doc-item__meta
  *   Footer      .site-footer .footer-grid .footer-brand .footer-col .footer-qr .footer-bottom .footer-bottom__row .footer-admin
+ *   Member net  .mobile-note (beside member-network links) .topbar__note .cta-band__action
  *   Misc        .notice .notice--integrity .empty .cta-band .cta-band__inner .pager
  */
 export const SITE_CSS = `
@@ -188,6 +189,8 @@ p + .zh-text, .prose + .zh-text { margin-top: 2px; }
 .topbar__links a + a { border-left: 1px solid var(--line-strong); }
 .topbar__links a:last-child { padding-right: 0; }
 .topbar__links a:hover { color: var(--purple-700); text-decoration: underline; }
+.topbar__note { display: inline-flex; align-items: center; gap: 5px; padding-right: 12px; color: var(--muted); }
+.topbar__note svg { width: 13px; height: 13px; }
 .topbar__zh { margin-left: 6px; color: var(--zh); font-size: 0.9em; }
 .site-header { position: sticky; top: 0; z-index: 50; background: var(--white); border-bottom: 1px solid var(--line); box-shadow: 0 2px 0 rgba(43, 17, 73, 0.04); }
 .site-header__inner { display: flex; align-items: center; gap: 40px; min-height: 72px; }
@@ -401,6 +404,12 @@ a.partner:hover { border-color: var(--purple-700); color: var(--purple-700); }
 .empty { padding: 40px 24px; background: var(--white); border: 1px dashed var(--line-strong); color: var(--muted); text-align: center; }
 .empty strong { display: block; margin-bottom: 6px; color: var(--ink-soft); font-size: 1.05rem; }
 
+.mobile-note { display: flex; align-items: flex-start; gap: 6px; margin-top: 10px; color: var(--muted); font-size: 0.8rem; line-height: 1.4; }
+.mobile-note svg { flex: none; width: 14px; height: 14px; margin-top: 1px; }
+.mobile-note .zh { margin-top: 1px; font-size: 0.68rem; }
+.site-footer .mobile-note { margin-top: 12px; }
+.cta-band__action { display: grid; justify-items: start; }
+.cta-band .mobile-note { color: var(--purple-900); }
 .cta-band { background: var(--gold-500); color: var(--purple-950); }
 .cta-band__inner { display: grid; gap: 24px; padding-top: 48px; padding-bottom: 48px; }
 .cta-band h2 { color: var(--purple-950); }

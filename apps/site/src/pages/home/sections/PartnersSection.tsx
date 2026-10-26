@@ -51,7 +51,7 @@ export function PartnersSection({ ctx }: { ctx: PageContext }) {
     (group) => group.items.length > 0,
   );
   return (
-    <section class="section section--alt" aria-labelledby="home-partners">
+    <section class="section" aria-labelledby="home-partners">
       <div class="container">
         <SectionHeading id="home-partners" eyebrow={t(HOME, 'partnersEyebrow', locale)} title={HOME.partnersTitle} lead={HOME.partnersLead} />
         {groups.length > 0 ? (

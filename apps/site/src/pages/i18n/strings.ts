@@ -19,6 +19,7 @@ export const COMMON = {
   navPeople: { zh: '我们的团队', en: 'Our People' },
   navAbout: { zh: '关于我们', en: 'About' },
   memberNetwork: { zh: '成员网络', en: 'Member Network' },
+  memberNetworkMobileOnly: { zh: '成员网络目前只适配手机端', en: 'The Member Network is designed for phones only' },
   joinUs: { zh: '加入我们', en: 'Join us' },
   viewAll: { zh: '查看全部', en: 'View all' },
   learnMore: { zh: '了解更多', en: 'Learn more' },

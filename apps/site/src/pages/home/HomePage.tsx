@@ -29,8 +29,8 @@ export function HomePage({ ctx, data }: { ctx: PageContext; data: HomeData }) {
       <PillarsSection ctx={ctx} />
       <UpcomingEventsSection ctx={ctx} events={data.upcomingEvents} />
       <TermReviewsSection ctx={ctx} term={data.term} courses={data.termCourses} />
-      <PartnersSection ctx={ctx} />
       <AdvisorsPreviewSection ctx={ctx} advisors={data.advisors} />
+      <PartnersSection ctx={ctx} />
       <JoinBandSection ctx={ctx} />
     </>
   );
