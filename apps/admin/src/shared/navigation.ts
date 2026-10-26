@@ -13,12 +13,13 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: readonly NavItem[] = [
-  { to: '/', label: '概览', description: '数量统计与最近修改', permission: null },
+  { to: '/', label: '概览', description: '数量统计与常用操作', permission: null },
   { to: '/events', label: '活动', description: '学术活动与课外活动', permission: 'events.edit' },
   { to: '/reviews', label: '考前复习', description: '课程、期中与期末复习场次、资料', permission: 'reviews.edit' },
   { to: '/people', label: '我们的团队', description: '主席团、部长团与荣誉顾问', permission: 'people.edit' },
   { to: '/documents', label: '公开文件', description: '章程、公开账目、选举结果', permission: 'documents.edit' },
   { to: '/settings', label: '网站设置', description: '首页文案、联系方式与公告栏', permission: 'settings.edit' },
+  { to: '/changes', label: '最近修改', description: '谁在什么时候改了什么', permission: null },
 ];
 
 export function visibleNavItems(permissions: readonly SitePermission[]): NavItem[] {

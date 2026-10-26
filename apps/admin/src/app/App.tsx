@@ -3,6 +3,7 @@ import { Navigate, Route, RouterProvider, Routes, createBrowserRouter } from 're
 import type { SitePermission } from '@msc-web/content';
 import { LoginPage } from '../features/auth/LoginPage';
 import { SessionUnavailablePage } from '../features/auth/SessionUnavailablePage';
+import { ChangesPage } from '../features/dashboard/ChangesPage';
 import { DashboardPage } from '../features/dashboard/DashboardPage';
 import { DocumentEditPage } from '../features/documents/DocumentEditPage';
 import { DocumentListPage } from '../features/documents/DocumentListPage';
@@ -40,6 +41,7 @@ function AppRoutes() {
       <Routes key={state.identity.memberId}>
         <Route element={<AdminShell />}>
           <Route index element={<DashboardPage />} />
+          <Route path="changes" element={<ChangesPage />} />
           <Route path="settings" element={<Guard permission="settings.edit"><SettingsPage /></Guard>} />
           <Route path="people" element={<Guard permission="people.edit"><PeopleListPage /></Guard>} />
           <Route path="people/new" element={<Guard permission="people.edit"><PersonEditPage /></Guard>} />
