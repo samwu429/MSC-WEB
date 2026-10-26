@@ -20,9 +20,9 @@ export function RecentChanges({ changes }: { changes: readonly ChangeLogEntry[] 
     return <EmptyState title="还没有修改记录">保存任何内容后，这里会显示修改人、时间与修改的内容。</EmptyState>;
   }
   return (
-    <ol className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-white text-sm shadow-sm">
+    <ol className="overflow-hidden rounded-xl border border-line bg-white py-2 text-sm leading-snug shadow-sm">
       {changes.map((change) => (
-        <li key={change.id} className="flex items-baseline gap-3 px-4 py-2">
+        <li key={change.id} className="flex items-baseline gap-3 px-4 py-0.5 hover:bg-canvas">
           <time dateTime={change.at} className="w-24 shrink-0 whitespace-nowrap text-xs tabular-nums text-ink-muted">
             {formatChangeTime(change.at, now)}
           </time>
