@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, RouterProvider, Routes, createBrowserRouter } from 'react-router-dom';
 import type { SitePermission } from '@msc-web/content';
 import { LoginPage } from '../features/auth/LoginPage';
 import { SessionUnavailablePage } from '../features/auth/SessionUnavailablePage';
@@ -15,6 +15,7 @@ import { CourseListPage } from '../features/reviews/CourseListPage';
 import { SessionEditPage } from '../features/reviews/SessionEditPage';
 import { SettingsPage } from '../features/settings/SettingsPage';
 import { SessionProvider, useSession } from '../shared/session/SessionProvider';
+import { ConfirmProvider } from '../shared/ui/confirm';
 import { EmptyState, Spinner } from '../shared/ui/feedback';
 import { AdminShell } from './AdminShell';
 
@@ -62,14 +63,27 @@ function AppRoutes() {
   );
 }
 
-/** Admin routes, relative to /admin/. */
-/** 后台路由，相对于 /admin/。 */
+/**
+ * Admin routes, relative to /admin/. A data router is used so editing screens can hold a link click while they
+ * have unsaved changes; the screens themselves are declared in AppRoutes.
+ * 后台路由，相对于 /admin/。使用数据路由器，编辑页面在有未保存的修改时才能拦下链接跳转；页面本身在 AppRoutes 中声明。
+ */
+const router = createBrowserRouter(
+  [
+    {
+      path: '*',
+      element: (
+        <SessionProvider>
+          <ConfirmProvider>
+            <AppRoutes />
+          </ConfirmProvider>
+        </SessionProvider>
+      ),
+    },
+  ],
+  { basename: '/admin', future: { v7_relativeSplatPath: true } },
+);
+
 export function App() {
-  return (
-    <BrowserRouter basename="/admin" future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <SessionProvider>
-        <AppRoutes />
-      </SessionProvider>
-    </BrowserRouter>
-  );
+  return <RouterProvider router={router} future={{ v7_startTransition: true }} />;
 }

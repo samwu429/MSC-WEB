@@ -15,9 +15,9 @@ export default {
           900: '#2A1044',
         },
         gold: { 100: '#fff4cc', 500: '#FFD23F', 600: '#e8b90f', 700: '#8a6a00' },
-        canvas: '#F5F3EF',
+        canvas: '#F4F3F7',
         ink: { DEFAULT: '#2C2140', soft: '#4A4155', muted: '#6B6570' },
-        line: { DEFAULT: '#E4E0D8', strong: '#D4CDC0' },
+        line: { DEFAULT: '#E2E0E8', strong: '#CBC7D4' },
       },
       fontFamily: {
         sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', 'Arial', 'sans-serif'],

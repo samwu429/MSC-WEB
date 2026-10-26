@@ -6,6 +6,8 @@ import { ActionFailedNotice, FAILED_ACTION_LABELS, type ActionFailure, type Form
 import { useArrivalNotice, withNotice } from '../../../shared/feedback/useArrivalNotice';
 import { useFlash } from '../../../shared/feedback/useFlash';
 import { issuesOf } from '../../../shared/forms/issues';
+import { sameValue, submitOnSaveShortcut, useUnsavedChanges } from '../../../shared/forms/unsaved';
+import { useConfirm } from '../../../shared/ui/confirm';
 import { ImageField } from '../../../shared/media/MediaFields';
 import { UPLOADING_STATUS, useUploadsInProgress } from '../../../shared/media/useUploadsInProgress';
 import { Button } from '../../../shared/ui/Button';
@@ -25,7 +27,12 @@ export function PersonForm(props: { person: Person | null; defaults: PersonInput
   const { flash, showFlash, clearFlash } = useFlash(useArrivalNotice());
   const { uploading, onBusyChange } = useUploadsInProgress();
   const [saved, setSaved] = useState<Person | null>(props.person);
-  const [value, setValue] = useState<PersonInput>(() => (props.person ? toPersonInput(props.person) : props.defaults));
+  const [initial] = useState<PersonInput>(() => (props.person ? toPersonInput(props.person) : props.defaults));
+  const [value, setValue] = useState<PersonInput>(initial);
+  const [baseline, setBaseline] = useState<PersonInput>(initial);
+  const dirty = !sameValue(value, baseline);
+  const { allowNavigation, dialog } = useUnsavedChanges(dirty);
+  const confirm = useConfirm();
   const [busy, setBusy] = useState<FormAction | null>(null);
   const [failure, setFailure] = useState<ActionFailure | null>(null);
   const issues = issuesOf(failure?.error);
@@ -52,11 +59,13 @@ export function PersonForm(props: { person: Person | null; defaults: PersonInput
     try {
       if (!saved) {
         const { person: createdPerson } = await peopleApi.create(value);
+        allowNavigation();
         navigate(`/people/${createdPerson.id}`, { replace: true, state: withNotice('成员已添加') });
         return;
       }
       const { person: updated } = await peopleApi.update(saved.id, value, saved.updatedAt);
       setValue(toPersonInput(updated));
+      setBaseline(toPersonInput(updated));
       setSaved(updated);
       showFlash('已保存');
     } catch (error) {
@@ -69,12 +78,19 @@ export function PersonForm(props: { person: Person | null; defaults: PersonInput
   async function remove() {
     if (!saved) return;
     const name = pickText(saved.name, 'zh') || '这位成员';
-    if (!window.confirm(`确定要删除「${name}」吗？删除后无法恢复。如果只是卸任，也可以取消勾选「在网站上显示」。`)) return;
+    const confirmed = await confirm({
+      title: `删除「${name}」？`,
+      message: '删除后无法恢复。如果只是卸任，可以改为取消勾选「在网站上显示」。',
+      confirmLabel: '删除成员',
+      tone: 'danger',
+    });
+    if (!confirmed) return;
     setBusy('delete');
     setFailure(null);
     clearFlash();
     try {
       await peopleApi.remove(saved.id);
+      allowNavigation();
       navigate('/people', { replace: true });
     } catch (error) {
       setFailure({ action: 'delete', error });
@@ -91,7 +107,8 @@ export function PersonForm(props: { person: Person | null; defaults: PersonInput
   ) : null;
 
   return (
-    <form noValidate onSubmit={(event) => void save(event)}>
+    <form noValidate onSubmit={(event) => void save(event)} onKeyDown={submitOnSaveShortcut}>
+      {dialog}
       <fieldset disabled={busy !== null} className="min-w-0 space-y-6">
         {failure && <ActionFailedNotice action={failure.action} error={failure.error} onReload={onReload} />}
 
@@ -136,7 +153,7 @@ export function PersonForm(props: { person: Person | null; defaults: PersonInput
           <Checkbox label="在网站上显示" checked={value.visible} onChange={(visible) => change({ visible })} hint="隐藏的成员只保留在后台，不会出现在网站上。" />
         </Panel>
 
-        <Panel title="姓名与介绍">
+        <Panel title="姓名与介绍" description="「我们的团队」在网站上只显示英文，请务必填写英文；中文只用于后台识别。">
           <LocalizedInput
             label="姓名"
             value={value.name}
@@ -211,7 +228,7 @@ export function PersonForm(props: { person: Person | null; defaults: PersonInput
         </Panel>
       </fieldset>
 
-      <FormActions status={status}>
+      <FormActions status={status} dirty={dirty}>
         {saved && (
           <Button variant="danger" busy={busy === 'delete'} disabled={busy !== null} onClick={() => void remove()}>
             删除

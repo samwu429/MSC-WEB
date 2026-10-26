@@ -7,6 +7,8 @@ import type { ActionFailure } from '../../../shared/feedback/notices';
 import { useArrivalNotice, withNotice } from '../../../shared/feedback/useArrivalNotice';
 import { useFlash } from '../../../shared/feedback/useFlash';
 import { issuesOf } from '../../../shared/forms/issues';
+import { sameValue, submitOnSaveShortcut, useUnsavedChanges } from '../../../shared/forms/unsaved';
+import { useConfirm } from '../../../shared/ui/confirm';
 import { Button, buttonClass } from '../../../shared/ui/Button';
 import { Checkbox, LocalizedInput, NumberInput, TextInput } from '../../../shared/ui/fields';
 import { FormActions, PageHeader, Panel } from '../../../shared/ui/layout';
@@ -21,7 +23,12 @@ export function CourseEditor({ loaded, onReload }: { loaded: CourseResponse | nu
   const navigate = useNavigate();
   const { flash, showFlash, clearFlash } = useFlash(useArrivalNotice());
   const [record, setRecord] = useState<Course | null>(loaded?.course ?? null);
-  const [draft, setDraft] = useState(() => courseDraftOf(record));
+  const [initial] = useState(() => courseDraftOf(record));
+  const [draft, setDraft] = useState(initial);
+  const [baseline, setBaseline] = useState(initial);
+  const dirty = !sameValue(draft, baseline);
+  const { allowNavigation, dialog } = useUnsavedChanges(dirty);
+  const confirm = useConfirm();
   const [busy, setBusy] = useState<'save' | 'delete' | null>(null);
   const [failure, setFailure] = useState<ActionFailure | null>(null);
   const issues = issuesOf(failure?.error);
@@ -37,12 +44,14 @@ export function CourseEditor({ loaded, onReload }: { loaded: CourseResponse | nu
       const input = courseInputOf(draft);
       if (!record) {
         const { course } = await coursesApi.create(input);
+        allowNavigation();
         navigate(`/reviews/courses/${course.id}`, { replace: true, state: withNotice('课程已创建，现在可以添加复习场次') });
         return;
       }
       const { course } = await coursesApi.update(record.id, input, record.updatedAt);
       setRecord(course);
       setDraft(courseDraftOf(course));
+      setBaseline(courseDraftOf(course));
       showFlash('已保存');
     } catch (error) {
       setFailure({ action: 'save', error });
@@ -53,12 +62,14 @@ export function CourseEditor({ loaded, onReload }: { loaded: CourseResponse | nu
 
   async function remove() {
     if (!record) return;
-    if (!window.confirm(`确定删除课程 ${record.code} 吗？它的所有复习场次和资料都会一并删除，且无法恢复。`)) return;
+    const confirmed = await confirm({ title: `删除课程 ${record.code}？`, message: '它的所有复习场次和资料都会一并删除，且无法恢复。', confirmLabel: '删除课程', tone: 'danger' });
+    if (!confirmed) return;
     setBusy('delete');
     setFailure(null);
     clearFlash();
     try {
       await coursesApi.remove(record.id);
+      allowNavigation();
       navigate('/reviews', { replace: true, state: withNotice(`课程 ${record.code} 已删除`) });
     } catch (error) {
       setFailure({ action: 'delete', error });
@@ -80,7 +91,8 @@ export function CourseEditor({ loaded, onReload }: { loaded: CourseResponse | nu
           )
         }
       />
-      <form noValidate onSubmit={(event) => void save(event)}>
+      <form noValidate onSubmit={(event) => void save(event)} onKeyDown={submitOnSaveShortcut}>
+        {dialog}
         <fieldset disabled={busy !== null} className="min-w-0 space-y-6">
           <Panel title="课程信息">
             <TextInput
@@ -115,7 +127,7 @@ export function CourseEditor({ loaded, onReload }: { loaded: CourseResponse | nu
           </Panel>
         </fieldset>
 
-        <FormActions status={<SaveFeedback failure={failure} flash={flash} onReload={onReload} />}>
+        <FormActions status={failure || flash ? <SaveFeedback failure={failure} flash={flash} onReload={onReload} /> : undefined} dirty={dirty}>
           {record && (
             <Button variant="danger" busy={busy === 'delete'} disabled={busy !== null} onClick={() => void remove()}>
               删除课程

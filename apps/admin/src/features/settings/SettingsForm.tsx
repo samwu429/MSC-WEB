@@ -3,6 +3,7 @@ import type { SettingsResponse, SiteSettings } from '@msc-web/content';
 import { settingsApi } from '../../shared/api/endpoints';
 import { ActionFailedNotice } from '../../shared/feedback/notices';
 import { issuesOf } from '../../shared/forms/issues';
+import { sameValue, submitOnSaveShortcut, useUnsavedChanges } from '../../shared/forms/unsaved';
 import { UPLOADING_STATUS, useUploadsInProgress } from '../../shared/media/useUploadsInProgress';
 import { Button } from '../../shared/ui/Button';
 import { Notice } from '../../shared/ui/feedback';
@@ -23,6 +24,9 @@ import { patchSettings } from './sections/section';
  */
 export function SettingsForm({ initial, onReload }: { initial: SettingsResponse; onReload: () => void }) {
   const [settings, setSettings] = useState<SiteSettings>(initial.settings);
+  const [baseline, setBaseline] = useState<SiteSettings>(initial.settings);
+  const dirty = !sameValue(settings, baseline);
+  const { dialog } = useUnsavedChanges(dirty);
   const [updatedAt, setUpdatedAt] = useState(initial.updatedAt);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<unknown>(null);
@@ -50,6 +54,7 @@ export function SettingsForm({ initial, onReload }: { initial: SettingsResponse;
     try {
       const response = await settingsApi.save(settings, updatedAt);
       setSettings(response.settings);
+      setBaseline(response.settings);
       setUpdatedAt(response.updatedAt);
       setSaved(true);
     } catch (failure) {
@@ -62,7 +67,8 @@ export function SettingsForm({ initial, onReload }: { initial: SettingsResponse;
   const status = uploading ? UPLOADING_STATUS : error !== null ? '未能保存，请查看页面顶部的提示' : saved ? '已保存' : null;
 
   return (
-    <form noValidate onSubmit={(event) => void save(event)}>
+    <form noValidate onSubmit={(event) => void save(event)} onKeyDown={submitOnSaveShortcut}>
+      {dialog}
       <fieldset disabled={saving} className="min-w-0 space-y-6">
         {error !== null && <ActionFailedNotice action="save" error={error} onReload={onReload} />}
         {saved && <Notice tone="success">网站设置已保存。</Notice>}
@@ -73,7 +79,7 @@ export function SettingsForm({ initial, onReload }: { initial: SettingsResponse;
         <PartnersSection items={settings.partners.items} onChange={changePartners} issues={issues} onBusyChange={onBusyChange} />
         <AnnouncementSection value={settings.announcement} onPatch={(part) => patch('announcement', part)} issues={issues} />
       </fieldset>
-      <FormActions status={status}>
+      <FormActions status={status ?? undefined} dirty={dirty}>
         <Button type="submit" busy={saving} disabled={uploading}>
           保存设置
         </Button>

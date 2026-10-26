@@ -19,7 +19,7 @@ export function SummaryCards({ cards }: { cards: readonly SummaryCard[] }) {
             >
               <span className="block text-sm font-semibold text-ink-soft">{card.title}</span>
               <span className="mt-2 flex items-baseline gap-1.5">
-                <span className="font-serif text-3xl font-bold text-brand-900">{card.value}</span>
+                <span className="text-3xl font-bold text-brand-900">{card.value}</span>
                 <span className="text-sm text-ink-muted">{card.unit}</span>
               </span>
               {card.detail && <span className="mt-1 block text-xs text-ink-muted">{card.detail}</span>}

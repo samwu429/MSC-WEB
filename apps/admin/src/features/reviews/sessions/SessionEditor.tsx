@@ -22,6 +22,8 @@ import type { ActionFailure } from '../../../shared/feedback/notices';
 import { useArrivalNotice, withNotice } from '../../../shared/feedback/useArrivalNotice';
 import { useFlash } from '../../../shared/feedback/useFlash';
 import { issuesOf } from '../../../shared/forms/issues';
+import { sameValue, submitOnSaveShortcut, useUnsavedChanges } from '../../../shared/forms/unsaved';
+import { useConfirm } from '../../../shared/ui/confirm';
 import { Button } from '../../../shared/ui/Button';
 import { LocalizedInput, Select, TextInput, WallTimeInput } from '../../../shared/ui/fields';
 import { FormActions, PageHeader, Panel } from '../../../shared/ui/layout';
@@ -52,7 +54,12 @@ export function SessionEditor({ course, session, onReload }: { course: Course; s
   const { flash, showFlash, clearFlash } = useFlash(useArrivalNotice());
   const [today] = useState(() => wallDateOf(torontoWallTime(new Date())));
   const [record, setRecord] = useState<ReviewSession | null>(session);
-  const [draft, setDraft] = useState(() => sessionDraftOf(session, today));
+  const [initial] = useState(() => sessionDraftOf(session, today));
+  const [draft, setDraft] = useState(initial);
+  const [baseline, setBaseline] = useState(initial);
+  const dirty = !sameValue(draft, baseline);
+  const { allowNavigation, dialog } = useUnsavedChanges(dirty);
+  const confirm = useConfirm();
   const [busy, setBusy] = useState<'save' | 'delete' | null>(null);
   const [failure, setFailure] = useState<ActionFailure | null>(null);
   const issues = issuesOf(failure?.error);
@@ -71,12 +78,14 @@ export function SessionEditor({ course, session, onReload }: { course: Course; s
       const input = sessionInputOf(draft);
       if (!record) {
         const { session: created } = await coursesApi.addSession(course.id, input);
+        allowNavigation();
         navigate(`/reviews/sessions/${created.id}`, { replace: true, state: withNotice('复习场次已创建，现在可以添加资料') });
         return;
       }
       const { session: updated } = await reviewSessionsApi.update(record.id, input, record.updatedAt);
       setRecord(updated);
       setDraft(sessionDraftOf(updated, today));
+      setBaseline(sessionDraftOf(updated, today));
       showFlash('已保存');
     } catch (error) {
       setFailure({ action: 'save', error });
@@ -87,12 +96,14 @@ export function SessionEditor({ course, session, onReload }: { course: Course; s
 
   async function remove() {
     if (!record) return;
-    if (!window.confirm('确定删除这场复习吗？其中的所有资料也会一并删除，且无法恢复。')) return;
+    const confirmed = await confirm({ title: '删除这场复习？', message: '其中的所有资料也会一并删除，且无法恢复。', confirmLabel: '删除场次', tone: 'danger' });
+    if (!confirmed) return;
     setBusy('delete');
     setFailure(null);
     clearFlash();
     try {
       await reviewSessionsApi.remove(record.id);
+      allowNavigation();
       navigate(courseLink, { replace: true, state: withNotice('复习场次已删除') });
     } catch (error) {
       setFailure({ action: 'delete', error });
@@ -113,7 +124,8 @@ export function SessionEditor({ course, session, onReload }: { course: Course; s
         }
         actions={record && <StatusBadge status={record.status} />}
       />
-      <form noValidate onSubmit={(event) => void save(event)}>
+      <form noValidate onSubmit={(event) => void save(event)} onKeyDown={submitOnSaveShortcut}>
+        {dialog}
         <fieldset disabled={busy !== null} className="min-w-0 space-y-6">
           <Panel title="基本信息">
             <div className="grid gap-4 sm:grid-cols-3">
@@ -172,7 +184,7 @@ export function SessionEditor({ course, session, onReload }: { course: Course; s
           </Panel>
         </fieldset>
 
-        <FormActions status={<SaveFeedback failure={failure} flash={flash} onReload={onReload} />}>
+        <FormActions status={failure || flash ? <SaveFeedback failure={failure} flash={flash} onReload={onReload} /> : undefined} dirty={dirty}>
           {record && (
             <Button variant="danger" busy={busy === 'delete'} disabled={busy !== null} onClick={() => void remove()}>
               删除场次

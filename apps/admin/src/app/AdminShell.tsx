@@ -68,7 +68,7 @@ export function AdminShell() {
           <a href="/" className="flex items-center gap-3" title="打开公开网站">
             <BookMark className="h-8 w-10" />
             <span className="leading-tight">
-              <span className="block font-serif text-lg font-bold text-brand-900">UTMMSC</span>
+              <span className="block text-lg font-bold text-brand-900">UTMMSC</span>
               <span className="block text-xs text-ink-muted">官网后台</span>
             </span>
           </a>

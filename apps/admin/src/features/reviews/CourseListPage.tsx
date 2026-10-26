@@ -1,16 +1,20 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { pickText, type CourseSummary } from '@msc-web/content';
 import { coursesApi } from '../../shared/api/endpoints';
 import { useLoad } from '../../shared/data/useLoad';
+import { matchesSearch } from '../../shared/data/search';
 import { LoadFailedNotice } from '../../shared/feedback/notices';
 import { useArrivalNotice } from '../../shared/feedback/useArrivalNotice';
 import { useFlash } from '../../shared/feedback/useFlash';
 import { LinkButton } from '../../shared/ui/Button';
 import { Badge, EmptyState, Notice, Spinner } from '../../shared/ui/feedback';
+import { SearchInput } from '../../shared/ui/fields';
 import { PageHeader } from '../../shared/ui/layout';
 
-function CourseList({ courses }: { courses: readonly CourseSummary[] }) {
+function CourseList({ courses, searching }: { courses: readonly CourseSummary[]; searching: boolean }) {
   if (courses.length === 0) {
+    if (searching) return <EmptyState title="没有找到这门课程">换一个课程代码或名称试试。</EmptyState>;
     return <EmptyState title="还没有课程">点击“新增课程”添加第一门课程，然后在课程页面中安排复习场次。</EmptyState>;
   }
   return (
@@ -44,6 +48,7 @@ function CourseList({ courses }: { courses: readonly CourseSummary[] }) {
 export function CourseListPage() {
   const { state, reload } = useLoad(() => coursesApi.list(), []);
   const { flash } = useFlash(useArrivalNotice());
+  const [query, setQuery] = useState('');
 
   return (
     <>
@@ -60,7 +65,15 @@ export function CourseListPage() {
         {flash && <Notice tone="success">{flash}</Notice>}
         {state.status === 'loading' && <Spinner />}
         {state.status === 'error' && <LoadFailedNotice error={state.error} onRetry={reload} />}
-        {state.status === 'ready' && <CourseList courses={state.data.courses} />}
+        {state.status === 'ready' && (
+          <>
+            {state.data.courses.length > 0 && <SearchInput label="搜索课程" value={query} onChange={setQuery} placeholder="搜索课程代码或名称，例如 CSC108" className="sm:w-80" />}
+            <CourseList
+              courses={state.data.courses.filter((course) => matchesSearch(query, [course.code, course.title.zh, course.title.en]))}
+              searching={query.trim() !== ''}
+            />
+          </>
+        )}
       </div>
     </>
   );

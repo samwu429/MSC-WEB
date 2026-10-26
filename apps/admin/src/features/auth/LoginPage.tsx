@@ -101,7 +101,7 @@ export function LoginPage({ expired = false }: { expired?: boolean }) {
           <rect x="112" y="64" width="40" height="4" fill="#FFD23F" />
           <rect x="112" y="82" width="40" height="4" fill="#FFD23F" />
         </svg>
-        <Heading id={titleId} className="mt-4 font-serif text-2xl font-bold text-brand-900">
+        <Heading id={titleId} className="mt-4 text-2xl font-bold text-brand-900">
           {expired ? '登录已过期' : 'UTMMSC 官网后台'}
         </Heading>
         <p className="mt-2 text-sm text-ink-muted">

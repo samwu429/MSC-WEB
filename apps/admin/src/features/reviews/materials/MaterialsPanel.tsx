@@ -4,6 +4,7 @@ import { reviewSessionsApi } from '../../../shared/api/endpoints';
 import { useFlash } from '../../../shared/feedback/useFlash';
 import { errorMessage } from '../../../shared/forms/issues';
 import { Button } from '../../../shared/ui/Button';
+import { useConfirm } from '../../../shared/ui/confirm';
 import { Badge, Notice } from '../../../shared/ui/feedback';
 import { Panel } from '../../../shared/ui/layout';
 import { MaterialForm } from './MaterialForm';
@@ -39,6 +40,7 @@ export function MaterialsPanel({ sessionId, initialMaterials, className }: { ses
   const [editing, setEditing] = useState<ReviewMaterial | 'new' | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [error, setError] = useState<unknown>(null);
+  const confirm = useConfirm();
   const { flash, showFlash, clearFlash } = useFlash();
   const refreshGeneration = useRef(0);
 
@@ -72,7 +74,8 @@ export function MaterialsPanel({ sessionId, initialMaterials, className }: { ses
   }
 
   async function remove(material: ReviewMaterial) {
-    if (!window.confirm(`确定删除资料“${materialListLabel(material)}”吗？删除后无法恢复。`)) return;
+    const confirmed = await confirm({ title: `删除资料“${materialListLabel(material)}”？`, message: '删除后无法恢复。', confirmLabel: '删除资料', tone: 'danger' });
+    if (!confirmed) return;
     setRemovingId(material.id);
     setError(null);
     clearFlash();

@@ -44,6 +44,7 @@ export function ContactSection({ value, onPatch, issues, onBusyChange }: Section
         issues={issues}
         field="contact.wechatQrKey"
         aspect="aspect-square"
+        fit="contain"
         hint="建议上传 PNG 格式的二维码，PNG 会保持原格式，扫描更清晰。"
       />
       <div className="grid gap-5 sm:grid-cols-2">

@@ -197,23 +197,15 @@ export function LocalizedInput(props: {
       <legend className="mb-1.5 text-sm font-semibold text-ink">
         {props.label}
         {props.required && <span className="ml-1 text-red-600">*</span>}
-        {props.required && <span className="ml-2 text-xs font-normal text-ink-muted">至少填写一种语言</span>}
+        {props.required && <span className="ml-2 text-xs font-normal text-ink-muted">至少填写一种语言，建议两种都填</span>}
       </legend>
+      {/* English comes first because the public site shows it first, with the Chinese in small type beneath. */}
+      {/* 英文在前，因为公开网站先显示英文，中文以小字显示在其下方。 */}
       <div className="grid gap-3 md:grid-cols-2">
         <div>
-          <label htmlFor={zhId} className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-muted">
-            中文
-          </label>
-          {control(zhId, 'zh', zhError)}
-          {zhError && (
-            <p className="mt-1.5 text-xs font-medium text-red-700" role="alert">
-              {zhError}
-            </p>
-          )}
-        </div>
-        <div>
-          <label htmlFor={enId} className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-muted">
+          <label htmlFor={enId} className="mb-1 flex items-baseline gap-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
             English
+            <span className="font-normal normal-case tracking-normal text-ink-muted/80">网站主要显示</span>
           </label>
           {control(enId, 'en', enError)}
           {enError && (
@@ -222,8 +214,48 @@ export function LocalizedInput(props: {
             </p>
           )}
         </div>
+        <div>
+          <label htmlFor={zhId} className="mb-1 flex items-baseline gap-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
+            中文
+            <span className="font-normal normal-case tracking-normal text-ink-muted/80">显示在英文下方</span>
+          </label>
+          {control(zhId, 'zh', zhError)}
+          {zhError && (
+            <p className="mt-1.5 text-xs font-medium text-red-700" role="alert">
+              {zhError}
+            </p>
+          )}
+        </div>
       </div>
       {props.hint && <p className="mt-1.5 text-xs text-ink-muted">{props.hint}</p>}
     </fieldset>
+  );
+}
+
+/** A list's search box: filters as the officer types, with a button to clear it. */
+/** 列表的搜索框：随输入即时筛选，并带有清除按钮。 */
+export function SearchInput(props: { label: string; value: string; onChange: (value: string) => void; placeholder?: string; className?: string }) {
+  const id = useId();
+  return (
+    <div className={`relative ${props.className ?? ''}`}>
+      <label htmlFor={id} className="sr-only">
+        {props.label}
+      </label>
+      <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-3.5-3.5" strokeLinecap="round" />
+      </svg>
+      <input
+        id={id}
+        type="search"
+        className={`${INPUT} pl-9`}
+        value={props.value}
+        placeholder={props.placeholder}
+        onChange={(event) => props.onChange(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') props.onChange('');
+        }}
+      />
+    </div>
   );
 }

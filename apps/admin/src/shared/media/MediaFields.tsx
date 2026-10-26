@@ -26,6 +26,9 @@ export function ImageField(props: {
   aspect?: string;
   required?: boolean;
   onBusyChange?: (busy: boolean) => void;
+  /** "contain" shows the whole image, for logos and QR codes that must not be cropped. */
+  /** "contain" 显示完整图片，用于不能被裁切的 Logo 与二维码。 */
+  fit?: 'cover' | 'contain';
 }) {
   const inputId = useId();
   const input = useRef<HTMLInputElement>(null);
@@ -55,7 +58,7 @@ export function ImageField(props: {
       <div className="flex flex-wrap items-start gap-4">
         <div className={`w-48 overflow-hidden rounded-lg border border-line bg-canvas ${props.aspect ?? 'aspect-video'}`}>
           {props.value ? (
-            <img src={mediaUrl(props.value)} alt="" className="h-full w-full object-cover" />
+            <img src={mediaUrl(props.value)} alt="" className={`h-full w-full ${props.fit === 'contain' ? 'bg-white object-contain p-2' : 'object-cover'}`} />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-xs text-ink-muted">未上传</div>
           )}

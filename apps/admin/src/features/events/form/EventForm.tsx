@@ -6,9 +6,11 @@ import { ActionFailedNotice, FAILED_ACTION_LABELS, type ActionFailure, type Form
 import { useArrivalNotice, withNotice } from '../../../shared/feedback/useArrivalNotice';
 import { useFlash } from '../../../shared/feedback/useFlash';
 import { issuesOf } from '../../../shared/forms/issues';
+import { sameValue, submitOnSaveShortcut, useUnsavedChanges } from '../../../shared/forms/unsaved';
 import { ImageField } from '../../../shared/media/MediaFields';
 import { UPLOADING_STATUS, useUploadsInProgress } from '../../../shared/media/useUploadsInProgress';
 import { Button, buttonClass } from '../../../shared/ui/Button';
+import { useConfirm } from '../../../shared/ui/confirm';
 import { Notice } from '../../../shared/ui/feedback';
 import { LocalizedInput, Select, TextInput, WallTimeInput } from '../../../shared/ui/fields';
 import { FormActions, Panel } from '../../../shared/ui/layout';
@@ -25,7 +27,12 @@ export function EventForm(props: { event: SiteEvent | null; onReload: () => void
   const { flash, showFlash, clearFlash } = useFlash(useArrivalNotice());
   const { uploading, onBusyChange } = useUploadsInProgress();
   const [saved, setSaved] = useState<SiteEvent | null>(props.event);
-  const [value, setValue] = useState<EventInput>(() => (props.event ? toEventInput(props.event) : emptyEventInput()));
+  const [initial] = useState<EventInput>(() => (props.event ? toEventInput(props.event) : emptyEventInput()));
+  const [value, setValue] = useState<EventInput>(initial);
+  const [baseline, setBaseline] = useState<EventInput>(initial);
+  const dirty = !sameValue(value, baseline);
+  const { allowNavigation, dialog } = useUnsavedChanges(dirty);
+  const confirm = useConfirm();
   const [busy, setBusy] = useState<FormAction | null>(null);
   const [failure, setFailure] = useState<ActionFailure | null>(null);
   const issues = issuesOf(failure?.error);
@@ -45,11 +52,13 @@ export function EventForm(props: { event: SiteEvent | null; onReload: () => void
     try {
       if (!saved) {
         const { event: createdEvent } = await eventsApi.create(value);
+        allowNavigation();
         navigate(`/events/${createdEvent.id}`, { replace: true, state: withNotice('活动已创建，现在可以添加活动照片') });
         return;
       }
       const { event: updated } = await eventsApi.update(saved.id, value, saved.updatedAt);
       setValue(toEventInput(updated));
+      setBaseline(toEventInput(updated));
       setSaved(updated);
       showFlash('已保存');
     } catch (error) {
@@ -62,12 +71,14 @@ export function EventForm(props: { event: SiteEvent | null; onReload: () => void
   async function remove() {
     if (!saved) return;
     const title = pickText(saved.title, 'zh') || '这个活动';
-    if (!window.confirm(`确定要删除活动「${title}」吗？活动的照片会一并删除，删除后无法恢复。`)) return;
+    const confirmed = await confirm({ title: `删除活动「${title}」？`, message: '活动的照片会一并删除，删除后无法恢复。', confirmLabel: '删除活动', tone: 'danger' });
+    if (!confirmed) return;
     setBusy('delete');
     setFailure(null);
     clearFlash();
     try {
       await eventsApi.remove(saved.id);
+      allowNavigation();
       navigate('/events', { replace: true });
     } catch (error) {
       setFailure({ action: 'delete', error });
@@ -91,7 +102,8 @@ export function EventForm(props: { event: SiteEvent | null; onReload: () => void
   ) : null;
 
   return (
-    <form noValidate onSubmit={(event) => void save(event)}>
+    <form noValidate onSubmit={(event) => void save(event)} onKeyDown={submitOnSaveShortcut}>
+      {dialog}
       <fieldset disabled={busy !== null} className="min-w-0 space-y-6">
         {failure && <ActionFailedNotice action={failure.action} error={failure.error} onReload={onReload} />}
 
@@ -221,7 +233,7 @@ export function EventForm(props: { event: SiteEvent | null; onReload: () => void
         </Panel>
       </fieldset>
 
-      <FormActions status={status}>
+      <FormActions status={status} dirty={dirty}>
         {saved && (
           <Button variant="danger" busy={busy === 'delete'} disabled={busy !== null} onClick={() => void remove()}>
             删除

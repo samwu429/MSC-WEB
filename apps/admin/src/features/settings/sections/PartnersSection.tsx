@@ -102,6 +102,7 @@ export function PartnersSection({
               issues={issues}
               field={`${field}.logoKey`}
               aspect="aspect-[3/2]"
+              fit="contain"
               hint="建议上传透明背景的 PNG，PNG 会保持原格式。"
             />
             {issues.get(`${field}.id`) && (

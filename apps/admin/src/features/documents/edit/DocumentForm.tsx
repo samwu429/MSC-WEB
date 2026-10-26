@@ -5,6 +5,8 @@ import { ActionFailedNotice, type ActionFailure } from '../../../shared/feedback
 import { useArrivalNotice } from '../../../shared/feedback/useArrivalNotice';
 import { useFlash } from '../../../shared/feedback/useFlash';
 import { issuesOf } from '../../../shared/forms/issues';
+import { sameValue, submitOnSaveShortcut, useUnsavedChanges } from '../../../shared/forms/unsaved';
+import { useConfirm } from '../../../shared/ui/confirm';
 import { DocumentField } from '../../../shared/media/MediaFields';
 import { UPLOADING_STATUS, useUploadsInProgress } from '../../../shared/media/useUploadsInProgress';
 import { Button } from '../../../shared/ui/Button';
@@ -27,7 +29,12 @@ export interface DocumentFormProps {
 export function DocumentForm({ document, onCreated, onDeleted, onReload }: DocumentFormProps) {
   const { flash, showFlash, clearFlash } = useFlash(useArrivalNotice());
   const { uploading, onBusyChange } = useUploadsInProgress();
-  const [value, setValue] = useState<SiteDocumentInput>(() => (document ? documentInputOf(document) : newDocumentInput(new Date())));
+  const [initial] = useState<SiteDocumentInput>(() => (document ? documentInputOf(document) : newDocumentInput(new Date())));
+  const [value, setValue] = useState<SiteDocumentInput>(initial);
+  const [baseline, setBaseline] = useState<SiteDocumentInput>(initial);
+  const dirty = !sameValue(value, baseline);
+  const { allowNavigation, dialog } = useUnsavedChanges(dirty);
+  const confirm = useConfirm();
   const [updatedAt, setUpdatedAt] = useState(document?.updatedAt ?? '');
   const [busy, setBusy] = useState<'saving' | 'deleting' | null>(null);
   const [failure, setFailure] = useState<ActionFailure | null>(null);
@@ -45,11 +52,14 @@ export function DocumentForm({ document, onCreated, onDeleted, onReload }: Docum
     clearFlash();
     try {
       if (!document) {
-        onCreated((await documentsApi.create(value)).document);
+        const created = (await documentsApi.create(value)).document;
+        allowNavigation();
+        onCreated(created);
         return;
       }
       const saved = (await documentsApi.update(document.id, value, updatedAt)).document;
       setValue(documentInputOf(saved));
+      setBaseline(documentInputOf(saved));
       setUpdatedAt(saved.updatedAt);
       showFlash('已保存');
     } catch (error) {
@@ -62,12 +72,14 @@ export function DocumentForm({ document, onCreated, onDeleted, onReload }: Docum
   async function remove() {
     if (!document) return;
     const title = pickText(document.title, 'zh') || '这份文件';
-    if (!window.confirm(`确定要删除「${title}」吗？公开网站将不再提供这份文件，删除后无法恢复。`)) return;
+    const confirmed = await confirm({ title: `删除「${title}」？`, message: '公开网站将不再提供这份文件，删除后无法恢复。', confirmLabel: '删除文件', tone: 'danger' });
+    if (!confirmed) return;
     setBusy('deleting');
     setFailure(null);
     clearFlash();
     try {
       await documentsApi.remove(document.id);
+      allowNavigation();
       onDeleted();
     } catch (error) {
       setFailure({ action: 'delete', error });
@@ -78,7 +90,8 @@ export function DocumentForm({ document, onCreated, onDeleted, onReload }: Docum
   const status = uploading ? UPLOADING_STATUS : failure ? '未能完成，请查看页面顶部的提示' : flash;
 
   return (
-    <form noValidate onSubmit={(event) => void save(event)}>
+    <form noValidate onSubmit={(event) => void save(event)} onKeyDown={submitOnSaveShortcut}>
+      {dialog}
       <fieldset disabled={busy !== null} className="min-w-0 space-y-6">
         {failure && <ActionFailedNotice action={failure.action} error={failure.error} onReload={onReload} />}
         {flash && <Notice tone="success">{flash}</Notice>}
@@ -137,7 +150,7 @@ export function DocumentForm({ document, onCreated, onDeleted, onReload }: Docum
           <Checkbox label="在网站上显示" checked={value.visible} onChange={(visible) => change({ visible })} hint="取消勾选后文件仍保留在后台，但访客看不到。" />
         </Panel>
       </fieldset>
-      <FormActions status={status}>
+      <FormActions status={status} dirty={dirty}>
         {document && (
           <Button variant="danger" busy={busy === 'deleting'} disabled={busy !== null} onClick={() => void remove()}>
             删除文件

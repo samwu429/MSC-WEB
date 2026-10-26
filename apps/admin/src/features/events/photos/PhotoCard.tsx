@@ -3,6 +3,7 @@ import { EVENT_LIMITS, mediaUrl, pickText, type EventPhoto } from '@msc-web/cont
 import { eventsApi } from '../../../shared/api/endpoints';
 import { errorMessage, issuesOf } from '../../../shared/forms/issues';
 import { Button } from '../../../shared/ui/Button';
+import { useConfirm } from '../../../shared/ui/confirm';
 import { Notice } from '../../../shared/ui/feedback';
 import { LocalizedInput, NumberInput } from '../../../shared/ui/fields';
 import { MAX_PHOTO_SORT_ORDER } from './photo-upload';
@@ -18,6 +19,7 @@ export function PhotoCard(props: { eventId: string; photo: EventPhoto; onSaved: 
   const [busy, setBusy] = useState<Busy>(null);
   const [error, setError] = useState<unknown>(null);
   const [justSaved, setJustSaved] = useState(false);
+  const confirm = useConfirm();
   const issues = issuesOf(error);
   const dirty = caption.zh !== photo.caption.zh || caption.en !== photo.caption.en || sortOrder !== photo.sortOrder;
   const url = mediaUrl(photo.mediaKey);
@@ -40,7 +42,8 @@ export function PhotoCard(props: { eventId: string; photo: EventPhoto; onSaved: 
   }
 
   async function remove() {
-    if (!window.confirm('确定要从相册中删除这张照片吗？删除后无法恢复。')) return;
+    const confirmed = await confirm({ title: '从相册中删除这张照片？', message: '删除后无法恢复。', confirmLabel: '删除照片', tone: 'danger' });
+    if (!confirmed) return;
     setBusy('delete');
     setError(null);
     try {

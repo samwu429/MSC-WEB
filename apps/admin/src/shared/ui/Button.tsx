@@ -1,13 +1,14 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { Link, type LinkProps } from 'react-router-dom';
 
-type Variant = 'primary' | 'secondary' | 'danger' | 'ghost';
+type Variant = 'primary' | 'secondary' | 'danger' | 'danger-solid' | 'ghost';
 type Size = 'md' | 'sm';
 
 const VARIANTS: Record<Variant, string> = {
   primary: 'bg-brand-700 text-white hover:bg-brand-800 disabled:bg-brand-700/50',
   secondary: 'border border-line-strong bg-white text-brand-800 hover:border-brand-700 hover:bg-brand-50 disabled:opacity-50',
   danger: 'border border-red-200 bg-white text-red-700 hover:bg-red-50 hover:border-red-300 disabled:opacity-50',
+  'danger-solid': 'bg-red-600 text-white hover:bg-red-700 disabled:bg-red-600/50',
   ghost: 'text-ink-soft hover:bg-brand-50 hover:text-brand-800 disabled:opacity-50',
 };
 
