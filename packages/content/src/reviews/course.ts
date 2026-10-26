@@ -14,6 +14,9 @@ export interface Course {
   description: LocalizedText;
   sortOrder: number;
   visible: boolean;
+  /** Marked as ended by an officer: out of the current term, listed with the ended courses at the bottom of the page. */
+  /** 由干部标记为已结束：不再出现在当前学期中，而是列在页面底部的已结束课程里。 */
+  archived: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -54,6 +57,7 @@ export function validateCourseInput(raw: unknown): ValidationResult<CourseInput>
     description: readLocalizedText(issues, body.description, 'description', { label: '课程说明', max: COURSE_LIMITS.description, multiline: true }),
     sortOrder: readInteger(issues, body.sortOrder, 'sortOrder', { label: '排序', min: 0, max: 9999, fallback: 0 }),
     visible: readBoolean(issues, body.visible, 'visible', '是否显示', true),
+    archived: readBoolean(issues, body.archived, 'archived', '是否已结束', false),
   };
   return issues.result(value);
 }

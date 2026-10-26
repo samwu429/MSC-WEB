@@ -4,9 +4,11 @@ import { toEventPhoto, toSiteEvent, type EventPhotoRow, type EventRow } from '..
 /**
  * Read queries behind the public event pages. Only published events ever leave the database. An event is upcoming
  * until it starts and has ended once "now" is past its end, or past the end of its start day when it has no end:
- * the same rule timeStatus applies on the page, so a card never shows "past" in the upcoming list.
+ * the same rule eventStatus applies on the page, so a card never shows "past" in the upcoming list. An event an
+ * officer marked as ended (archived) has ended whatever its date.
  * 公开活动页面背后的读取查询。只有已发布的活动会被读出数据库。活动在开始前为即将开始；当现在晚于其结束时间
- * （没有结束时间时为开始当天结束）即为已结束。这与页面上 timeStatus 的规则一致，因此近期列表中的卡片永远不会显示 "已结束"。
+ * （没有结束时间时为开始当天结束）即为已结束。这与页面上 eventStatus 的规则一致，因此近期列表中的卡片永远不会显示 "已结束"。
+ * 被干部标记为已结束（已归档）的活动无论日期如何都视为已结束。
  */
 
 const PUBLISHED: PublishStatus = 'published';
@@ -15,8 +17,8 @@ const EVENT_END = "COALESCE(ends_at, substr(starts_at, 1, 10) || 'T23:59')";
 
 /** ?1 status, ?2 category or null for all, ?3 now. */
 /** ?1 为发布状态，?2 为类别（为 null 时表示全部），?3 为现在。 */
-const NOT_ENDED = `status = ?1 AND (?2 IS NULL OR category = ?2) AND (starts_at > ?3 OR ${EVENT_END} >= ?3)`;
-const ENDED = `status = ?1 AND (?2 IS NULL OR category = ?2) AND starts_at <= ?3 AND ${EVENT_END} < ?3`;
+const NOT_ENDED = `status = ?1 AND (?2 IS NULL OR category = ?2) AND archived = 0 AND (starts_at > ?3 OR ${EVENT_END} >= ?3)`;
+const ENDED = `status = ?1 AND (?2 IS NULL OR category = ?2) AND (archived = 1 OR (starts_at <= ?3 AND ${EVENT_END} < ?3))`;
 
 export interface UpcomingEventsOptions {
   category?: EventCategory | null;

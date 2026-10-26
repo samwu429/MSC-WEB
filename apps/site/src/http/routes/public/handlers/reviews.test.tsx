@@ -91,6 +91,31 @@ describe.skipIf(!sqlite)('test review pages', () => {
     expect(page).not.toMatch(/ style=|<script/);
   });
 
+  it('moves a course marked as ended out of the term into a compact list at the bottom, and its page stops sign-ups', async () => {
+    seedCourses();
+    test.d1.exec("UPDATE courses SET archived = 1 WHERE code = 'CSC108H5'");
+
+    const page = await html('/reviews');
+    const term = page.slice(page.indexOf('id="term-reviews"'), page.indexOf('id="all-courses"'));
+    expect(term).not.toContain('CSC108H5');
+    const all = page.slice(page.indexOf('id="all-courses"'), page.indexOf('id="ended-courses"'));
+    expect(all).toContain('MAT135H5');
+    expect(all).not.toContain('CSC108H5');
+    const ended = page.slice(page.indexOf('id="ended-courses"'));
+    expect(ended).toContain('Ended courses<span class="zh" lang="zh-CN">已结束的课程</span>');
+    expect(ended).toContain('<a href="/reviews/csc108h5"><span class="ended-list__code">CSC108H5</span>');
+
+    const course = await html('/reviews/csc108h5');
+    expect(course).toContain('Reviews for this course have ended');
+    expect(course).not.toContain('https://forms.example.com/csc108-midterm');
+    expect(course).toContain('https://video.example.com/csc108-final');
+  });
+
+  it('leaves out the ended courses list while every course is running', async () => {
+    seedCourses();
+    expect(await html('/reviews')).not.toContain('id="ended-courses"');
+  });
+
   it('shows an explicitly requested term', async () => {
     seedCourses();
     const page = await html('/reviews?term=2026-winter');

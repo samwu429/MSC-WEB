@@ -9,7 +9,7 @@ import {
 } from '@msc-web/content';
 import { changeStatement } from './change-log';
 import { listEventPhotos } from './event-photos';
-import { newId, nextVersion, nowIso, versionedOutcome, type VersionedOutcome } from './records';
+import { newId, nextVersion, nowIso, toFlag, versionedOutcome, type VersionedOutcome } from './records';
 import { toSiteEvent, type EventRow } from './rows/events';
 
 const EVENTS_TABLE = 'events';
@@ -70,9 +70,9 @@ export async function listEventSlugsStartingWith(db: D1Database, prefix: string)
   return result.results.map((row) => row.slug);
 }
 
-/** Values for the columns slug through registration_url, in the order the insert and the update both list them. */
-/** slug 至 registration_url 各列的值，顺序与插入和更新语句中列出的顺序一致。 */
-function contentValues(input: EventInput): (string | null)[] {
+/** Values for the columns slug through archived, in the order the insert and the update both list them. */
+/** slug 至 archived 各列的值，顺序与插入和更新语句中列出的顺序一致。 */
+function contentValues(input: EventInput): (string | number | null)[] {
   return [
     input.slug,
     input.category,
@@ -89,6 +89,7 @@ function contentValues(input: EventInput): (string | null)[] {
     input.endsAt,
     input.coverKey,
     input.registrationUrl,
+    toFlag(input.archived),
   ];
 }
 
@@ -101,8 +102,8 @@ export async function insertEvent(db: D1Database, identity: AdminIdentity, input
     db
       .prepare(
         `INSERT INTO events (id, slug, category, status, title_zh, title_en, summary_zh, summary_en, body_zh, body_en, location_zh,
-           location_en, starts_at, ends_at, cover_key, registration_url, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           location_en, starts_at, ends_at, cover_key, registration_url, archived, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .bind(event.id, ...contentValues(event), event.createdAt, event.updatedAt),
     changeStatement(db, identity, { action: 'create', entity: 'event', entityId: event.id, summary: pickText(event.title, 'zh') }),
@@ -123,7 +124,8 @@ export async function updateEvent(
     db
       .prepare(
         `UPDATE events SET slug = ?, category = ?, status = ?, title_zh = ?, title_en = ?, summary_zh = ?, summary_en = ?, body_zh = ?,
-           body_en = ?, location_zh = ?, location_en = ?, starts_at = ?, ends_at = ?, cover_key = ?, registration_url = ?, updated_at = ?
+           body_en = ?, location_zh = ?, location_en = ?, starts_at = ?, ends_at = ?, cover_key = ?, registration_url = ?, archived = ?,
+           updated_at = ?
          WHERE id = ? AND updated_at = ?`,
       )
       .bind(...contentValues(input), nextVersion(expectedUpdatedAt), id, expectedUpdatedAt),

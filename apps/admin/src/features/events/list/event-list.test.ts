@@ -17,6 +17,7 @@ function event(overrides: Partial<SiteEvent>): SiteEvent {
     location: emptyText(),
     coverKey: null,
     registrationUrl: null,
+    archived: false,
     createdAt: '2026-09-01T00:00:00.000Z',
     updatedAt: '2026-09-01T00:00:00.000Z',
     ...overrides,
@@ -58,6 +59,10 @@ describe('hasEnded', () => {
     const talk = event({ startsAt: '2026-10-25T18:30', endsAt: null });
     expect(hasEnded(talk, '2026-10-25T23:59')).toBe(false);
     expect(hasEnded(talk, '2026-10-26T00:00')).toBe(true);
+  });
+
+  it('is over once an officer marks it as ended, whatever its time', () => {
+    expect(hasEnded(event({ startsAt: '2026-11-01T10:00', archived: true }), '2026-10-25T12:00')).toBe(true);
   });
 
   it('is not over before it starts', () => {

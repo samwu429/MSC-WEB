@@ -1,7 +1,7 @@
 import { materialLabel, mediaUrl, termLabel, type Course, type Locale, type ReviewMaterial, type ReviewSessionDetail } from '@msc-web/content';
 import type { PageContext } from '../../context';
 import type { PageMeta } from '../../layout/Document';
-import { Bi, BiRichText, EmptyState, MetaItem, SectionHeading, fallbackLang, txt } from '../../components/common';
+import { Bi, BiRichText, BiText, EmptyState, MetaItem, SectionHeading, fallbackLang, txt } from '../../components/common';
 import { Icon } from '../../components/Icon';
 import { t } from '../../i18n/strings';
 import { sitePath } from '../../routing/paths';
@@ -34,7 +34,7 @@ function MaterialLink({ material, locale }: { material: ReviewMaterial; locale: 
 
 /** One session in full. Its id is the anchor that course cards link to for materials. */
 /** 一场复习的完整信息。其 id 是课程卡片链接资料时使用的锚点。 */
-function SessionBlock({ session, ctx }: { session: ReviewSessionDetail; ctx: PageContext }) {
+function SessionBlock({ session, ctx, ended }: { session: ReviewSessionDetail; ctx: PageContext; ended: boolean }) {
   const { locale } = ctx;
   const anchor = sessionAnchor(session);
   const headingId = `${anchor}-title`;
@@ -53,7 +53,7 @@ function SessionBlock({ session, ctx }: { session: ReviewSessionDetail; ctx: Pag
           </div>
         )}
       </div>
-      <SessionActions session={session} ctx={ctx} />
+      <SessionActions session={session} ctx={ctx} ended={ended} />
     </article>
   );
 }
@@ -89,6 +89,17 @@ export function CourseView({ ctx, course, sessions }: { ctx: PageContext; course
             </p>
           )}
           <BiRichText text={course.description} class="prose page-hero__lead" />
+          {course.archived && (
+            <div class="notice" role="note">
+              <Icon name="calendar" />
+              <div>
+                <strong>
+                  <Bi text={REVIEWS.courseEndedTitle} />
+                </strong>
+                <BiText text={REVIEWS.courseEndedText} />
+              </div>
+            </div>
+          )}
         </div>
       </header>
       {groups.length > 0 ? (
@@ -101,7 +112,7 @@ export function CourseView({ ctx, course, sessions }: { ctx: PageContext; course
                 <div class="course">
                   <div class="course__sessions">
                     {group.sessions.map((session) => (
-                      <SessionBlock session={session} ctx={ctx} />
+                      <SessionBlock session={session} ctx={ctx} ended={course.archived} />
                     ))}
                   </div>
                 </div>

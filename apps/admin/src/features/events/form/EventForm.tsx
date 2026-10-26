@@ -46,26 +46,47 @@ export function EventForm(props: { event: SiteEvent | null; onReload: () => void
 
   async function save(event: FormEvent) {
     event.preventDefault();
+    await persist(value, '已保存');
+  }
+
+  async function persist(input: EventInput, message: string) {
     setBusy('save');
     setFailure(null);
     clearFlash();
     try {
       if (!saved) {
-        const { event: createdEvent } = await eventsApi.create(value);
+        const { event: createdEvent } = await eventsApi.create(input);
         allowNavigation();
         navigate(`/events/${createdEvent.id}`, { replace: true, state: withNotice('活动已创建，现在可以添加活动照片') });
         return;
       }
-      const { event: updated } = await eventsApi.update(saved.id, value, saved.updatedAt);
+      const { event: updated } = await eventsApi.update(saved.id, input, saved.updatedAt);
       setValue(toEventInput(updated));
       setBaseline(toEventInput(updated));
       setSaved(updated);
-      showFlash('已保存');
+      showFlash(message);
     } catch (error) {
       setFailure({ action: 'save', error });
     } finally {
       setBusy(null);
     }
+  }
+
+/**
+   * Marks the event as ended, or takes it back, saving the form with it. An ended event leaves the upcoming list and
+   * takes no more sign-ups; the site lists it among past events.
+   * 将活动标记为已结束或取消标记，并连同表单一起保存。已结束的活动离开近期活动列表、不再接受报名，网站把它列在往期活动中。
+   */
+  async function toggleArchived() {
+    if (!saved) return;
+    const ending = !saved.archived;
+    const confirmed = await confirm(
+      ending
+        ? { title: '标记为已结束？', message: '活动会从近期活动中移到网站下方的往期活动列表，并且不再显示报名入口。之后可以随时恢复。', confirmLabel: '标记为已结束' }
+        : { title: '恢复为未结束？', message: '活动会按时间重新判断是否已结束，未结束时会回到近期活动中。', confirmLabel: '恢复' },
+    );
+    if (!confirmed) return;
+    await persist({ ...value, archived: ending }, ending ? '已标记为已结束，并移入往期活动' : '已恢复为未结束');
   }
 
   async function remove() {
@@ -106,6 +127,7 @@ export function EventForm(props: { event: SiteEvent | null; onReload: () => void
       {dialog}
       <fieldset disabled={busy !== null} className="min-w-0 space-y-6">
         {failure && <ActionFailedNotice action={failure.action} error={failure.error} onReload={onReload} />}
+        {saved?.archived && <Notice tone="info" title="这个活动已标记为已结束">网站上把它列在往期活动中，不再显示报名入口。点击底部的「恢复为未结束」可以撤销。</Notice>}
 
         <Panel title="活动内容">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -237,6 +259,11 @@ export function EventForm(props: { event: SiteEvent | null; onReload: () => void
         {saved && (
           <Button variant="danger" busy={busy === 'delete'} disabled={busy !== null} onClick={() => void remove()}>
             删除
+          </Button>
+        )}
+        {saved && (
+          <Button variant="secondary" disabled={busy !== null || uploading} onClick={() => void toggleArchived()}>
+            {saved.archived ? '恢复为未结束' : '标记为已结束'}
           </Button>
         )}
         <Button type="submit" busy={busy === 'save'} disabled={busy !== null || uploading}>

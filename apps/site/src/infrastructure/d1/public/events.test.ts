@@ -32,6 +32,18 @@ describe.skipIf(!sqlite)('public event queries', () => {
     expect(slugs(await listUpcomingEvents(d1.db, TEST_NOW, { limit: 2 }))).toEqual(['today-no-end', 'ongoing']);
   });
 
+  it('counts an event marked as ended as past, whatever its date', async () => {
+    seedEvent(d1, { slug: 'next-week', startsAt: '2026-11-01T18:00' });
+    seedEvent(d1, { slug: 'called-off', startsAt: '2026-11-08T18:00' });
+    d1.exec("UPDATE events SET archived = 1 WHERE slug = 'called-off'");
+
+    expect(slugs(await listUpcomingEvents(d1.db, TEST_NOW))).toEqual(['next-week']);
+    const past = await listPastEvents(d1.db, TEST_NOW, { category: null, page: 1, pageSize: 12 });
+    expect(slugs(past.events)).toEqual(['called-off']);
+    expect(past.total).toBe(1);
+    expect(past.events[0]?.archived).toBe(true);
+  });
+
   it('pages through ended events newest first and counts them all', async () => {
     for (let day = 1; day <= 14; day += 1) {
       seedEvent(d1, { slug: `past-${day}`, startsAt: `2026-09-${String(day).padStart(2, '0')}T18:00`, endsAt: `2026-09-${String(day).padStart(2, '0')}T20:00` });

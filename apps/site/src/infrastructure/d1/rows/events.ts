@@ -1,4 +1,5 @@
 import type { EventCategory, EventPhoto, PublishStatus, SiteEvent } from '@msc-web/content';
+import { fromFlag } from '../records';
 
 /** A row of the events table. */
 /** events 表的一行。 */
@@ -19,6 +20,7 @@ export interface EventRow {
   ends_at: string | null;
   cover_key: string | null;
   registration_url: string | null;
+  archived: number;
   created_at: string;
   updated_at: string;
 }
@@ -37,6 +39,7 @@ export function toSiteEvent(row: EventRow): SiteEvent {
     location: { zh: row.location_zh, en: row.location_en },
     coverKey: row.cover_key,
     registrationUrl: row.registration_url,
+    archived: fromFlag(row.archived),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

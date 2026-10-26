@@ -24,7 +24,7 @@ export function EventRows({ events, now }: { events: readonly SiteEvent[]; now: 
               <span className="mt-2 flex flex-wrap gap-1.5 md:mt-0">
                 <Badge tone={event.category === 'academic' ? 'purple' : 'gold'}>{EVENT_CATEGORY_LABELS[event.category].zh}</Badge>
                 <Badge tone={event.status === 'published' ? 'green' : 'gray'}>{PUBLISH_STATUS_LABELS[event.status].zh}</Badge>
-                {hasEnded(event, now) && <Badge>已结束</Badge>}
+                {event.archived ? <Badge tone="red">已归档</Badge> : hasEnded(event, now) && <Badge>已结束</Badge>}
               </span>
             </Link>
           </li>

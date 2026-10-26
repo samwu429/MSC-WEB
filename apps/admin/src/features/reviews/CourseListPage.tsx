@@ -12,9 +12,10 @@ import { Badge, EmptyState, Notice, Spinner } from '../../shared/ui/feedback';
 import { SearchInput } from '../../shared/ui/fields';
 import { PageHeader } from '../../shared/ui/layout';
 
-function CourseList({ courses, searching }: { courses: readonly CourseSummary[]; searching: boolean }) {
+function CourseList({ courses, searching, emptyLabel }: { courses: readonly CourseSummary[]; searching: boolean; emptyLabel?: string }) {
   if (courses.length === 0) {
     if (searching) return <EmptyState title="没有找到这门课程">换一个课程代码或名称试试。</EmptyState>;
+    if (emptyLabel) return <p className="text-sm text-ink-muted">{emptyLabel}</p>;
     return <EmptyState title="还没有课程">点击“新增课程”添加第一门课程，然后在课程页面中安排复习场次。</EmptyState>;
   }
   return (
@@ -26,6 +27,7 @@ function CourseList({ courses, searching }: { courses: readonly CourseSummary[];
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-mono text-sm font-bold text-brand-800">{course.code}</span>
                 {!course.visible && <Badge>已隐藏</Badge>}
+                {course.archived && <Badge tone="red">已归档</Badge>}
               </div>
               <p className="mt-0.5 break-words text-sm text-ink">{pickText(course.title, 'zh')}</p>
             </div>
@@ -69,9 +71,24 @@ export function CourseListPage() {
           <>
             {state.data.courses.length > 0 && <SearchInput label="搜索课程" value={query} onChange={setQuery} placeholder="搜索课程代码或名称，例如 CSC108" className="sm:w-80" />}
             <CourseList
-              courses={state.data.courses.filter((course) => matchesSearch(query, [course.code, course.title.zh, course.title.en]))}
+              courses={state.data.courses.filter((course) => !course.archived && matchesSearch(query, [course.code, course.title.zh, course.title.en]))}
               searching={query.trim() !== ''}
+              emptyLabel={state.data.courses.length > 0 ? '没有未结束的课程。' : undefined}
             />
+            {state.data.courses.some((course) => course.archived) && (
+              <section className="space-y-2 pt-4" aria-labelledby="archived-courses">
+                <h2 id="archived-courses" className="text-sm font-bold text-ink-muted">
+                  已结束的课程
+                  <span className="ml-2 font-normal">网站上显示在复习页面底部的紧凑列表中</span>
+                </h2>
+                <div className="opacity-80">
+                  <CourseList
+                    courses={state.data.courses.filter((course) => course.archived && matchesSearch(query, [course.code, course.title.zh, course.title.en]))}
+                    searching={query.trim() !== ''}
+                  />
+                </div>
+              </section>
+            )}
           </>
         )}
       </div>

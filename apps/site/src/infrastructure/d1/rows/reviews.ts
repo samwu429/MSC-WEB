@@ -21,6 +21,7 @@ export interface CourseRow {
   description_en: string;
   sort_order: number;
   visible: number;
+  archived: number;
   created_at: string;
   updated_at: string;
 }
@@ -33,6 +34,7 @@ export function toCourse(row: CourseRow): Course {
     description: { zh: row.description_zh, en: row.description_en },
     sortOrder: row.sort_order,
     visible: fromFlag(row.visible),
+    archived: fromFlag(row.archived),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

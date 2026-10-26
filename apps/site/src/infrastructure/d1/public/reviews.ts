@@ -40,13 +40,13 @@ function withMaterials(sessionRows: ReviewSessionRow[], materialRows: ReviewMate
   });
 }
 
-/** Terms that have published sessions of visible courses, newest first. */
-/** 拥有可见课程已发布场次的学期，按从新到旧排列。 */
+/** Terms that have published sessions of visible courses still running, newest first. */
+/** 拥有仍在进行的可见课程已发布场次的学期，按从新到旧排列。 */
 export async function listPublishedTerms(db: D1Database): Promise<TermKey[]> {
   const { results } = await db
     .prepare(
       `SELECT DISTINCT s.term FROM review_sessions s JOIN courses c ON c.id = s.course_id
-       WHERE s.status = ? AND c.visible = 1`,
+       WHERE s.status = ? AND c.visible = 1 AND c.archived = 0`,
     )
     .bind(PUBLISHED)
     .all<{ term: string }>();
@@ -57,10 +57,10 @@ export async function listPublishedTerms(db: D1Database): Promise<TermKey[]> {
 }
 
 /**
- * Visible courses with published sessions in a term, by sort order then code, each with those sessions and their
+ * Visible courses still running (not archived) with published sessions in a term, by sort order then code, each with those sessions and their
  * materials. The three reads filter on the term itself rather than on a list of ids, so no statement grows with
  * the number of courses.
- * 某学期拥有已发布场次的可见课程，按排序值再按课程代码排列，每门课附带这些场次及其资料。三次读取都直接按学期筛选，
+ * 某学期拥有已发布场次、且仍在进行（未归档）的可见课程，按排序值再按课程代码排列，每门课附带这些场次及其资料。三次读取都直接按学期筛选，
  * 而不是按 id 列表筛选，因此语句长度不会随课程数量增长。
  */
 export async function listTermCourseReviews(db: D1Database, term: TermKey): Promise<CourseReviews[]> {
@@ -68,7 +68,7 @@ export async function listTermCourseReviews(db: D1Database, term: TermKey): Prom
     db
       .prepare(
         `SELECT c.* FROM courses c
-         WHERE c.visible = 1 AND EXISTS (SELECT 1 FROM review_sessions s WHERE s.course_id = c.id AND s.status = ?1 AND s.term = ?2)
+         WHERE c.visible = 1 AND c.archived = 0 AND EXISTS (SELECT 1 FROM review_sessions s WHERE s.course_id = c.id AND s.status = ?1 AND s.term = ?2)
          ORDER BY c.sort_order, c.code`,
       )
       .bind(PUBLISHED, term)
@@ -76,7 +76,7 @@ export async function listTermCourseReviews(db: D1Database, term: TermKey): Prom
     db
       .prepare(
         `SELECT s.* FROM review_sessions s JOIN courses c ON c.id = s.course_id
-         WHERE s.status = ?1 AND s.term = ?2 AND c.visible = 1
+         WHERE s.status = ?1 AND s.term = ?2 AND c.visible = 1 AND c.archived = 0
          ORDER BY ${SESSION_ORDER}`,
       )
       .bind(PUBLISHED, term)
@@ -86,7 +86,7 @@ export async function listTermCourseReviews(db: D1Database, term: TermKey): Prom
         `SELECT m.* FROM review_materials m
          JOIN review_sessions s ON s.id = m.session_id
          JOIN courses c ON c.id = s.course_id
-         WHERE s.status = ?1 AND s.term = ?2 AND c.visible = 1
+         WHERE s.status = ?1 AND s.term = ?2 AND c.visible = 1 AND c.archived = 0
          ORDER BY ${MATERIAL_ORDER}`,
       )
       .bind(PUBLISHED, term)
@@ -96,8 +96,8 @@ export async function listTermCourseReviews(db: D1Database, term: TermKey): Prom
   return courses.results.map(toCourse).map((course) => ({ course, sessions: details.filter((session) => session.courseId === course.id) }));
 }
 
-/** Visible courses with at least one published session in any term, by sort order then code. */
-/** 在任一学期至少有一场已发布复习的可见课程，按排序值再按课程代码排列。 */
+/** Visible courses with at least one published session in any term, archived ones included, by sort order then code. */
+/** 在任一学期至少有一场已发布复习的可见课程（包括已归档的），按排序值再按课程代码排列。 */
 export async function listReviewedCourses(db: D1Database): Promise<Course[]> {
   const { results } = await db
     .prepare(

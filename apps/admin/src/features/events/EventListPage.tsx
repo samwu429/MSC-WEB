@@ -11,18 +11,24 @@ import { SearchInput } from '../../shared/ui/fields';
 import { PageHeader } from '../../shared/ui/layout';
 import { EventRows } from './list/EventRows';
 import { FilterButtons } from './list/FilterButtons';
-import { CATEGORY_FILTERS, STATUS_FILTERS, parseEventFilter, sortNewestFirst } from './list/event-list';
+import { ARCHIVE_FILTERS, CATEGORY_FILTERS, STATUS_FILTERS, inArchiveView, parseArchiveView, parseEventFilter, sortNewestFirst, type ArchiveView } from './list/event-list';
 
 export function EventListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const filter = parseEventFilter(searchParams);
   const { state, reload } = useLoad(() => eventsApi.list(filter).then(({ events }) => sortNewestFirst(events)), [filter.category, filter.status]);
   const [query, setQuery] = useState('');
-  const filtered = filter.category !== undefined || filter.status !== undefined || query.trim() !== '';
-  const shown = state.status === 'ready' ? state.data.filter((event) => matchesSearch(query, [event.title.zh, event.title.en, event.slug])) : [];
+  const archive = parseArchiveView(searchParams);
+  const filtered = filter.category !== undefined || filter.status !== undefined || archive !== undefined || query.trim() !== '';
+  const shown =
+    state.status === 'ready'
+      ? state.data.filter((event) => inArchiveView(event, archive) && matchesSearch(query, [event.title.zh, event.title.en, event.slug]))
+      : [];
 
-  function applyFilter(next: EventListFilter) {
-    setSearchParams(filterSearchParams(next), { replace: true });
+  function applyFilter(next: EventListFilter, nextArchive: ArchiveView | undefined = archive) {
+    const params = filterSearchParams(next);
+    if (nextArchive) params.set('archive', nextArchive);
+    setSearchParams(params, { replace: true });
   }
 
   return (
@@ -39,6 +45,7 @@ export function EventListPage() {
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-8">
         <FilterButtons label="类别" value={filter.category} options={CATEGORY_FILTERS} onChange={(category) => applyFilter({ ...filter, category })} />
         <FilterButtons label="状态" value={filter.status} options={STATUS_FILTERS} onChange={(status) => applyFilter({ ...filter, status })} />
+        <FilterButtons label="进度" value={archive} options={ARCHIVE_FILTERS} onChange={(view) => applyFilter(filter, view)} />
         <SearchInput label="搜索活动" value={query} onChange={setQuery} placeholder="搜索标题或链接名" className="sm:ml-auto sm:w-64" />
       </div>
       {state.status === 'loading' && <Spinner />}

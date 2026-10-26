@@ -4,7 +4,7 @@ import type { PageMeta } from '../../layout/Document';
 import { EmptyState, PageHero, SectionHeading, txt } from '../../components/common';
 import { COMMON, t } from '../../i18n/strings';
 import { sitePath, withQuery } from '../../routing/paths';
-import { EventCard } from '../EventCard';
+import { EventCard, PastEventList } from '../EventCard';
 import { EVENTS, pageStatus } from '../strings';
 import { PAST_EVENTS_PAGE_SIZE, type EventsQuery } from './events-query';
 
@@ -98,11 +98,11 @@ export function EventsListView({ ctx, data }: { ctx: PageContext; data: EventsLi
           )}
         </div>
       </section>
-      <section class="section section--alt" aria-labelledby={PAST_ID}>
+      <section class="section section--alt section--tight" aria-labelledby={PAST_ID}>
         <div class="container">
           <SectionHeading id={PAST_ID} title={EVENTS.pastTitle} lead={EVENTS.pastLead} />
           {data.past.length > 0 ? (
-            <EventGrid ctx={ctx} events={data.past} />
+            <PastEventList ctx={ctx} events={data.past} />
           ) : query.page > 1 ? (
             <EmptyState title={EVENTS.pageEmptyTitle} text={EVENTS.pageEmptyText} />
           ) : (

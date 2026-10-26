@@ -16,7 +16,7 @@ const PUBLISHED: PublishStatus = 'published';
 
 /** Columns a save writes, in the order contentValues lists their values. */
 /** 保存时写入的列，顺序与 contentValues 给出的值一致。 */
-const CONTENT_COLUMNS = ['code', 'title_zh', 'title_en', 'description_zh', 'description_en', 'sort_order', 'visible'] as const;
+const CONTENT_COLUMNS = ['code', 'title_zh', 'title_en', 'description_zh', 'description_en', 'sort_order', 'visible', 'archived'] as const;
 
 const INSERT_SQL = `INSERT INTO courses (id, ${CONTENT_COLUMNS.join(', ')}, created_at, updated_at)
   VALUES (${Array.from({ length: CONTENT_COLUMNS.length + 3 }, () => '?').join(', ')})`;
@@ -35,7 +35,7 @@ interface CourseSummaryRow extends CourseRow {
 }
 
 function contentValues(input: CourseInput): (string | number)[] {
-  return [input.code, input.title.zh, input.title.en, input.description.zh, input.description.en, input.sortOrder, toFlag(input.visible)];
+  return [input.code, input.title.zh, input.title.en, input.description.zh, input.description.en, input.sortOrder, toFlag(input.visible), toFlag(input.archived)];
 }
 
 function changeSummary(course: Pick<CourseInput, 'title'>): string {

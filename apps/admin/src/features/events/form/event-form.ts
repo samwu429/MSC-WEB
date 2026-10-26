@@ -33,6 +33,7 @@ export function emptyEventInput(): EventInput {
     location: emptyText(),
     coverKey: null,
     registrationUrl: null,
+    archived: false,
   };
 }
 
@@ -51,6 +52,7 @@ export function toEventInput(event: SiteEvent): EventInput {
     location: event.location,
     coverKey: event.coverKey,
     registrationUrl: event.registrationUrl,
+    archived: event.archived,
   };
 }
 

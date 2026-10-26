@@ -1,9 +1,11 @@
 import type { LocalizedText } from '../locale/locale';
 import { PUBLISH_STATUSES, type PublishStatus } from '../publishing/status';
+import { timeStatus, type TimeStatus } from '../time/schedule';
 import type { WallTime } from '../time/toronto';
 import { IssueCollector, asRecord, type ValidationResult } from '../validation/issues';
 import {
   checkTimeOrder,
+  readBoolean,
   readEnum,
   readInteger,
   readLocalizedText,
@@ -48,6 +50,9 @@ export interface SiteEvent {
   location: LocalizedText;
   coverKey: string | null;
   registrationUrl: string | null;
+  /** Marked as ended by an officer: listed with past events whatever its date, and no longer taking sign-ups. */
+  /** 由干部标记为已结束：无论日期如何都列在往期活动中，并且不再接受报名。 */
+  archived: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -84,6 +89,12 @@ export const EVENT_LIMITS = {
   photos: 60,
 } as const;
 
+/** Where an event stands: as its time says, except that one an officer marked as ended has ended. */
+/** 活动所处的状态：按时间判断；但被干部标记为已结束的活动一律视为已结束。 */
+export function eventStatus(event: Pick<SiteEvent, 'startsAt' | 'endsAt' | 'archived'>, now: WallTime): TimeStatus {
+  return event.archived ? 'past' : timeStatus(event.startsAt, event.endsAt, now);
+}
+
 export function validateEventInput(raw: unknown): ValidationResult<EventInput> {
   const issues = new IssueCollector();
   const body = asRecord(raw);
@@ -102,6 +113,7 @@ export function validateEventInput(raw: unknown): ValidationResult<EventInput> {
     location: readLocalizedText(issues, body.location, 'location', { label: '地点', max: EVENT_LIMITS.location }),
     coverKey: readOptionalMediaKey(issues, body.coverKey, 'coverKey', 'image', '封面图片'),
     registrationUrl: readOptionalUrl(issues, body.registrationUrl, 'registrationUrl', { label: '报名链接' }),
+    archived: readBoolean(issues, body.archived, 'archived', '是否已结束', false),
   };
   return issues.result(value);
 }

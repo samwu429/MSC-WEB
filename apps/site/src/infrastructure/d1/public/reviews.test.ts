@@ -54,6 +54,23 @@ describe.skipIf(!sqlite)('public review queries', () => {
     expect(await listTermCourseReviews(d1.db, '2024-fall')).toEqual([]);
   });
 
+  it('takes a course marked as ended out of the term but keeps it among the reviewed courses', async () => {
+    const running = seedCourse(d1, { code: 'CSC108H5' });
+    const ended = seedCourse(d1, { code: 'MAT135H5' });
+    seedSession(d1, { courseId: running, term: '2026-fall' });
+    seedSession(d1, { courseId: ended, term: '2026-fall' });
+    seedSession(d1, { courseId: ended, term: '2025-winter' });
+    d1.exec("UPDATE courses SET archived = 1 WHERE code = 'MAT135H5'");
+
+    expect(await listPublishedTerms(d1.db)).toEqual(['2026-fall']);
+    expect((await listTermCourseReviews(d1.db, '2026-fall')).map((entry) => entry.course.code)).toEqual(['CSC108H5']);
+    expect((await listReviewedCourses(d1.db)).map((course) => [course.code, course.archived])).toEqual([
+      ['CSC108H5', false],
+      ['MAT135H5', true],
+    ]);
+    expect((await findVisibleCourse(d1.db, 'MAT135H5'))?.archived).toBe(true);
+  });
+
   it('lists every visible course that has a published session', async () => {
     seedSession(d1, { courseId: seedCourse(d1, { code: 'MAT135H5', sortOrder: 2 }), term: '2025-fall' });
     seedSession(d1, { courseId: seedCourse(d1, { code: 'CSC108H5', sortOrder: 1 }), term: '2026-fall' });

@@ -3,8 +3,8 @@ import {
   EVENT_CATEGORY_LABELS,
   PUBLISH_STATUSES,
   PUBLISH_STATUS_LABELS,
+  eventStatus,
   pickText,
-  timeStatus,
   type EventCategory,
   type PublishStatus,
   type SiteEvent,
@@ -52,10 +52,30 @@ export function formatWallTime(time: WallTime): string {
   return time.replace('T', ' ');
 }
 
-/** Whether an event is over, by the same rule the public site uses. */
-/** 按公开网站使用的同一规则判断活动是否已结束。 */
-export function hasEnded(event: Pick<SiteEvent, 'startsAt' | 'endsAt'>, now: WallTime): boolean {
-  return timeStatus(event.startsAt, event.endsAt, now) === 'past';
+/** Whether an event is over, by the same rule the public site uses: past its time, or marked as ended. */
+/** 按公开网站使用的同一规则判断活动是否已结束：时间已过，或已被标记为已结束。 */
+export function hasEnded(event: Pick<SiteEvent, 'startsAt' | 'endsAt' | 'archived'>, now: WallTime): boolean {
+  return eventStatus(event, now) === 'past';
+}
+
+/** Which events the list shows: those still running (the default), those marked as ended, or all. */
+/** 列表显示哪些活动：仍在进行的（默认）、已标记为已结束的，或全部。 */
+export type ArchiveView = 'archived' | 'all';
+
+export const ARCHIVE_FILTERS: readonly FilterOption<ArchiveView>[] = [
+  { value: undefined, label: '未结束' },
+  { value: 'archived', label: '已结束' },
+  { value: 'all', label: '全部' },
+];
+
+export function parseArchiveView(params: URLSearchParams): ArchiveView | undefined {
+  const view = params.get('archive');
+  return view === 'archived' || view === 'all' ? view : undefined;
+}
+
+export function inArchiveView(event: Pick<SiteEvent, 'archived'>, view: ArchiveView | undefined): boolean {
+  if (view === 'all') return true;
+  return view === 'archived' ? event.archived : !event.archived;
 }
 
 export function eventListTitle(event: Pick<SiteEvent, 'title'>): string {

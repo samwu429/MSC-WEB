@@ -10,6 +10,7 @@ import { REVIEWS } from '../strings';
 
 const TERM_ID = 'term-reviews';
 const ALL_COURSES_ID = 'all-courses';
+const ENDED_COURSES_ID = 'ended-courses';
 
 export interface ReviewsData {
   /** Term tabs, newest first. */
@@ -64,6 +65,8 @@ export function reviewsMeta(ctx: PageContext): PageMeta {
 }
 
 export function ReviewsView({ ctx, data }: { ctx: PageContext; data: ReviewsData }) {
+  const running = data.allCourses.filter((course) => !course.archived);
+  const ended = data.allCourses.filter((course) => course.archived);
   const { locale } = ctx;
   return (
     <>
@@ -92,9 +95,9 @@ export function ReviewsView({ ctx, data }: { ctx: PageContext; data: ReviewsData
       <section class="section section--alt" aria-labelledby={ALL_COURSES_ID}>
         <div class="container">
           <SectionHeading id={ALL_COURSES_ID} title={REVIEWS.allCoursesTitle} lead={REVIEWS.allCoursesLead} />
-          {data.allCourses.length > 0 ? (
+          {running.length > 0 ? (
             <ul class="doc-list grid--3">
-              {data.allCourses.map((course) => (
+              {running.map((course) => (
                 <li class="doc-item">
                   <span class="doc-item__icon">
                     <Icon name="book" />
@@ -115,6 +118,26 @@ export function ReviewsView({ ctx, data }: { ctx: PageContext; data: ReviewsData
           )}
         </div>
       </section>
+      {ended.length > 0 && (
+        <section class="section section--tight" aria-labelledby={ENDED_COURSES_ID}>
+          <div class="container">
+            <h2 class="ended-title" id={ENDED_COURSES_ID}>
+              <Bi text={REVIEWS.endedCoursesTitle} />
+            </h2>
+            <BiText text={REVIEWS.endedCoursesLead} class="ended-lead" />
+            <ul class="ended-list">
+              {ended.map((course) => (
+                <li>
+                  <a href={courseHref(course)}>
+                    <span class="ended-list__code">{course.code}</span>
+                    <span class="ended-list__name">{txt(course.title, ctx.locale)}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
     </>
   );
 }

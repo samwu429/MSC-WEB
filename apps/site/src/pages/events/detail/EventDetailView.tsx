@@ -1,4 +1,4 @@
-import { EVENT_CATEGORY_LABELS, formatTimeRange, mediaUrl, timeStatus, type SiteEventDetail } from '@msc-web/content';
+import { EVENT_CATEGORY_LABELS, eventStatus, formatTimeRange, mediaUrl, type SiteEventDetail } from '@msc-web/content';
 import type { PageContext } from '../../context';
 import { Bi, BiRichText, BiText, MediaImage, MetaItem, SectionHeading, StatusChip, fallbackLang, txt } from '../../components/common';
 import { Icon } from '../../components/Icon';
@@ -56,7 +56,7 @@ export function EventDetailView({ ctx, event }: { ctx: PageContext; event: SiteE
   const location = txt(event.location, locale);
   const category = txt(EVENT_CATEGORY_LABELS[event.category], locale);
   const when = formatTimeRange(event.startsAt, event.endsAt, locale, ctx.currentYear);
-  const status = timeStatus(event.startsAt, event.endsAt, ctx.now);
+  const status = eventStatus(event, ctx.now);
   const registrationUrl = status === 'past' ? null : event.registrationUrl;
   return (
     <article aria-labelledby={TITLE_ID}>

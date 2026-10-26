@@ -1,4 +1,4 @@
-import { EVENT_CATEGORY_LABELS, formatTimeRange, timeStatus, wallDateOf, type SiteEvent } from '@msc-web/content';
+import { EVENT_CATEGORY_LABELS, eventStatus, formatTimeRange, formatLongDate, wallDateOf, type SiteEvent } from '@msc-web/content';
 import type { PageContext } from '../context';
 import { Bi, DateBox, MediaImage, MetaItem, StatusChip, fallbackLang, txt } from '../components/common';
 import { BookMark } from '../components/Icon';
@@ -19,7 +19,7 @@ export function eventHref(event: Pick<SiteEvent, 'slug'>): string {
 export function EventCard(props: { event: SiteEvent; ctx: PageContext }) {
   const { event, ctx } = props;
   const { locale } = ctx;
-  const status = timeStatus(event.startsAt, event.endsAt, ctx.now);
+  const status = eventStatus(event, ctx.now);
   const location = txt(event.location, locale);
   const summary = event.summary.en.trim() || event.summary.zh.trim();
   const summaryZh = event.summary.en.trim() ? event.summary.zh.trim() : '';
@@ -65,5 +65,29 @@ export function EventCard(props: { event: SiteEvent; ctx: PageContext }) {
         )}
       </div>
     </article>
+  );
+}
+
+/**
+ * Events that have ended, as a compact list: the date, the title and its category on one line each. They show the
+ * Group has held them without taking the room the upcoming events need.
+ * 已结束的活动，以紧凑列表显示：每个活动一行，包括日期、标题与类别。它们说明联盟举办过这些活动，又不会占用近期活动所需的版面。
+ */
+export function PastEventList(props: { events: SiteEvent[]; ctx: PageContext }) {
+  const { ctx } = props;
+  return (
+    <ul class="past-list">
+      {props.events.map((event) => (
+        <li>
+          <time class="past-list__date" dateTime={wallDateOf(event.startsAt)}>
+            {formatLongDate(wallDateOf(event.startsAt), ctx.locale)}
+          </time>
+          <a class="past-list__title" href={eventHref(event)}>
+            <Bi text={event.title} />
+          </a>
+          <span class="past-list__tag">{txt(EVENT_CATEGORY_LABELS[event.category], ctx.locale)}</span>
+        </li>
+      ))}
+    </ul>
   );
 }

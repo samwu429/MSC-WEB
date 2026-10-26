@@ -85,6 +85,7 @@ describe.skipIf(!sqlite)('review session repository', () => {
       description: { zh: '', en: '' },
       sortOrder: 0,
       visible: true,
+      archived: false,
     });
   });
 

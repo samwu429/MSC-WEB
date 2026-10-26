@@ -72,13 +72,14 @@ export function SessionLabel({ session, ctx, headingId }: { session: ReviewSessi
 }
 
 /**
- * Register until the session ends, a materials link when `materialsHref` is given and there are materials, and the
- * recording when one is published.
- * 场次结束前显示报名；提供 `materialsHref` 且有资料时显示资料链接；发布了回放时显示回放链接。
+ * Register until the session ends (and never once its course is marked `ended`), a materials link when
+ * `materialsHref` is given and there are materials, and the recording when one is published.
+ * 场次结束前显示报名（课程被标记为 `ended` 后不再显示）；提供 `materialsHref` 且有资料时显示资料链接；发布了回放时显示回放链接。
  */
-export function SessionActions({ session, ctx, materialsHref }: { session: ReviewSessionDetail; ctx: PageContext; materialsHref?: string }) {
+export function SessionActions(props: { session: ReviewSessionDetail; ctx: PageContext; materialsHref?: string; ended?: boolean }) {
+  const { session, ctx, materialsHref } = props;
   const { locale } = ctx;
-  const registrationUrl = timeStatus(session.startsAt, session.endsAt, ctx.now) === 'past' ? null : session.registrationUrl;
+  const registrationUrl = props.ended || timeStatus(session.startsAt, session.endsAt, ctx.now) === 'past' ? null : session.registrationUrl;
   const showMaterials = materialsHref !== undefined && session.materials.length > 0;
   if (!registrationUrl && !showMaterials && !session.recordingUrl) return null;
   return (

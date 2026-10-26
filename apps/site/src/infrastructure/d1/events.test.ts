@@ -29,6 +29,7 @@ function eventInput(overrides: Partial<EventInput> = {}): EventInput {
     location: { zh: '', en: '' },
     coverKey: null,
     registrationUrl: null,
+    archived: false,
     ...overrides,
   };
 }

@@ -79,20 +79,20 @@ describe.skipIf(!sqlite)('events pages', () => {
     expect(html).not.toContain('class="pager"');
   });
 
-  it('pages through past events twelve at a time and keeps the category', async () => {
+  it('pages through past events twelve at a time as a compact list and keeps the category', async () => {
     for (let day = 1; day <= 14; day += 1) {
       const date = `2026-09-${String(day).padStart(2, '0')}`;
       seedEvent(test.d1, { slug: `talk-${day}`, startsAt: `${date}T18:00`, endsAt: `${date}T19:00` });
     }
 
     const first = sections((await get('/events')).html).past;
-    expect(first.match(/class="card card--link"/g)).toHaveLength(12);
+    expect(first.match(/class="past-list__title"/g)).toHaveLength(12);
     expect(first).toContain('href="/events?page=2#past-events"');
     expect(first).toContain('Page 1 of 2');
     expect(first.indexOf('/events/talk-14')).toBeLessThan(first.indexOf('/events/talk-13'));
 
     const second = sections((await get('/events?page=2')).html).past;
-    expect(second.match(/class="card card--link"/g)).toHaveLength(2);
+    expect(second.match(/class="past-list__title"/g)).toHaveLength(2);
     expect(second).toContain('href="/events#past-events"');
     expect(second).not.toContain('page=3');
 
@@ -101,11 +101,11 @@ describe.skipIf(!sqlite)('events pages', () => {
 
     for (const page of ['0', '-1', 'abc']) {
       const fallback = sections((await get(`/events?page=${page}`)).html).past;
-      expect(fallback.match(/class="card card--link"/g), page).toHaveLength(12);
+      expect(fallback.match(/class="past-list__title"/g), page).toHaveLength(12);
     }
 
     const beyond = sections((await get('/events?page=9')).html).past;
-    expect(beyond).not.toContain('class="card card--link"');
+    expect(beyond).not.toContain('class="past-list__title"');
     expect(beyond).toContain('There are no more events on this page<span class="zh" lang="zh-CN">这一页没有更多活动</span>');
     expect(beyond).toContain('href="/events?page=2#past-events"');
   });
@@ -181,6 +181,22 @@ describe.skipIf(!sqlite)('events pages', () => {
     expect(html).toContain('chip chip--past');
     expect(html).not.toContain('https://forms.example.com/welcome');
     expect(html).toContain('<meta name="description" content="迎新周的完整介绍。"/>');
+  });
+
+  it('lists an event marked as ended among past events and stops its sign-ups, whatever its date', async () => {
+    seedEvent(test.d1, { slug: 'next-week', startsAt: '2026-11-01T18:00' });
+    seedEvent(test.d1, { slug: 'called-off', startsAt: '2026-11-08T18:00', registrationUrl: 'https://forms.example.com/called-off' });
+    test.d1.exec("UPDATE events SET archived = 1 WHERE slug = 'called-off'");
+
+    const { upcoming, past } = sections((await get('/events')).html);
+    expect(upcoming).toContain('/events/next-week');
+    expect(upcoming).not.toContain('/events/called-off');
+    expect(past).toContain('<ul class="past-list">');
+    expect(past).toContain('<a class="past-list__title" href="/events/called-off">');
+
+    const detail = (await get('/events/called-off')).html;
+    expect(detail).toContain('chip chip--past');
+    expect(detail).not.toContain('https://forms.example.com/called-off');
   });
 
   it('answers 404 for drafts, unknown slugs and malformed slugs', async () => {

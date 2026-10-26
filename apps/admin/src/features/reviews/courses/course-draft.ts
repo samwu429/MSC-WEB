@@ -1,8 +1,8 @@
 import { emptyText, normalizeCourseCode, type Course, type CourseInput } from '@msc-web/content';
 
 export function courseDraftOf(course: Course | null): CourseInput {
-  if (!course) return { code: '', title: emptyText(), description: emptyText(), sortOrder: 0, visible: true };
-  return { code: course.code, title: course.title, description: course.description, sortOrder: course.sortOrder, visible: course.visible };
+  if (!course) return { code: '', title: emptyText(), description: emptyText(), sortOrder: 0, visible: true, archived: false };
+  return { code: course.code, title: course.title, description: course.description, sortOrder: course.sortOrder, visible: course.visible, archived: course.archived };
 }
 
 /** The code is sent in the canonical form the server stores, such as CSC108H5 for "csc 108h5". */

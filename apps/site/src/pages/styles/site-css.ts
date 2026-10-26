@@ -35,6 +35,7 @@
  *   Documents   .doc-group .doc-list .doc-item .doc-item__icon .doc-item__body .doc-item__title .doc-item__meta
  *   Footer      .site-footer .footer-grid .footer-brand .footer-col .footer-qr .footer-bottom .footer-bottom__row .footer-admin
  *   Member net  .mobile-note (beside member-network links) .topbar__note .cta-band__action
+ *   Ended       .past-list .past-list__date .past-list__title .past-list__tag .ended-title .ended-lead .ended-list .ended-list__code .ended-list__name
  *   Misc        .notice .notice--integrity .empty .cta-band .cta-band__inner .pager
  */
 export const SITE_CSS = `
@@ -112,7 +113,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 
 .zh { display: block; margin-top: 1px; color: var(--zh); font-size: 0.72rem; font-weight: 400; letter-spacing: 0.02em; line-height: 1.3; }
 .zh-text { margin-top: 2px; color: var(--zh); font-size: 0.75rem; font-weight: 400; line-height: 1.5; }
-:is(.hero__tagline, .lead, .section-lead, .page-hero__lead, .pillar__text, .card__text, .course__text, .dept__text, .prose).zh-text { color: var(--zh); font-size: 0.75rem; font-weight: 400; line-height: 1.5; }
+:is(.hero__tagline, .lead, .section-lead, .page-hero__lead, .pillar__text, .card__text, .course__text, .dept__text, .ended-lead, .prose).zh-text { color: var(--zh); font-size: 0.75rem; font-weight: 400; line-height: 1.5; }
 p + .zh-text, .prose + .zh-text { margin-top: 2px; }
 .section-lead.zh-text, .page-hero__lead.zh-text { margin-top: 2px; }
 .stat__label .zh, .footer-col h2 .zh, .partner__name .zh, .doc-item__meta .zh, .course__title .zh, .site-nav__menu-link .zh, .mobile-nav__panel .zh, .pillar__title .zh, .card__title .zh, .dept__name .zh { font-size: 0.625rem; }
@@ -417,6 +418,22 @@ a.partner:hover { border-color: var(--purple-700); color: var(--purple-700); }
 .cta-band .btn--ghost { border-color: var(--purple-900); color: var(--purple-900); }
 .cta-band .btn--ghost:hover { background: var(--purple-900); color: #fff; }
 @media (min-width: 860px) { .cta-band__inner { grid-template-columns: minmax(0, 1fr) auto; align-items: center; } }
+
+.past-list { display: grid; gap: 2px 32px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr)); list-style: none; font-size: 0.9rem; }
+.past-list li { display: flex; align-items: baseline; gap: 12px; min-width: 0; padding: 5px 0; }
+.past-list__date { flex: none; width: 8.5rem; color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.past-list__title { flex: 1; min-width: 0; color: var(--ink); font-weight: 600; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.past-list__title:hover { color: var(--purple-700); text-decoration: underline; }
+.past-list__title .zh { display: inline; margin-left: 6px; font-size: 0.7rem; }
+.past-list__tag { flex: none; color: var(--muted); font-size: 0.75rem; }
+.ended-title { color: var(--ink-soft); font-size: 1.05rem; }
+.ended-title .zh { display: inline; margin-left: 8px; }
+.ended-lead { margin-top: 2px; color: var(--muted); font-size: 0.85rem; }
+.ended-list { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 12px; list-style: none; font-size: 0.85rem; }
+.ended-list a { display: inline-flex; gap: 6px; align-items: baseline; color: var(--ink-soft); text-decoration: none; }
+.ended-list a:hover { color: var(--purple-700); text-decoration: underline; }
+.ended-list__code { font-family: var(--font-mono); font-weight: 700; }
+.ended-list__name { color: var(--muted); }
 
 .pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin-top: 36px; }
 

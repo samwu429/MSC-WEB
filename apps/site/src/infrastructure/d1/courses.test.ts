@@ -14,6 +14,7 @@ function courseInput(overrides: Partial<CourseInput> = {}): CourseInput {
     description: { zh: '', en: '' },
     sortOrder: 0,
     visible: true,
+    archived: false,
     ...overrides,
   };
 }
