@@ -70,6 +70,7 @@ describe.skipIf(!sqlite)('test review pages', () => {
     seedCourses();
     const page = await html('/reviews');
     expect(page).toContain('<html lang="en-CA">');
+    expect(page).toContain('<a class="doc-link" href="/static/docs/code-of-behaviour-on-academic-matters.pdf" type="application/pdf" target="_blank" rel="noopener">');
     expect(page).toContain('<a class="tab" href="/reviews" aria-current="page">Fall 2026</a>');
     expect(page).toContain('<a class="tab" href="/reviews?term=2026-winter">Winter 2026</a>');
     expect(page).not.toContain('Fall 2025');

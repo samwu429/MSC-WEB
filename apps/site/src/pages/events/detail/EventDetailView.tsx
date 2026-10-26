@@ -1,6 +1,6 @@
 import { EVENT_CATEGORY_LABELS, eventStatus, formatTimeRange, mediaUrl, type SiteEventDetail } from '@msc-web/content';
 import type { PageContext } from '../../context';
-import { Bi, BiRichText, BiText, MediaImage, MetaItem, SectionHeading, StatusChip, fallbackLang, txt } from '../../components/common';
+import { Bi, BiRichText, BiText, CodeOfBehaviourLink, MediaImage, MetaItem, SectionHeading, StatusChip, fallbackLang, txt } from '../../components/common';
 import { Icon } from '../../components/Icon';
 import { COMMON, t } from '../../i18n/strings';
 import { sitePath } from '../../routing/paths';
@@ -96,6 +96,7 @@ export function EventDetailView({ ctx, event }: { ctx: PageContext; event: SiteE
               )}
             </div>
             <aside class="detail__aside" aria-label={t(EVENTS, 'detailsLabel', locale)}>
+              {event.category === 'academic' && <CodeOfBehaviourLink />}
               <div class="info-list">
                 <InfoRow label={t(EVENTS, 'dateAndTime', locale)} value={when} />
                 <InfoRow label={t(EVENTS, 'location', locale)} value={location || t(COMMON, 'toBeAnnounced', locale)} lang={fallbackLang(event.location, locale)} />

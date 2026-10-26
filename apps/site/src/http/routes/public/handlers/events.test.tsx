@@ -119,6 +119,17 @@ describe.skipIf(!sqlite)('events pages', () => {
     expect(html).not.toContain('/events/welcome-week');
   });
 
+  it('links the Code of Behaviour on the Academic tab and on academic event pages only', async () => {
+    seedTypicalEvents();
+    const academic = (await get('/events?type=academic')).html;
+    expect(academic).toContain('Academic integrity<span class="zh" lang="zh-CN">学术诚信</span>');
+    expect(academic).toContain('<a class="doc-link" href="/static/docs/code-of-behaviour-on-academic-matters.pdf" type="application/pdf" target="_blank" rel="noopener">');
+    expect((await get('/events?type=extracurricular')).html).not.toContain('code-of-behaviour');
+    expect((await get('/events')).html).not.toContain('code-of-behaviour');
+    expect((await get('/events/study-jam')).html).toContain('<a class="doc-link" href="/static/docs/code-of-behaviour-on-academic-matters.pdf" type="application/pdf" target="_blank" rel="noopener">');
+    expect((await get('/events/mid-autumn-night')).html).not.toContain('code-of-behaviour');
+  });
+
   it('shows every category for an unknown type', async () => {
     seedTypicalEvents();
     const { status, html } = await get('/events?type=sports');

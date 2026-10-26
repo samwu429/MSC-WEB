@@ -39,6 +39,7 @@ export const COMMON = {
   footerExplore: { zh: '浏览', en: 'Explore' },
   footerMembers: { zh: '成员', en: 'Members' },
   adminSignIn: { zh: '干部登录', en: 'Officer sign-in' },
+  codeOfBehaviour: { zh: '阅读多伦多大学《学术行为守则》（PDF）', en: "Read the University's Code of Behaviour on Academic Matters (PDF)" },
   androidApp: { zh: '安卓 App', en: 'Android app' },
   openMemberNetwork: { zh: '进入成员网络', en: 'Open the member network' },
   downloadAndroid: { zh: '下载安卓 App', en: 'Download the Android app' },

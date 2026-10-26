@@ -1,7 +1,7 @@
 import { termLabel, type Course, type ReviewSessionDetail, type TermKey } from '@msc-web/content';
 import type { PageContext } from '../../context';
 import type { PageMeta } from '../../layout/Document';
-import { Bi, BiText, EmptyState, PageHero, SectionHeading, txt } from '../../components/common';
+import { Bi, BiText, CodeOfBehaviourLink, EmptyState, PageHero, SectionHeading, txt } from '../../components/common';
 import { Icon } from '../../components/Icon';
 import { COMMON, t } from '../../i18n/strings';
 import { sitePath, withQuery } from '../../routing/paths';
@@ -55,6 +55,7 @@ function IntegrityNotice() {
           <Bi text={REVIEWS.integrityTitle} />
         </strong>
         <BiText text={REVIEWS.integrityText} />
+        <CodeOfBehaviourLink />
       </div>
     </div>
   );

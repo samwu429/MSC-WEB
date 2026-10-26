@@ -1,7 +1,8 @@
 import { EVENT_CATEGORIES, EVENT_CATEGORY_LABELS, type EventCategory, type SiteEvent } from '@msc-web/content';
 import type { PageContext } from '../../context';
 import type { PageMeta } from '../../layout/Document';
-import { EmptyState, PageHero, SectionHeading, txt } from '../../components/common';
+import { Bi, BiText, CodeOfBehaviourLink, EmptyState, PageHero, SectionHeading, txt } from '../../components/common';
+import { Icon } from '../../components/Icon';
 import { COMMON, t } from '../../i18n/strings';
 import { sitePath, withQuery } from '../../routing/paths';
 import { EventCard, PastEventList } from '../EventCard';
@@ -76,6 +77,23 @@ function Pager({ ctx, query, pastTotal }: { ctx: PageContext; query: EventsQuery
   );
 }
 
+/** On the Academic tab: the Group's academic activities follow the University's Code. */
+/** 学术活动标签页上：联盟的学术活动遵守学校的守则。 */
+export function AcademicIntegrityNotice() {
+  return (
+    <div class="notice notice--integrity" role="note">
+      <Icon name="shield" />
+      <div>
+        <strong>
+          <Bi text={EVENTS.integrityTitle} />
+        </strong>
+        <BiText text={EVENTS.integrityText} />
+        <CodeOfBehaviourLink />
+      </div>
+    </div>
+  );
+}
+
 export function eventsListMeta(ctx: PageContext): PageMeta {
   return { title: t(COMMON, 'navEvents', ctx.locale), description: t(EVENTS, 'heroLead', ctx.locale) };
 }
@@ -86,6 +104,7 @@ export function EventsListView({ ctx, data }: { ctx: PageContext; data: EventsLi
   return (
     <>
       <PageHero eyebrow={t(EVENTS, 'heroEyebrow', locale)} title={COMMON.navEvents} lead={EVENTS.heroLead}>
+        {query.category === 'academic' && <AcademicIntegrityNotice />}
         <CategoryTabs ctx={ctx} active={query.category} />
       </PageHero>
       <section class="section" aria-labelledby={UPCOMING_ID}>

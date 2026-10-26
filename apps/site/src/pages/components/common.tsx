@@ -74,6 +74,23 @@ export function BiRichText({ text, class: className = 'prose' }: { text: Localiz
   );
 }
 
+/** The University of Toronto's Code of Behaviour on Academic Matters (effective July 1, 2025), served with the site. */
+/** 多伦多大学《学术行为守则》（2025 年 7 月 1 日起生效），随网站一起提供。 */
+export const CODE_OF_BEHAVIOUR_PDF = '/static/docs/code-of-behaviour-on-academic-matters.pdf';
+
+/** The link to the Code, under every academic integrity note on the site. */
+/** 指向守则的链接，位于网站上每一处学术诚信说明之下。 */
+export function CodeOfBehaviourLink() {
+  return (
+    <a class="doc-link" href={CODE_OF_BEHAVIOUR_PDF} type="application/pdf" target="_blank" rel="noopener">
+      <Icon name="file" />
+      <span>
+        <Bi text={COMMON.codeOfBehaviour} />
+      </span>
+    </a>
+  );
+}
+
 /** The note shown beside links into the member network: it has been made for phone screens only. */
 /** 成员网络链接旁的说明：成员网络只适配了手机屏幕。 */
 export function MobileOnlyNote() {

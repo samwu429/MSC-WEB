@@ -36,6 +36,7 @@
  *   Footer      .site-footer .footer-grid .footer-brand .footer-col .footer-qr .footer-bottom .footer-bottom__row .footer-admin
  *   Member net  .mobile-note (beside member-network links) .topbar__note .cta-band__action
  *   Ended       .past-list .past-list__date .past-list__title .past-list__tag .ended-title .ended-lead .ended-list .ended-list__code .ended-list__name
+ *   Docs        .doc-link (a small link to a PDF, such as the Code of Behaviour)
  *   Misc        .notice .notice--integrity .empty .cta-band .cta-band__inner .pager
  */
 export const SITE_CSS = `
@@ -400,6 +401,11 @@ a.partner:hover { border-color: var(--purple-700); color: var(--purple-700); }
 .notice { display: flex; gap: 14px; padding: 18px 20px; background: var(--gold-100); color: var(--ink); border-left: 4px solid var(--gold-500); }
 .notice svg { flex: none; width: 22px; height: 22px; color: var(--purple-700); margin-top: 2px; }
 .notice--integrity { background: var(--purple-50); border-left-color: var(--purple-700); }
+.doc-link { display: inline-flex; align-items: flex-start; gap: 6px; margin-top: 8px; color: var(--purple-700); font-size: 0.85rem; font-weight: 700; text-decoration: none; }
+.doc-link:hover { text-decoration: underline; }
+.notice .doc-link svg { width: 15px; height: 15px; margin-top: 2px; color: currentColor; }
+.doc-link svg { flex: none; width: 15px; height: 15px; margin-top: 2px; }
+.page-hero .doc-link { color: var(--gold-500); }
 .notice strong { color: var(--purple-900); }
 
 .empty { padding: 40px 24px; background: var(--white); border: 1px dashed var(--line-strong); color: var(--muted); text-align: center; }

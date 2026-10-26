@@ -9,6 +9,11 @@ export const EVENTS = {
     en: 'From academic talks and workshops to festival gatherings and interest groups, we host events all year round, and every student is welcome.',
   },
   categoryTabsLabel: { zh: '活动类别', en: 'Event categories' },
+  integrityTitle: { zh: '学术诚信', en: 'Academic integrity' },
+  integrityText: {
+    zh: '我们的学术活动遵守多伦多大学《学术行为守则》：帮助同学学习，绝不替任何人完成计入成绩的作业或考试。',
+    en: "Our academic activities follow the University's Code of Behaviour on Academic Matters: we help members learn, and never complete graded work for anyone.",
+  },
   allCategories: { zh: '全部', en: 'All' },
   upcomingTitle: { zh: '近期活动', en: 'Upcoming events' },
   upcomingLead: { zh: '正在进行和即将举行的活动。', en: 'Events happening now and coming up soon.' },

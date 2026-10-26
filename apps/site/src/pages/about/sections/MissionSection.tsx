@@ -1,6 +1,6 @@
 import type { PageContext } from '../../context';
 import { Icon } from '../../components/Icon';
-import { Bi, BiRichText, BiText, SectionHeading } from '../../components/common';
+import { Bi, BiRichText, BiText, CodeOfBehaviourLink, SectionHeading } from '../../components/common';
 import { t } from '../../i18n/strings';
 import { STATIC_PHOTOS, STATIC_PHOTO_SIZE } from '../../home/static-photos';
 import { ABOUT } from '../strings';
@@ -38,6 +38,7 @@ export function MissionSection({ ctx }: { ctx: PageContext }) {
                   <Bi text={ABOUT.integrityTitle} />
                 </strong>
                 <BiText text={ABOUT.integrityText} />
+                <CodeOfBehaviourLink />
               </div>
             </div>
           </div>
