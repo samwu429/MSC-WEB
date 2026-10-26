@@ -1,39 +1,39 @@
 import { describe, expect, it } from 'vitest';
-import { localePath, sectionOfPath, siteHref, splitLocalePath } from './paths';
+import { legacyEnglishTarget, rooted, sectionOfPath, siteHref, sitePath } from './paths';
 
-describe('localePath', () => {
-  it('puts English pages under /en and keeps Chinese pages at the root', () => {
-    expect(localePath('zh', '/events')).toBe('/events');
-    expect(localePath('en', '/events')).toBe('/en/events');
-    expect(localePath('zh', '/')).toBe('/');
-    expect(localePath('en', '/')).toBe('/en');
-    expect(localePath('en', 'about')).toBe('/en/about');
+describe('sitePath', () => {
+  it('serves every page at the root', () => {
+    expect(sitePath('/events')).toBe('/events');
+    expect(sitePath('/')).toBe('/');
+    expect(sitePath('about')).toBe('/about');
   });
 
   it('never produces a protocol-relative link from a path with several leading slashes', () => {
-    expect(localePath('zh', '//evil.example')).toBe('/evil.example');
-    expect(localePath('zh', '///evil.example/x')).toBe('/evil.example/x');
-    expect(localePath('en', '//evil.example')).toBe('/en/evil.example');
-    expect(localePath('zh', '//')).toBe('/');
-    expect(localePath('en', '//')).toBe('/en');
+    expect(sitePath('//evil.example')).toBe('/evil.example');
+    expect(sitePath('///evil.example/x')).toBe('/evil.example/x');
+    expect(sitePath('//')).toBe('/');
+    expect(rooted('')).toBe('/');
+    expect(rooted('//evil.example')).toBe('/evil.example');
   });
 });
 
-describe('splitLocalePath', () => {
-  it('reads the language from the /en prefix', () => {
-    expect(splitLocalePath('/events')).toEqual({ locale: 'zh', path: '/events' });
-    expect(splitLocalePath('/en/events')).toEqual({ locale: 'en', path: '/events' });
-    expect(splitLocalePath('/en')).toEqual({ locale: 'en', path: '/' });
-    expect(splitLocalePath('/en/')).toEqual({ locale: 'en', path: '/' });
-    expect(splitLocalePath('')).toEqual({ locale: 'zh', path: '/' });
-    expect(splitLocalePath('/english')).toEqual({ locale: 'zh', path: '/english' });
+describe('legacyEnglishTarget', () => {
+  it('moves the old /en addresses to the same path at the root', () => {
+    expect(legacyEnglishTarget('/en')).toBe('/');
+    expect(legacyEnglishTarget('/en/')).toBe('/');
+    expect(legacyEnglishTarget('/en/events')).toBe('/events');
+    expect(legacyEnglishTarget('/en/people/presidium')).toBe('/people/presidium');
   });
 
-  it('collapses leading slashes, so the language switch of /en//evil.example stays on the site', () => {
-    expect(splitLocalePath('/en//evil.example')).toEqual({ locale: 'en', path: '/evil.example' });
-    expect(splitLocalePath('//evil.example')).toEqual({ locale: 'zh', path: '/evil.example' });
-    const { path } = splitLocalePath('/en//evil.example');
-    expect(localePath('zh', path)).toBe('/evil.example');
+  it('leaves every other path alone', () => {
+    expect(legacyEnglishTarget('/events')).toBeNull();
+    expect(legacyEnglishTarget('/english')).toBeNull();
+    expect(legacyEnglishTarget('/')).toBeNull();
+  });
+
+  it('collapses leading slashes, so /en//evil.example stays on the site', () => {
+    expect(legacyEnglishTarget('/en//evil.example')).toBe('/evil.example');
+    expect(legacyEnglishTarget('/en///evil.example/x')).toBe('/evil.example/x');
   });
 });
 
@@ -48,17 +48,16 @@ describe('sectionOfPath', () => {
 });
 
 describe('siteHref', () => {
-  it('moves a public page path into the visitor language, keeping its query and fragment', () => {
-    expect(siteHref('en', '/events/2026-10-mid')).toBe('/en/events/2026-10-mid');
-    expect(siteHref('en', '/about')).toBe('/en/about');
-    expect(siteHref('en', '/')).toBe('/en');
-    expect(siteHref('en', '/events?type=academic')).toBe('/en/events?type=academic');
-    expect(siteHref('en', '/reviews#all-courses')).toBe('/en/reviews#all-courses');
-    expect(siteHref('en', '/?from=announcement')).toBe('/en?from=announcement');
+  it('points a link written for the old English pages at the page itself, keeping its query and fragment', () => {
+    expect(siteHref('/en/events/2026-10-mid')).toBe('/events/2026-10-mid');
+    expect(siteHref('/en/about')).toBe('/about');
+    expect(siteHref('/en')).toBe('/');
+    expect(siteHref('/en/events?type=academic#past-events')).toBe('/events?type=academic#past-events');
+    expect(siteHref('/en?from=announcement')).toBe('/?from=announcement');
   });
 
-  it('leaves Chinese links as entered', () => {
-    for (const url of ['/events/2026-10-mid', '/', '/about?x=1']) expect(siteHref('zh', url)).toBe(url);
+  it('leaves page links as entered', () => {
+    for (const url of ['/events/2026-10-mid', '/', '/about?x=1', '/reviews#all-courses']) expect(siteHref(url)).toBe(url);
   });
 
   it('passes through everything that is not a public page', () => {
@@ -68,14 +67,14 @@ describe('siteHref', () => {
       '/media/doc/2026/0123456789abcdef0123456789abcdef.pdf',
       '/static/photos/community.jpg',
       '/admin',
-      '/en/events',
-      '/en',
+      '/en/UTMMSC/',
+      '/en//evil.example',
       'https://forms.example.com/join',
       'mailto:hello@utmmsc.com',
       '//evil.example',
       '',
     ]) {
-      expect(siteHref('en', url), url).toBe(url);
+      expect(siteHref(url), url).toBe(url);
     }
   });
 });

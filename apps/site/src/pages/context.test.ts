@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SITE_SETTINGS } from '@msc-web/content';
-import { buildPageContext } from './context';
+import { SITE_LOCALE, buildPageContext } from './context';
 
 const ENV = { MEMBER_APP_URL: '/UTMMSC/', ANDROID_DOWNLOAD_URL: '/download/android', PUBLIC_ORIGIN: 'https://utmmsc.com' };
 
@@ -9,8 +9,8 @@ const ENV = { MEMBER_APP_URL: '/UTMMSC/', ANDROID_DOWNLOAD_URL: '/download/andro
 const NOW = new Date('2026-10-25T16:00:00.000Z');
 
 describe('buildPageContext', () => {
-  it('takes the locale-neutral path and query from the URL and the Toronto time from the instant', () => {
-    const ctx = buildPageContext(new URL('https://utmmsc.com/en/events?type=academic'), ENV, 'en', DEFAULT_SITE_SETTINGS, NOW);
+  it('takes the path and query from the URL and the Toronto time from the instant', () => {
+    const ctx = buildPageContext(new URL('https://utmmsc.com/events?type=academic'), ENV, SITE_LOCALE, DEFAULT_SITE_SETTINGS, NOW);
     expect(ctx.locale).toBe('en');
     expect(ctx.path).toBe('/events');
     expect(ctx.search).toBe('?type=academic');
@@ -21,12 +21,12 @@ describe('buildPageContext', () => {
   });
 
   it('trims trailing slashes from the public origin, so canonical links never contain "//"', () => {
-    const ctx = buildPageContext(new URL('https://utmmsc.com/about'), { ...ENV, PUBLIC_ORIGIN: 'https://utmmsc.com//' }, 'zh', DEFAULT_SITE_SETTINGS, NOW);
+    const ctx = buildPageContext(new URL('https://utmmsc.com/about'), { ...ENV, PUBLIC_ORIGIN: 'https://utmmsc.com//' }, SITE_LOCALE, DEFAULT_SITE_SETTINGS, NOW);
     expect(ctx.links.publicOrigin).toBe('https://utmmsc.com');
   });
 
   it('collapses leading slashes of the request path', () => {
-    const ctx = buildPageContext(new URL('https://utmmsc.com/en//evil.example'), ENV, 'en', DEFAULT_SITE_SETTINGS, NOW);
+    const ctx = buildPageContext(new URL('https://utmmsc.com//evil.example'), ENV, SITE_LOCALE, DEFAULT_SITE_SETTINGS, NOW);
     expect(ctx.path).toBe('/evil.example');
   });
 });

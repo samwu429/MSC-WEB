@@ -94,28 +94,31 @@ describe.skipIf(!sqlite)('home page', () => {
     `);
   }
 
-  it.each([
-    { path: '/', name: '国语学者联盟', other: 'Mandarin Scholars Coalition', otherLang: 'en-CA', term: '2026 秋季学期', events: '/events' },
-    { path: '/en', name: 'Mandarin Scholars Coalition', other: '国语学者联盟', otherLang: 'zh-CN', term: 'Fall 2026', events: '/en/events' },
-  ])('renders $path from an empty database with empty states and vacant offices', async ({ path, name, other, otherLang, term, events }) => {
-    const html = await render(path);
+  it('renders / from an empty database in English with the Chinese beneath, empty states and no people', async () => {
+    const html = await render('/');
 
     expect(occurrences(html, '<h1')).toBe(1);
-    expect(html).toContain(`<h1 class="hero__title" id="home-title">${name}</h1>`);
-    expect(html).toContain(`<p class="hero__subtitle" lang="${otherLang}">${other}</p>`);
+    expect(html).toContain('<html lang="en-CA">');
+    expect(html).toContain('<h1 class="hero__title" id="home-title">Mandarin Scholars Coalition</h1>');
+    expect(html).toContain('<p class="hero__subtitle" lang="zh-CN">国语学者联盟</p>');
+    expect(html).toContain('<p class="hero__tagline">A home for Mandarin speakers and learners at UTM, built around learning together.</p>');
+    expect(html).toContain('<p class="hero__tagline zh-text" lang="zh-CN">用中文相聚，一起学习，一起走进加拿大校园。</p>');
     expect(html).toContain('src="/static/photos/academic-talk.jpg"');
     expect(html).toMatch(/class="hero__photo"[^>]*width="1600" height="1200" loading="eager"/);
 
     expect(occurrences(html, 'class="stat"')).toBe(1);
     expect(html).toContain('<div class="stat__value">$0</div>');
+    expect(html).toContain('<h2 class="stats__title" id="home-stats">UTMMSC at a glance<span class="zh" lang="zh-CN">联盟一览</span></h2>');
 
     expect(occurrences(html, 'class="empty"')).toBe(4);
     expect(html).toContain('aria-labelledby="home-partners"');
     expect(html).not.toContain('class="partner-group"');
-    expect(html).toContain(`<div class="eyebrow">${term}</div>`);
+    expect(html).toContain('<div class="eyebrow">Fall 2026</div>');
+    expect(html).toContain('<h2 class="section-title" id="home-reviews">Test reviews this term<span class="zh" lang="zh-CN">本学期考前复习</span></h2>');
     expect(html).not.toContain('class="person');
     expect(html).not.toContain('class="gallery');
-    expect(html).toContain(`href="${events}?type=academic"`);
+    expect(html).toContain('href="/events?type=academic"');
+    expect(html).not.toContain('href="/en');
     expect(html).not.toContain('github.com');
     expect(html).toContain('class="cta-band"');
   });
@@ -124,62 +127,63 @@ describe.skipIf(!sqlite)('home page', () => {
     await seed();
     const html = await render('/');
 
-    const eventOrder = ['进行中讲座', '近期联谊', '十一月工作坊'].map((title) => html.indexOf(title));
+    const eventOrder = ['Ongoing Talk', 'Next Social', 'November Workshop'].map((title) => html.indexOf(title));
     expect(eventOrder.every((index) => index > 0)).toBe(true);
     expect([...eventOrder].sort((a, b) => a - b)).toEqual(eventOrder);
-    expect(html).not.toContain('第四场活动');
-    expect(html).not.toContain('往期活动');
-    expect(html).not.toContain('草稿活动');
+    expect(html).toContain('<a class="card__link" href="/events/2026-10-next-social">Next Social<span class="zh" lang="zh-CN">近期联谊</span></a>');
+    expect(html).not.toContain('Fourth Event');
+    expect(html).not.toContain('Past Event');
+    expect(html).not.toContain('Draft Event');
 
     expect(html).toContain('CSC108H5');
     expect(html).not.toContain('MAT135H5');
     expect(html).not.toContain('ECO100Y5');
     expect(html).not.toContain('PSY100H5');
 
-    expect(html).toContain('<div class="stat__value">2</div><div class="stat__label">考前复习场次</div>');
-    expect(html).toContain('<div class="stat__value">5</div><div class="stat__label">活动</div>');
-    expect(html).toContain('<div class="stat__value">2</div><div class="stat__label">开设复习的课程</div>');
+    expect(html).toContain('<div class="stat__value">2</div><div class="stat__label">Test review sessions<span class="zh" lang="zh-CN">考前复习场次</span></div>');
+    expect(html).toContain('<div class="stat__value">5</div><div class="stat__label">Events<span class="zh" lang="zh-CN">活动</span></div>');
+    expect(html).toContain('<div class="stat__value">2</div><div class="stat__label">Courses with reviews<span class="zh" lang="zh-CN">开设复习的课程</span></div>');
 
-    expect(html).toContain('陈教授');
-    expect(html).not.toContain('顾问简介');
-    expect(html).not.toContain('隐藏顾问');
+    // The advisors are people, so they show in English only.
+    // 荣誉顾问属于人员内容，因此只显示英文。
+    const advisors = html.slice(html.indexOf('aria-labelledby="home-advisors"'), html.indexOf('class="cta-band"'));
+    expect(advisors).toContain('Prof. Chen');
+    expect(advisors).not.toContain('陈教授');
+    expect(advisors).not.toContain('class="zh"');
+    expect(advisors).not.toContain('Advisor bio');
+    expect(html).not.toContain('Hidden Advisor');
     expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
-    expect(html).not.toContain('王会长');
+    expect(html).not.toContain('Wang Hui');
     expect(html).not.toContain('person--vacant');
     expect(html).toContain('<a class="section-link link-arrow" href="/people/advisors">');
+    expect(html).toContain('href="/reviews"');
+    expect(html).toContain('href="/people"');
 
     expect(html).not.toContain('class="gallery');
-    expect(html).not.toContain('alt="近期联谊"');
 
     expect(html).toContain(`class="hero__photo" src="${mediaUrl(PHOTO_KEY)}"`);
     expect(html).toContain(`<meta property="og:image" content="https://utmmsc.com${mediaUrl(PHOTO_KEY)}"/>`);
     expect(html).toContain('href="https://github.com/utmmsc" rel="noopener noreferrer" target="_blank"');
   });
 
-  it('links events and actions to the English pages on /en', async () => {
-    await seed();
-    const html = await render('/en');
-    expect(html).toContain('Ongoing Talk');
-    expect(html).toContain('<a class="card__link" href="/en/events/2026-10-next-social">Next Social</a>');
-    expect(html).toContain('href="/en/reviews"');
-    expect(html).toContain('href="/en/people"');
-    expect(html).toContain('<a class="section-link link-arrow" href="/en/people/advisors">');
-    expect(html).toContain('Prof. Chen');
-    expect(html).toContain('<div class="stat__label">Courses with reviews</div>');
+  it('moves the old English home page to the root', async () => {
+    const ctx = testExecutionContext();
+    const response = await app.request('/en', {}, test.env, ctx);
+    await ctx.settle();
+    expect(response.status).toBe(301);
+    expect(response.headers.get('location')).toBe('/');
   });
 
-  it.each([
-    { path: '/', open: '进入成员网络', download: '下载安卓 App', iphone: '添加到主屏幕' },
-    { path: '/en', open: 'Open the member network', download: 'Download the Android app', iphone: 'Add to Home Screen' },
-  ])('offers the member network and the Android download on $path', async ({ path, open, download, iphone }) => {
-    const html = await render(path);
+  it('offers the member network and the Android download, with the Chinese beneath', async () => {
+    const html = await render('/');
     const main = html.slice(html.indexOf('<main'), html.indexOf('</main>'));
     const section = main.slice(main.indexOf('aria-labelledby="home-member-app"'));
     expect(section).toContain('href="/UTMMSC/"');
-    expect(section).toContain(open);
+    expect(section).toContain('Open the member network');
     expect(section).toContain('href="/download/android"');
-    expect(section).toContain(download);
-    expect(section).toContain(iphone);
+    expect(section).toContain('Download the Android app');
+    expect(section).toContain('Add to Home Screen');
+    expect(section).toMatch(/<p class="pillar__text zh-text" lang="zh-CN">[^<]*添加到主屏幕/);
     expect(main.indexOf('home-member-app')).toBeLessThan(main.indexOf('home-pillars'));
   });
 
@@ -192,23 +196,28 @@ describe.skipIf(!sqlite)('home page', () => {
     ];
     await test.d1.db.prepare("UPDATE settings SET value = ? WHERE key = 'site'").bind(JSON.stringify({ partners: { items: partners } })).run();
 
-    const html = await render('/en');
+    const html = await render('/');
     const main = html.slice(html.indexOf('<main'), html.indexOf('</main>'));
     const section = main.slice(main.indexOf('aria-labelledby="home-partners"'), main.indexOf('aria-labelledby="home-advisors"'));
     expect(main.indexOf('home-partners')).toBeGreaterThan(main.indexOf('home-reviews'));
     expect(main.indexOf('home-partners')).toBeLessThan(main.indexOf('home-advisors'));
 
     expect(occurrences(section, 'class="partner-group"')).toBe(2);
-    expect(section).not.toContain('>Partners</h3>');
-    expect(section.indexOf('>Sponsors</h3>')).toBeLessThan(section.indexOf('>Partner clubs</h3>'));
+    expect(section).not.toContain('>Partners<span');
+    expect(section).toContain('<h3 class="partner-group__title">Sponsors<span class="zh" lang="zh-CN">赞助商</span></h3>');
+    expect(section).toContain('<h3 class="partner-group__title">Partner clubs<span class="zh" lang="zh-CN">联动社团</span></h3>');
+    expect(section.indexOf('>Sponsors<')).toBeLessThan(section.indexOf('>Partner clubs<'));
     expect(section.indexOf('示例赞助商')).toBeLessThan(section.indexOf('Second Sponsor'));
-    expect(section).toContain(`<a class="partner" href="https://sponsor.example" rel="noopener noreferrer" target="_blank"><span class="partner__logo"><img src="${mediaUrl(PHOTO_KEY)}" alt=""`);
-    expect(section).toContain('<span class="partner__name" lang="zh-CN">示例赞助商</span>');
+    expect(section).toContain(
+      `<a class="partner" href="https://sponsor.example" rel="noopener noreferrer" target="_blank"><span class="partner__logo"><img src="${mediaUrl(PHOTO_KEY)}" alt=""`,
+    );
+    expect(section).toContain('<span class="partner__name"><span lang="zh-CN">示例赞助商</span></span>');
+    expect(section).toContain('<span class="partner__name">Second Sponsor<span class="zh" lang="zh-CN">第二赞助商</span></span>');
     expect(section).toContain('<div class="partner"><span class="partner__logo"><span class="partner__mark" aria-hidden="true">Chess Club</span></span>');
     expect(section).not.toContain('class="empty"');
   });
 
-  it('marks editor text shown in the other language with its lang', async () => {
+  it('shows editor text without English in Chinese with its lang, and only the English when there is no Chinese', async () => {
     await seed();
     test.d1.exec("UPDATE events SET title_en = '' WHERE id = 'evt-next'");
     await test.d1.db
@@ -216,14 +225,12 @@ describe.skipIf(!sqlite)('home page', () => {
       .bind(JSON.stringify({ hero: { imageKey: PHOTO_KEY, tagline: { zh: '一起学习，一起成长', en: '' }, intro: { zh: '', en: 'A home for Mandarin learners.' } } }))
       .run();
 
-    const english = await render('/en');
-    expect(english).toContain('<p class="hero__tagline" lang="zh-CN">一起学习，一起成长</p>');
-    expect(english).toContain('<p lang="zh-CN">一起学习，一起成长</p>');
-    expect(english).toContain('<div class="prose hero__intro"><p>A home for Mandarin learners.</p></div>');
-    expect(english).toContain('<h3 class="card__title" lang="zh-CN"><a class="card__link" href="/en/events/2026-10-next-social">近期联谊</a></h3>');
-
-    const chinese = await render('/');
-    expect(chinese).toContain('<p class="hero__tagline">一起学习，一起成长</p>');
-    expect(chinese).toContain('<div class="prose hero__intro" lang="en-CA"><p>A home for Mandarin learners.</p></div>');
+    const html = await render('/');
+    expect(html).toContain('<p class="hero__tagline" lang="zh-CN">一起学习，一起成长</p>');
+    expect(html).not.toContain('hero__tagline zh-text');
+    expect(html).toContain('<p lang="zh-CN">一起学习，一起成长</p>');
+    expect(html).toContain('<div class="prose hero__intro"><p>A home for Mandarin learners.</p></div>');
+    expect(html).not.toContain('hero__intro zh-text');
+    expect(html).toContain('<h3 class="card__title"><a class="card__link" href="/events/2026-10-next-social"><span lang="zh-CN">近期联谊</span></a></h3>');
   });
 });

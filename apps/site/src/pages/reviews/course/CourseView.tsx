@@ -1,11 +1,10 @@
 import { materialLabel, mediaUrl, termLabel, type Course, type Locale, type ReviewMaterial, type ReviewSessionDetail } from '@msc-web/content';
 import type { PageContext } from '../../context';
 import type { PageMeta } from '../../layout/Document';
-import { EmptyState, MetaItem, SectionHeading, fallbackLang, txt } from '../../components/common';
+import { Bi, BiRichText, EmptyState, MetaItem, SectionHeading, fallbackLang, txt } from '../../components/common';
 import { Icon } from '../../components/Icon';
-import { RichText } from '../../components/RichText';
 import { t } from '../../i18n/strings';
-import { localePath } from '../../routing/paths';
+import { sitePath } from '../../routing/paths';
 import { groupSessionsByTerm } from '../review-terms';
 import { SessionActions, SessionLabel, SessionWhen, sessionAnchor } from '../session/SessionParts';
 import { REVIEWS, courseDescription, presentersLine } from '../strings';
@@ -45,7 +44,7 @@ function SessionBlock({ session, ctx }: { session: ReviewSessionDetail; ctx: Pag
         <SessionLabel session={session} ctx={ctx} headingId={headingId} />
         <SessionWhen session={session} ctx={ctx} />
         {session.presenters && <MetaItem icon="users" text={presentersLine(session.presenters, locale)} />}
-        <RichText text={txt(session.notes, locale)} lang={fallbackLang(session.notes, locale)} />
+        <BiRichText text={session.notes} />
         {session.materials.length > 0 && (
           <div class="materials" role="group" aria-label={t(REVIEWS, 'materials', locale)}>
             {session.materials.map((material) => (
@@ -76,18 +75,20 @@ export function CourseView({ ctx, course, sessions }: { ctx: PageContext; course
     <>
       <header class="page-hero">
         <div class="container">
-          <a class="backlink" href={localePath(locale, '/reviews')}>
+          <a class="backlink" href={sitePath('/reviews')}>
             <Icon name="arrow" />
             {t(REVIEWS, 'backToReviews', locale)}
           </a>
           <div class="eyebrow">{t(REVIEWS, 'courseEyebrow', locale)}</div>
           <h1 class="page-hero__title">{course.code}</h1>
           {title && (
-            <p class="page-hero__lead" lang={fallbackLang(course.title, locale)}>
-              <strong>{title}</strong>
+            <p class="page-hero__lead">
+              <strong>
+                <Bi text={course.title} />
+              </strong>
             </p>
           )}
-          <RichText text={txt(course.description, locale)} class="prose page-hero__lead" lang={fallbackLang(course.description, locale)} />
+          <BiRichText text={course.description} class="prose page-hero__lead" />
         </div>
       </header>
       {groups.length > 0 ? (
@@ -96,7 +97,7 @@ export function CourseView({ ctx, course, sessions }: { ctx: PageContext; course
           return (
             <section class={index % 2 === 1 ? 'section section--tight section--alt' : 'section section--tight'} aria-labelledby={headingId}>
               <div class="container">
-                <SectionHeading id={headingId} title={txt(termLabel(group.term), locale)} />
+                <SectionHeading id={headingId} title={termLabel(group.term)} />
                 <div class="course">
                   <div class="course__sessions">
                     {group.sessions.map((session) => (
@@ -111,7 +112,7 @@ export function CourseView({ ctx, course, sessions }: { ctx: PageContext; course
       ) : (
         <div class="section">
           <div class="container">
-            <EmptyState title={t(REVIEWS, 'courseEmptyTitle', locale)} text={t(REVIEWS, 'courseEmptyText', locale)} />
+            <EmptyState title={REVIEWS.courseEmptyTitle} text={REVIEWS.courseEmptyText} />
           </div>
         </div>
       )}

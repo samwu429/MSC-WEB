@@ -22,8 +22,8 @@ export const eventsPage: PageHandler = async (c, locale) => {
 
 export const eventDetailPage: PageHandler = async (c, locale) => {
   const slug = c.req.param('slug');
-  if (!isSlug(slug)) return renderNotFound(c, locale);
+  if (!isSlug(slug)) return renderNotFound(c);
   const [ctx, event] = await Promise.all([loadPageContext(c, locale), findPublishedEvent(c.env.DB, slug)]);
-  if (!event) return renderNotFound(c, locale);
+  if (!event) return renderNotFound(c);
   return renderPage(c, ctx, eventDetailMeta(event, locale), <EventDetailView ctx={ctx} event={event} />);
 };

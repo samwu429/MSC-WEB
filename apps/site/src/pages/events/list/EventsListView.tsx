@@ -3,7 +3,7 @@ import type { PageContext } from '../../context';
 import type { PageMeta } from '../../layout/Document';
 import { EmptyState, PageHero, SectionHeading, txt } from '../../components/common';
 import { COMMON, t } from '../../i18n/strings';
-import { localePath, withQuery } from '../../routing/paths';
+import { sitePath, withQuery } from '../../routing/paths';
 import { EventCard } from '../EventCard';
 import { EVENTS, pageStatus } from '../strings';
 import { PAST_EVENTS_PAGE_SIZE, type EventsQuery } from './events-query';
@@ -21,7 +21,7 @@ export interface EventsListData {
 /** The list address for a category and page; the first page and "all" leave their parameters out. */
 /** 某类别与页码对应的列表地址；第一页与 "全部" 不带对应参数。 */
 function listHref(ctx: PageContext, category: EventCategory | null, page = 1): string {
-  return localePath(ctx.locale, withQuery('/events', { type: category, page: page > 1 ? page : null }));
+  return sitePath(withQuery('/events', { type: category, page: page > 1 ? page : null }));
 }
 
 function CategoryTabs({ ctx, active }: { ctx: PageContext; active: EventCategory | null }) {
@@ -85,28 +85,28 @@ export function EventsListView({ ctx, data }: { ctx: PageContext; data: EventsLi
   const { query } = data;
   return (
     <>
-      <PageHero eyebrow={t(EVENTS, 'heroEyebrow', locale)} title={t(COMMON, 'navEvents', locale)} lead={t(EVENTS, 'heroLead', locale)}>
+      <PageHero eyebrow={t(EVENTS, 'heroEyebrow', locale)} title={COMMON.navEvents} lead={EVENTS.heroLead}>
         <CategoryTabs ctx={ctx} active={query.category} />
       </PageHero>
       <section class="section" aria-labelledby={UPCOMING_ID}>
         <div class="container">
-          <SectionHeading id={UPCOMING_ID} title={t(EVENTS, 'upcomingTitle', locale)} lead={t(EVENTS, 'upcomingLead', locale)} />
+          <SectionHeading id={UPCOMING_ID} title={EVENTS.upcomingTitle} lead={EVENTS.upcomingLead} />
           {data.upcoming.length > 0 ? (
             <EventGrid ctx={ctx} events={data.upcoming} />
           ) : (
-            <EmptyState title={t(EVENTS, 'upcomingEmptyTitle', locale)} text={t(EVENTS, 'upcomingEmptyText', locale)} />
+            <EmptyState title={EVENTS.upcomingEmptyTitle} text={EVENTS.upcomingEmptyText} />
           )}
         </div>
       </section>
       <section class="section section--alt" aria-labelledby={PAST_ID}>
         <div class="container">
-          <SectionHeading id={PAST_ID} title={t(EVENTS, 'pastTitle', locale)} lead={t(EVENTS, 'pastLead', locale)} />
+          <SectionHeading id={PAST_ID} title={EVENTS.pastTitle} lead={EVENTS.pastLead} />
           {data.past.length > 0 ? (
             <EventGrid ctx={ctx} events={data.past} />
           ) : query.page > 1 ? (
-            <EmptyState title={t(EVENTS, 'pageEmptyTitle', locale)} text={t(EVENTS, 'pageEmptyText', locale)} />
+            <EmptyState title={EVENTS.pageEmptyTitle} text={EVENTS.pageEmptyText} />
           ) : (
-            <EmptyState title={t(EVENTS, 'pastEmptyTitle', locale)} />
+            <EmptyState title={EVENTS.pastEmptyTitle} />
           )}
           <Pager ctx={ctx} query={query} pastTotal={data.pastTotal} />
         </div>

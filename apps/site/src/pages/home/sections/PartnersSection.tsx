@@ -1,6 +1,6 @@
 import { PARTNER_KINDS, PARTNER_KIND_LABELS, isSafeHttpUrl, mediaUrl, type Locale, type Partner } from '@msc-web/content';
 import type { PageContext } from '../../context';
-import { EmptyState, SectionHeading, fallbackLang, txt } from '../../components/common';
+import { Bi, EmptyState, SectionHeading, fallbackLang, txt } from '../../components/common';
 import { t } from '../../i18n/strings';
 import { HOME } from '../strings';
 
@@ -25,8 +25,8 @@ function PartnerTile({ partner, locale }: { partner: Partner; locale: Locale }) 
           </span>
         )}
       </span>
-      <span class="partner__name" lang={lang}>
-        {name}
+      <span class="partner__name">
+        <Bi text={partner.name} />
       </span>
     </>
   );
@@ -53,11 +53,13 @@ export function PartnersSection({ ctx }: { ctx: PageContext }) {
   return (
     <section class="section section--alt" aria-labelledby="home-partners">
       <div class="container">
-        <SectionHeading id="home-partners" eyebrow={t(HOME, 'partnersEyebrow', locale)} title={t(HOME, 'partnersTitle', locale)} lead={t(HOME, 'partnersLead', locale)} />
+        <SectionHeading id="home-partners" eyebrow={t(HOME, 'partnersEyebrow', locale)} title={HOME.partnersTitle} lead={HOME.partnersLead} />
         {groups.length > 0 ? (
           groups.map((group) => (
             <div class="partner-group">
-              <h3 class="partner-group__title">{txt(PARTNER_KIND_LABELS[group.kind], locale)}</h3>
+              <h3 class="partner-group__title">
+                <Bi text={PARTNER_KIND_LABELS[group.kind]} />
+              </h3>
               <ul class="partner-grid">
                 {group.items.map((partner) => (
                   <li>
@@ -68,7 +70,7 @@ export function PartnersSection({ ctx }: { ctx: PageContext }) {
             </div>
           ))
         ) : (
-          <EmptyState title={t(HOME, 'partnersEmptyTitle', locale)} text={t(HOME, 'partnersEmptyText', locale)} />
+          <EmptyState title={HOME.partnersEmptyTitle} text={HOME.partnersEmptyText} />
         )}
       </div>
     </section>

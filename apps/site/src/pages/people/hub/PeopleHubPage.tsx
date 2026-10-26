@@ -4,7 +4,7 @@ import { Icon } from '../../components/Icon';
 import { PageHero, txt } from '../../components/common';
 import { COMMON, t } from '../../i18n/strings';
 import { peoplePageLabel } from '../../layout/navigation';
-import { PEOPLE_PAGES, PEOPLE_PAGE_PATHS, localePath, type PeoplePageKey } from '../../routing/paths';
+import { PEOPLE_PAGES, PEOPLE_PAGE_PATHS, sitePath, type PeoplePageKey } from '../../routing/paths';
 import { peoplePageEyebrow, peoplePageLead } from '../layout/PeopleSectionHero';
 import { PEOPLE } from '../strings';
 
@@ -40,7 +40,7 @@ export function PeopleHubPage({ ctx }: { ctx: PageContext }) {
                 <div class="card__body">
                   <div class="eyebrow">{peoplePageEyebrow(page, ctx)}</div>
                   <h2 class="card__title">
-                    <a class="card__link" href={localePath(locale, PEOPLE_PAGE_PATHS[page])}>
+                    <a class="card__link" href={sitePath(PEOPLE_PAGE_PATHS[page])}>
                       {txt(peoplePageLabel(page), locale)}
                     </a>
                   </h2>

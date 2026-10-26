@@ -1,8 +1,8 @@
-import { localeTag, personDisplayTitle, personInitials, type Locale, type Person } from '@msc-web/content';
+import { personDisplayTitle, personInitials, type Locale, type Person } from '@msc-web/content';
 import { Icon } from '../components/Icon';
 import { MediaImage, fallbackLang, txt } from '../components/common';
 import { COMMON, t } from '../i18n/strings';
-import { localePath, personPath } from '../routing/paths';
+import { sitePath, personPath } from '../routing/paths';
 import { PEOPLE } from './strings';
 
 /**
@@ -12,33 +12,21 @@ import { PEOPLE } from './strings';
  */
 export type CardHeadingLevel = 2 | 3;
 
-/** The other language's name, shown under the main one when the two differ. */
-/** 另一种语言的姓名；两种语言的姓名不同时显示在主姓名下方。 */
-export function secondaryName(person: Person, locale: Locale): string {
-  const other: Locale = locale === 'zh' ? 'en' : 'zh';
-  const zh = person.name.zh.trim();
-  const en = person.name.en.trim();
-  return zh && en && zh !== en ? person.name[other] : '';
-}
-
 function headingTag(level: CardHeadingLevel): 'h2' | 'h3' {
   return level === 2 ? 'h2' : 'h3';
 }
 
 /**
- * One person in a list: photo or monogram, office title, name in the visitor's language with the other one beneath,
- * and affiliation. The name links to the person's own page, which has the bio and contact links, and the link
+ * One person in a list, in English only like all of Our People: photo or monogram, office title, name and affiliation. The name links to the person's own page, which has the bio and contact links, and the link
  * stretches over the whole card.
- * 列表中的一位成员：照片或姓名首字、职位头衔、访问者语言的姓名（下方附另一种语言）以及专业或单位。
+ * 列表中的一位成员，与 "我们的团队" 的其他内容一样只显示英文：照片或姓名首字、职位头衔、姓名以及专业或单位。
  * 姓名链接到该成员的个人页面（简介与联系方式在那里），链接覆盖整张卡片。
  */
 export function PersonCard(props: { person: Person; locale: Locale; headingLevel?: CardHeadingLevel }) {
   const { person, locale } = props;
   const Heading = headingTag(props.headingLevel ?? 3);
-  const otherLocale: Locale = locale === 'zh' ? 'en' : 'zh';
   const name = txt(person.name, locale);
   const nameLang = fallbackLang(person.name, locale);
-  const otherName = secondaryName(person, locale);
   const displayTitle = personDisplayTitle(person);
   const affiliation = txt(person.affiliation, locale);
 
@@ -56,15 +44,10 @@ export function PersonCard(props: { person: Person; locale: Locale; headingLevel
           {txt(displayTitle, locale)}
         </p>
         <Heading class="person__name" lang={nameLang}>
-          <a class="person__link" href={localePath(locale, personPath(person.id))}>
+          <a class="person__link" href={sitePath(personPath(person.id))}>
             {name}
           </a>
         </Heading>
-        {otherName && (
-          <p class="muted small" lang={localeTag(otherLocale)}>
-            {otherName}
-          </p>
-        )}
         {affiliation && (
           <p class="person__affiliation" lang={fallbackLang(person.affiliation, locale)}>
             {affiliation}

@@ -1,12 +1,11 @@
-import { isSafeHttpUrl, localeTag, personDisplayTitle, personInitials, type Locale, type Person } from '@msc-web/content';
+import { isSafeHttpUrl, personDisplayTitle, personInitials, type Person } from '@msc-web/content';
 import type { PageContext } from '../../context';
 import { Icon } from '../../components/Icon';
 import { MediaImage, fallbackLang, txt } from '../../components/common';
 import { RichText } from '../../components/RichText';
 import { COMMON, t } from '../../i18n/strings';
 import { peoplePageLabel, peoplePageOfSection } from '../../layout/navigation';
-import { PEOPLE_PAGE_PATHS, localePath } from '../../routing/paths';
-import { secondaryName } from '../PersonCard';
+import { PEOPLE_PAGE_PATHS, sitePath } from '../../routing/paths';
 import { PEOPLE } from '../strings';
 
 /**
@@ -18,12 +17,10 @@ import { PEOPLE } from '../strings';
  */
 export function PersonPage({ ctx, person }: { ctx: PageContext; person: Person }) {
   const { locale } = ctx;
-  const other: Locale = locale === 'zh' ? 'en' : 'zh';
   const page = peoplePageOfSection(person.section);
   const name = txt(person.name, locale);
   const nameLang = fallbackLang(person.name, locale);
   const title = personDisplayTitle(person);
-  const otherName = secondaryName(person, locale);
   const affiliation = txt(person.affiliation, locale);
   const bio = txt(person.bio, locale);
   const link = person.linkUrl && isSafeHttpUrl(person.linkUrl) ? person.linkUrl : null;
@@ -31,7 +28,7 @@ export function PersonPage({ ctx, person }: { ctx: PageContext; person: Person }
     <>
       <header class="page-hero">
         <div class="container">
-          <a class="backlink" href={localePath(locale, PEOPLE_PAGE_PATHS[page])}>
+          <a class="backlink" href={sitePath(PEOPLE_PAGE_PATHS[page])}>
             <Icon name="arrow" />
             {txt(peoplePageLabel(page), locale)}
           </a>
@@ -41,11 +38,6 @@ export function PersonPage({ ctx, person }: { ctx: PageContext; person: Person }
           <h1 class="page-hero__title" lang={nameLang}>
             {name}
           </h1>
-          {otherName && (
-            <p class="page-hero__lead" lang={localeTag(other)}>
-              {otherName}
-            </p>
-          )}
         </div>
       </header>
       <section class="section">

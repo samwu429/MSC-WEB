@@ -38,6 +38,13 @@ describe.skipIf(!sqlite)('site shell', () => {
     return { status: response.status, html: await response.text() };
   }
 
+  async function redirect(path: string): Promise<{ status: number; location: string | null }> {
+    const ctx = testExecutionContext();
+    const response = await app.request(path, { redirect: 'manual' }, test.env, ctx);
+    await ctx.settle();
+    return { status: response.status, location: response.headers.get('location') };
+  }
+
   async function saveSettings(settings: unknown): Promise<void> {
     await test.d1.db
       .prepare("INSERT INTO settings (key, value, updated_at, updated_by) VALUES ('site', ?, ?, 'mem_president')")
@@ -45,110 +52,124 @@ describe.skipIf(!sqlite)('site shell', () => {
       .run();
   }
 
-  describe('404 page', () => {
-    it('keeps the language switch of /en//evil.example on this site', async () => {
-      const { status, html } = await get('/en//evil.example');
-      expect(status).toBe(404);
-      expect(html).not.toMatch(/href="\/\/[^"]*"/);
-      expect(html).toContain('<a class="lang-switch" href="/evil.example" hreflang="zh-CN" lang="zh-CN">');
-      expect(html).toContain('<a href="/evil.example" hreflang="zh-CN" lang="zh-CN">中文</a>');
-      expect(html).toContain('<link rel="canonical" href="https://utmmsc.com/en/evil.example"/>');
+  describe('old English addresses', () => {
+    it.each([
+      { path: '/en', location: '/' },
+      { path: '/en/events?type=academic', location: '/events?type=academic' },
+      { path: '/en/people/presidium', location: '/people/presidium' },
+    ])('moves $path permanently to $location', async ({ path, location }) => {
+      expect(await redirect(path)).toEqual({ status: 301, location });
     });
 
-    it.each([
-      { path: '/nothing-here', lang: 'zh-CN', title: '页面不存在', home: '/' },
-      { path: '/en/nothing-here', lang: 'en-CA', title: 'Page not found', home: '/en' },
-    ])('renders $path in its language with a way home', async ({ path, lang, title, home }) => {
-      const { status, html } = await get(path);
+    it('reaches the home page from /en/ through the trailing-slash redirect', async () => {
+      const first = await redirect('/en/');
+      expect(first.status).toBe(301);
+      expect(new URL(first.location ?? '', 'http://localhost').pathname).toBe('/en');
+      expect(await redirect('/en')).toEqual({ status: 301, location: '/' });
+    });
+
+    it('keeps /en//evil.example on this site', async () => {
+      expect(await redirect('/en//evil.example')).toEqual({ status: 301, location: '/evil.example' });
+    });
+  });
+
+  describe('404 page', () => {
+    it('renders in English with the Chinese beneath and a way home', async () => {
+      const { status, html } = await get('/nothing-here');
       expect(status).toBe(404);
-      expect(html).toContain(`<html lang="${lang}">`);
-      expect(html).toContain(`<h1 class="section-title">${title}</h1>`);
-      expect(html).toContain(`<a class="btn btn--primary" href="${home}">`);
+      expect(html).toContain('<html lang="en-CA">');
+      expect(html).toContain('<h1 class="section-title">Page not found<span class="zh" lang="zh-CN">页面不存在</span></h1>');
+      expect(html).toContain('<p class="section-lead zh-text" lang="zh-CN">你访问的页面不存在，可能已被移动或删除。</p>');
+      expect(html).toContain('<a class="btn btn--primary" href="/">');
       expect(html).toContain('<meta name="robots" content="noindex"/>');
+      expect(html).not.toContain('hreflang');
     });
   });
 
   describe('500 page', () => {
-    it.each([
-      { path: '/en/about?from=mail', lang: 'en-CA', canonical: 'https://utmmsc.com/en/about', switchHref: '/about?from=mail', explore: 'Explore' },
-      { path: '/about?from=mail', lang: 'zh-CN', canonical: 'https://utmmsc.com/about', switchHref: '/en/about?from=mail', explore: '浏览' },
-    ])('renders $path like every other page when the database fails', async ({ path, lang, canonical, switchHref, explore }) => {
+    it('renders like every other page when the database fails', async () => {
       vi.spyOn(console, 'error').mockImplementation(() => undefined);
       test.close();
       test = createTestEnv({ PUBLIC_ORIGIN: 'https://utmmsc.com/' });
       test.d1.exec('DROP TABLE settings');
 
-      const { status, html } = await get(path);
+      const { status, html } = await get('/about?from=mail');
       expect(status).toBe(500);
-      expect(html).toContain(`<html lang="${lang}">`);
-      expect(html).toContain(`<link rel="canonical" href="${canonical}"/>`);
+      expect(html).toContain('<html lang="en-CA">');
+      expect(html).toContain('<link rel="canonical" href="https://utmmsc.com/about"/>');
       expect(html).not.toContain('https://utmmsc.com//');
-      expect(html).toContain(`class="lang-switch" href="${switchHref}"`);
+      expect(html).toContain('<h1 class="section-title">Something went wrong<span class="zh" lang="zh-CN">页面出错了</span></h1>');
       const footer = footerOf(html);
-      expect(footer).toContain(`<h2>${explore}</h2>`);
+      expect(footer).toContain('<h2>Explore<span class="zh" lang="zh-CN">浏览</span></h2>');
       expect(occurrences(footer, 'class="footer-col"')).toBe(2);
     });
   });
 
+  describe('header', () => {
+    it('has no language switch and no alternate-language links', async () => {
+      const html = (await get('/events?type=academic')).html;
+      expect(headerOf(html)).not.toContain('lang-switch');
+      expect(html).not.toContain('hreflang');
+      expect(html).not.toContain('href="/en');
+    });
+  });
+
   describe('footer', () => {
-    it.each([
-      { path: '/', contact: '联系我们' },
-      { path: '/en', contact: 'Contact' },
-    ])('leaves the Contact column out of $path until a contact detail is set', async ({ path, contact }) => {
-      const before = footerOf((await get(path)).html);
+    it('leaves the Contact column out until a contact detail is set', async () => {
+      const before = footerOf((await get('/')).html);
       expect(occurrences(before, 'class="footer-col"')).toBe(2);
-      expect(before).not.toContain(contact);
+      expect(before).not.toContain('Contact');
       expect(before).not.toContain('<h3');
 
       await saveSettings({ contact: { email: 'hello@utmmsc.com' } });
-      const after = footerOf((await get(path)).html);
+      const after = footerOf((await get('/')).html);
       expect(occurrences(after, 'class="footer-col"')).toBe(3);
-      expect(after).toContain(`<h2>${contact}</h2>`);
+      expect(after).toContain('<h2>Contact<span class="zh" lang="zh-CN">联系我们</span></h2>');
       expect(after).toContain('<a href="mailto:hello@utmmsc.com">hello@utmmsc.com</a>');
     });
 
-    it.each([
-      { path: '/', label: '干部登录' },
-      { path: '/en/events', label: 'Officer sign-in' },
-    ])('links $path to the editing backend at /admin/ in either language', async ({ path, label }) => {
+    it.each(['/', '/events'])('links %s to the editing backend at /admin/', async (path) => {
       const footer = footerOf((await get(path)).html);
-      expect(footer).toMatch(new RegExp(`<a class="footer-admin" href="/admin/" rel="nofollow"><svg[^]*?</svg>${label}</a>`));
+      expect(footer).toMatch(/<a class="footer-admin" href="\/admin\/" rel="nofollow"><svg[^]*?<\/svg>Officer sign-in<\/a>/);
     });
   });
 
   describe('editor links', () => {
-    beforeEach(async () => {
+    it('keeps a page path as entered', async () => {
       await saveSettings({
         announcement: { enabled: true, text: { zh: '中秋晚会报名开始', en: '' }, url: '/events/2026-10-mid' },
         join: { url: '/about' },
       });
-    });
-
-    it('sends English visitors to the English page of a site path', async () => {
-      const { html } = await get('/en/reviews');
-      expect(html).toContain('<a href="/en/events/2026-10-mid" class="link-arrow">');
-      expect(footerOf(html)).toContain('<a href="/en/about">Join us</a>');
-
-      const home = (await get('/en')).html;
-      expect(home).toContain('<a class="btn btn--gold" href="/en/about">');
-      expect(occurrences(home, 'href="/about"')).toBe(0);
-
-      const about = (await get('/en/about')).html;
-      expect(about).toContain('<a class="btn btn--primary" href="/en/about">');
-    });
-
-    it('keeps the path as entered on Chinese pages', async () => {
       const { html } = await get('/reviews');
       expect(html).toContain('<a href="/events/2026-10-mid" class="link-arrow">');
-      expect(footerOf(html)).toContain('<a href="/about">加入我们</a>');
+      expect(footerOf(html)).toContain('<a href="/about">Join us</a>');
       expect((await get('/')).html).toContain('<a class="btn btn--gold" href="/about">');
+      expect((await get('/about')).html).toContain('<a class="btn btn--primary" href="/about">');
     });
 
-    it('marks an announcement shown in the other language with its lang', async () => {
-      const english = headerOf((await get('/en/events')).html);
-      expect(english).toContain('<span lang="zh-CN">中秋晚会报名开始</span>');
-      const chinese = headerOf((await get('/events')).html);
-      expect(chinese).toContain('<span>中秋晚会报名开始</span>');
+    it('points a link written for the old English pages at the page itself', async () => {
+      await saveSettings({
+        announcement: { enabled: true, text: { zh: '中秋晚会报名开始', en: '' }, url: '/en/events/2026-10-mid' },
+        join: { url: '/en/about' },
+      });
+      const { html } = await get('/reviews');
+      expect(html).toContain('<a href="/events/2026-10-mid" class="link-arrow">');
+      expect(footerOf(html)).toContain('<a href="/about">Join us</a>');
+      const home = (await get('/')).html;
+      expect(home).toContain('<a class="btn btn--gold" href="/about">');
+      expect(home).not.toContain('href="/en/');
+    });
+
+    it('marks an announcement written only in Chinese with its lang', async () => {
+      await saveSettings({ announcement: { enabled: true, text: { zh: '中秋晚会报名开始', en: '' }, url: '' } });
+      expect(headerOf((await get('/events')).html)).toContain('<div class="announcement__text"><p lang="zh-CN">中秋晚会报名开始</p></div>');
+    });
+
+    it('shows the Chinese of an announcement under the English', async () => {
+      await saveSettings({ announcement: { enabled: true, text: { zh: '中秋晚会报名开始', en: 'Mid-Autumn sign-up is open' }, url: '' } });
+      expect(headerOf((await get('/events')).html)).toContain(
+        '<div class="announcement__text"><p>Mid-Autumn sign-up is open</p><p class="zh-text" lang="zh-CN">中秋晚会报名开始</p></div>',
+      );
     });
   });
 
@@ -157,20 +178,9 @@ describe.skipIf(!sqlite)('site shell', () => {
       announcement: { enabled: true, text: { zh: '公告', en: 'Notice' }, url: 'https://forms.example.com/mid-autumn' },
       join: { url: '/UTMMSC/' },
     });
-    const { html } = await get('/en');
+    const { html } = await get('/');
     expect(html).toContain('<a href="https://forms.example.com/mid-autumn" class="link-arrow">');
     expect(html).toContain('<a class="btn btn--gold" href="/UTMMSC/">');
     expect(footerOf(html)).toContain('<a href="/UTMMSC/">Join us</a>');
-  });
-
-  describe('language switch', () => {
-    it.each([
-      { path: '/events?type=academic', href: '/en/events?type=academic', lang: 'en', label: 'English' },
-      { path: '/en/events?type=academic', href: '/events?type=academic', lang: 'zh-CN', label: '中文' },
-    ])('marks both links on $path with the language they lead to', async ({ path, href, lang, label }) => {
-      const header = headerOf((await get(path)).html);
-      expect(header).toContain(`<a class="lang-switch" href="${href}" hreflang="${lang}" lang="${lang}">`);
-      expect(header).toContain(`<a href="${href}" hreflang="${lang}" lang="${lang}">${label}</a>`);
-    });
   });
 });

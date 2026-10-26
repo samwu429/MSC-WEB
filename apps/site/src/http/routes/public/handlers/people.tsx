@@ -53,9 +53,9 @@ export const departmentsPage = peopleGroupPage('departments');
 /** /people/:id：一位正在显示的成员的个人页面；隐藏的成员、不存在或格式不正确的编号均返回未找到。 */
 export const personPage: PageHandler = async (c, locale) => {
   const id = c.req.param('id');
-  if (!isPersonId(id)) return renderNotFound(c, locale);
+  if (!isPersonId(id)) return renderNotFound(c);
   const [ctx, person] = await Promise.all([loadPageContext(c, locale), findVisiblePerson(c.env.DB, id)]);
-  if (!person) return renderNotFound(c, locale);
+  if (!person) return renderNotFound(c);
   const description = [txt(personDisplayTitle(person), locale), txt(person.affiliation, locale)].filter(Boolean).join(' · ');
   return renderPage(
     c,

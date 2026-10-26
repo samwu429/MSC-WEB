@@ -1,18 +1,20 @@
 import type { PageContext } from '../../context';
 import { Icon, type IconName } from '../../components/Icon';
-import { SectionHeading } from '../../components/common';
+import { Bi, BiText, SectionHeading, type Copy } from '../../components/common';
 import { COMMON, t } from '../../i18n/strings';
 import { HOME } from '../strings';
 
-function AccessCard(props: { icon: IconName; title: string; text: string; href: string; action: string; actionIcon: IconName; primary?: boolean }) {
+function AccessCard(props: { icon: IconName; title: Copy; text: Copy; href: string; action: string; actionIcon: IconName; primary?: boolean }) {
   return (
     <article class="card">
       <div class="card__body">
         <div class="pillar__icon">
           <Icon name={props.icon} />
         </div>
-        <h3 class="card__title">{props.title}</h3>
-        <p class="pillar__text">{props.text}</p>
+        <h3 class="card__title">
+          <Bi text={props.title} />
+        </h3>
+        <BiText text={props.text} class="pillar__text" />
         <div class="btn-row">
           <a class={`btn ${props.primary ? 'btn--primary' : 'btn--ghost'}`} href={props.href}>
             <Icon name={props.actionIcon} />
@@ -37,14 +39,14 @@ export function MemberAppSection({ ctx }: { ctx: PageContext }) {
         <SectionHeading
           id="home-member-app"
           eyebrow={t(HOME, 'memberAppEyebrow', locale)}
-          title={t(HOME, 'memberAppTitle', locale)}
-          lead={t(HOME, 'memberAppLead', locale)}
+          title={HOME.memberAppTitle}
+          lead={HOME.memberAppLead}
         />
         <div class="grid grid--2">
           <AccessCard
             icon="globe"
-            title={t(HOME, 'memberAppWebTitle', locale)}
-            text={t(HOME, 'memberAppWebText', locale)}
+            title={HOME.memberAppWebTitle}
+            text={HOME.memberAppWebText}
             href={links.memberApp}
             action={t(COMMON, 'openMemberNetwork', locale)}
             actionIcon="arrow"
@@ -52,8 +54,8 @@ export function MemberAppSection({ ctx }: { ctx: PageContext }) {
           />
           <AccessCard
             icon="phone"
-            title={t(HOME, 'memberAppAndroidTitle', locale)}
-            text={t(HOME, 'memberAppAndroidText', locale)}
+            title={HOME.memberAppAndroidTitle}
+            text={HOME.memberAppAndroidText}
             href={links.android}
             action={t(COMMON, 'downloadAndroid', locale)}
             actionIcon="download"

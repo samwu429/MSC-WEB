@@ -26,8 +26,8 @@ export function ContactSection({ ctx }: { ctx: PageContext }) {
         <SectionHeading
           id="about-contact"
           eyebrow={t(ABOUT, 'contactEyebrow', locale)}
-          title={t(ABOUT, 'contactTitle', locale)}
-          lead={t(ABOUT, 'contactLead', locale)}
+          title={ABOUT.contactTitle}
+          lead={ABOUT.contactLead}
         />
         <div class="info-list">
           {contact.email && (

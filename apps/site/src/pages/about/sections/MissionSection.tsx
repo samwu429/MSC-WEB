@@ -1,7 +1,6 @@
 import type { PageContext } from '../../context';
 import { Icon } from '../../components/Icon';
-import { SectionHeading, fallbackLang, txt } from '../../components/common';
-import { RichText } from '../../components/RichText';
+import { Bi, BiRichText, BiText, SectionHeading } from '../../components/common';
 import { t } from '../../i18n/strings';
 import { STATIC_PHOTOS, STATIC_PHOTO_SIZE } from '../../home/static-photos';
 import { ABOUT } from '../strings';
@@ -27,14 +26,18 @@ export function MissionSection({ ctx }: { ctx: PageContext }) {
           />
         </figure>
         <div>
-          <SectionHeading id="about-mission" eyebrow={t(ABOUT, 'missionEyebrow', locale)} title={t(ABOUT, 'missionTitle', locale)} />
+          <SectionHeading id="about-mission" eyebrow={t(ABOUT, 'missionEyebrow', locale)} title={ABOUT.missionTitle} />
           <div class="grid">
-            <RichText text={txt(ctx.settings.about.mission, locale)} lang={fallbackLang(ctx.settings.about.mission, locale)} />
+            <div>
+              <BiRichText text={ctx.settings.about.mission} />
+            </div>
             <div class="notice notice--integrity" role="note">
               <Icon name="shield" />
               <div>
-                <strong>{t(ABOUT, 'integrityTitle', locale)}</strong>
-                <p>{t(ABOUT, 'integrityText', locale)}</p>
+                <strong>
+                  <Bi text={ABOUT.integrityTitle} />
+                </strong>
+                <BiText text={ABOUT.integrityText} />
               </div>
             </div>
           </div>

@@ -45,39 +45,37 @@ describe.skipIf(!sqlite)('events pages', () => {
     seedEvent(test.d1, { slug: 'secret-plan', startsAt: '2026-11-01T18:00', status: 'draft', title: { zh: '草稿活动', en: 'Draft event' } });
   }
 
-  it('lists upcoming events earliest first and past events separately, in Chinese', async () => {
+  it('lists upcoming events earliest first and past events separately, in English with the Chinese beneath', async () => {
     seedTypicalEvents();
     const { status, html } = await get('/events');
     expect(status).toBe(200);
-    expect(html).toContain('<html lang="zh-CN">');
+    expect(html).toContain('<html lang="en-CA">');
+    expect(html).toContain('Upcoming events<span class="zh" lang="zh-CN">近期活动</span>');
     const { upcoming, past } = sections(html);
     expect(upcoming.indexOf('/events/study-jam')).toBeGreaterThan(0);
     expect(upcoming.indexOf('/events/study-jam')).toBeLessThan(upcoming.indexOf('/events/mid-autumn-night'));
     expect(upcoming).toContain('chip chip--ongoing');
     expect(upcoming).not.toContain('/events/welcome-week');
+    expect(upcoming).toContain('<a class="card__link" href="/events/mid-autumn-night">Mid-Autumn Night<span class="zh" lang="zh-CN">中秋晚会</span></a>');
     expect(past).toContain('/events/welcome-week');
-    expect(past).toContain('迎新周');
+    expect(past).toContain('Welcome Week<span class="zh" lang="zh-CN">迎新周</span>');
     expect(html).not.toContain('secret-plan');
-    expect(html).not.toContain('草稿活动');
+    expect(html).not.toContain('Draft event');
+    expect(html).not.toContain('href="/en');
     expect(html.match(/<h1[ >]/g)).toHaveLength(1);
     expect(html).not.toMatch(/ style=|<script/);
   });
 
-  it('renders the list in English under /en', async () => {
-    seedTypicalEvents();
-    const { status, html } = await get('/en/events');
-    expect(status).toBe(200);
-    expect(html).toContain('<html lang="en-CA">');
-    expect(html).toContain('Upcoming events');
-    expect(html).toContain('href="/en/events/mid-autumn-night"');
-    expect(html).toContain('Mid-Autumn Night');
-    expect(html).not.toContain('Draft event');
+  it('moves the old English list to the root and keeps the query', async () => {
+    const response = await app.request('/en/events?type=academic', {}, test.env, testExecutionContext());
+    expect(response.status).toBe(301);
+    expect(response.headers.get('location')).toBe('/events?type=academic');
   });
 
   it('shows empty states when there are no events', async () => {
     const { html } = await get('/events');
-    expect(html).toContain('暂时没有即将举行的活动');
-    expect(html).toContain('还没有往期活动');
+    expect(html).toContain('<strong>No upcoming events right now<span class="zh" lang="zh-CN">暂时没有即将举行的活动</span></strong>');
+    expect(html).toContain('<strong>No past events yet<span class="zh" lang="zh-CN">还没有往期活动</span></strong>');
     expect(html).not.toContain('class="pager"');
   });
 
@@ -90,7 +88,7 @@ describe.skipIf(!sqlite)('events pages', () => {
     const first = sections((await get('/events')).html).past;
     expect(first.match(/class="card card--link"/g)).toHaveLength(12);
     expect(first).toContain('href="/events?page=2#past-events"');
-    expect(first).toContain('第 1 页，共 2 页');
+    expect(first).toContain('Page 1 of 2');
     expect(first.indexOf('/events/talk-14')).toBeLessThan(first.indexOf('/events/talk-13'));
 
     const second = sections((await get('/events?page=2')).html).past;
@@ -108,7 +106,7 @@ describe.skipIf(!sqlite)('events pages', () => {
 
     const beyond = sections((await get('/events?page=9')).html).past;
     expect(beyond).not.toContain('class="card card--link"');
-    expect(beyond).toContain('这一页没有更多活动');
+    expect(beyond).toContain('There are no more events on this page<span class="zh" lang="zh-CN">这一页没有更多活动</span>');
     expect(beyond).toContain('href="/events?page=2#past-events"');
   });
 
@@ -148,22 +146,26 @@ describe.skipIf(!sqlite)('events pages', () => {
 
     const { status, html } = await get('/events/mid-autumn-night');
     expect(status).toBe(200);
-    expect(html).toContain('<h1 class="page-hero__title" id="event-title">中秋晚会</h1>');
-    expect(html).toContain('<meta name="description" content="一起赏月、吃月饼。"/>');
+    expect(html).toContain('<h1 class="page-hero__title" id="event-title">Mid-Autumn Night<span class="zh" lang="zh-CN">中秋晚会</span></h1>');
+    expect(html).toContain('<p class="lead page-hero__lead">Mooncakes under the full moon.</p><p class="lead page-hero__lead zh-text" lang="zh-CN">一起赏月、吃月饼。</p>');
+    expect(html).toContain('<meta name="description" content="Mooncakes under the full moon."/>');
     expect(html).toContain(`<meta property="og:image" content="https://utmmsc.com/media/${COVER}"/>`);
     expect(html).toContain(`class="detail__cover" src="/media/${COVER}"`);
     expect(html).toContain('chip chip--upcoming');
-    expect(html).toContain('学生中心');
+    expect(html).toContain('Student Centre');
+    // The body has no English, so it shows in Chinese once, marked as Chinese.
+    // 正文没有英文，因此只以中文显示一次，并标记为中文。
+    expect(html).toContain('<div class="prose" lang="zh-CN"><p>欢迎所有同学。</p>');
+    expect(html).not.toContain('prose zh-text');
     expect(html).toContain('href="https://example.com/info"');
     expect(html).toContain(`<a href="/media/${PHOTO}">`);
-    expect(html).toContain('<figcaption>去年的合影</figcaption>');
+    expect(html).toContain('<figcaption>Last year</figcaption>');
     expect(html).toContain('href="https://forms.example.com/mid-autumn"');
+    expect(html).toContain('<a class="backlink" href="/events">');
 
-    const english = (await get('/en/events/mid-autumn-night')).html;
-    expect(english).toContain('Mid-Autumn Night');
-    expect(english).toContain('<figcaption>Last year</figcaption>');
-    expect(english).toContain('href="/en/events"');
-    expect(english).toContain('欢迎所有同学。');
+    const old = await app.request('/en/events/mid-autumn-night', {}, test.env, testExecutionContext());
+    expect(old.status).toBe(301);
+    expect(old.headers.get('location')).toBe('/events/mid-autumn-night');
   });
 
   it('drops registration once an event has ended and describes it by its body when there is no summary', async () => {
@@ -183,7 +185,7 @@ describe.skipIf(!sqlite)('events pages', () => {
 
   it('answers 404 for drafts, unknown slugs and malformed slugs', async () => {
     seedEvent(test.d1, { slug: 'secret-plan', startsAt: '2026-11-01T18:00', status: 'draft' });
-    for (const path of ['/events/secret-plan', '/en/events/secret-plan', '/events/nothing-here', '/events/Not_A_Slug']) {
+    for (const path of ['/events/secret-plan', '/events/nothing-here', '/events/Not_A_Slug']) {
       const { status, html } = await get(path);
       expect(status, path).toBe(404);
       expect(html).toContain('noindex');
@@ -200,7 +202,7 @@ describe.skipIf(!sqlite)('events pages', () => {
     }
   });
 
-  it('marks event text shown in the other language with its lang, on cards and on the event page', async () => {
+  it('shows event text without English in Chinese with its lang, on cards and on the event page', async () => {
     seedEvent(test.d1, {
       slug: 'mid-autumn-night',
       startsAt: '2026-11-05T18:30',
@@ -211,24 +213,19 @@ describe.skipIf(!sqlite)('events pages', () => {
     });
     seedEvent(test.d1, { slug: 'study-jam', startsAt: '2026-11-06T10:00', title: { zh: '', en: 'Study Jam' }, location: { zh: '图书馆', en: 'Library' } });
 
-    const list = (await get('/en/events')).html;
-    expect(list).toContain('<h3 class="card__title" lang="zh-CN"><a class="card__link" href="/en/events/mid-autumn-night">中秋晚会</a></h3>');
+    const list = (await get('/events')).html;
+    expect(list).toContain('<h3 class="card__title"><a class="card__link" href="/events/mid-autumn-night"><span lang="zh-CN">中秋晚会</span></a></h3>');
     expect(list).toContain('<p class="card__text" lang="zh-CN">一起赏月。</p>');
+    expect(list).not.toContain('card__text zh-text');
     expect(occurrences(list, '<span class="meta__item" lang="zh-CN">')).toBe(1);
-    expect(list).toContain('<h3 class="card__title"><a class="card__link" href="/en/events/study-jam">Study Jam</a></h3>');
+    // English with no Chinese shows the English alone.
+    // 只有英文时只显示英文。
+    expect(list).toContain('<h3 class="card__title"><a class="card__link" href="/events/study-jam">Study Jam</a></h3>');
 
-    const chineseList = (await get('/events')).html;
-    expect(chineseList).toContain('<h3 class="card__title" lang="en-CA"><a class="card__link" href="/events/study-jam">Study Jam</a></h3>');
-    expect(chineseList).toContain('<h3 class="card__title"><a class="card__link" href="/events/mid-autumn-night">中秋晚会</a></h3>');
-
-    const detail = (await get('/en/events/mid-autumn-night')).html;
-    expect(detail).toContain('<h1 class="page-hero__title" id="event-title" lang="zh-CN">中秋晚会</h1>');
+    const detail = (await get('/events/mid-autumn-night')).html;
+    expect(detail).toContain('<h1 class="page-hero__title" id="event-title"><span lang="zh-CN">中秋晚会</span></h1>');
     expect(detail).toContain('<p class="lead page-hero__lead" lang="zh-CN">一起赏月。</p>');
     expect(detail).toContain('<div class="prose" lang="zh-CN"><p>欢迎所有同学。</p></div>');
     expect(detail).toContain('<span class="info-list__value" lang="zh-CN">学生中心</span>');
-
-    const chineseDetail = (await get('/events/mid-autumn-night')).html;
-    expect(chineseDetail).toContain('<h1 class="page-hero__title" id="event-title">中秋晚会</h1>');
-    expect(chineseDetail).toContain('<span class="info-list__value">学生中心</span>');
   });
 });

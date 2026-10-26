@@ -3,21 +3,25 @@ import { torontoWallTime, type Locale, type SiteSettings, type WallTime } from '
 import type { Env } from '../env';
 import type { AppEnv } from '../http/context';
 import { loadSiteSettings } from '../infrastructure/d1/settings';
-import { splitLocalePath } from './routing/paths';
+import { rooted } from './routing/paths';
 
 /**
- * Everything the shared page shell needs and most pages use: language, the locale-neutral path for the language
- * switch, site settings for the header and footer, Toronto "now" for upcoming/past, and outbound links.
- * 共用页面外壳所需、且大多数页面都会用到的信息：语言、供语言切换使用的与语言无关的路径、页眉页脚所需的网站设置、
+ * Everything the shared page shell needs and most pages use: the main language (English, with Chinese shown beside
+ * it), the page path, site settings for the header and footer, Toronto "now" for upcoming/past, and outbound links.
+ * 共用页面外壳所需、且大多数页面都会用到的信息：主要语言（英文，中文附在旁边）、页面路径、页眉页脚所需的网站设置、
  * 用于判断即将开始或已结束的多伦多当前时间，以及站外链接。
  */
+/** The language pages are written in; Chinese is shown beside it where a page offers both. */
+/** 页面书写使用的语言；页面提供两种语言时，中文显示在旁边。 */
+export const SITE_LOCALE: Locale = 'en';
+
 export interface PageContext {
   locale: Locale;
-  /** Locale-neutral path, such as "/events/2026-10-mid-autumn". */
-  /** 与语言无关的路径，例如 "/events/2026-10-mid-autumn"。 */
+  /** The page path, such as "/events/2026-10-mid-autumn". */
+  /** 页面路径，例如 "/events/2026-10-mid-autumn"。 */
   path: string;
-  /** The query string with its "?", kept when switching language. */
-  /** 带 "?" 的查询字符串，切换语言时保留。 */
+  /** The query string with its "?". */
+  /** 带 "?" 的查询字符串。 */
   search: string;
   settings: SiteSettings;
   now: WallTime;
@@ -41,11 +45,10 @@ export function buildPageContext(
   settings: SiteSettings,
   now: Date,
 ): PageContext {
-  const { path } = splitLocalePath(url.pathname);
   const wall = torontoWallTime(now);
   return {
     locale,
-    path,
+    path: rooted(url.pathname),
     search: url.search,
     settings,
     now: wall,

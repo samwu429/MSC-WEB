@@ -3,7 +3,7 @@ import { Icon } from '../../components/Icon';
 import { txt } from '../../components/common';
 import { COMMON, t } from '../../i18n/strings';
 import { peoplePageLabel } from '../../layout/navigation';
-import { PEOPLE_PAGES, PEOPLE_PAGE_PATHS, SECTION_PATHS, localePath, type PeoplePageKey } from '../../routing/paths';
+import { PEOPLE_PAGES, PEOPLE_PAGE_PATHS, SECTION_PATHS, sitePath, type PeoplePageKey } from '../../routing/paths';
 import { PEOPLE } from '../strings';
 
 /** The h1 of each Our People page, which also labels the page's main section. */
@@ -40,7 +40,7 @@ export function PeopleSectionHero({ ctx, page }: { ctx: PageContext; page: Peopl
   return (
     <header class="page-hero">
       <div class="container">
-        <a class="backlink" href={localePath(locale, SECTION_PATHS.people)}>
+        <a class="backlink" href={sitePath(SECTION_PATHS.people)}>
           <Icon name="arrow" />
           {t(COMMON, 'navPeople', locale)}
         </a>
@@ -51,7 +51,7 @@ export function PeopleSectionHero({ ctx, page }: { ctx: PageContext; page: Peopl
         <p class="page-hero__lead">{peoplePageLead(page, ctx)}</p>
         <nav class="tabs" aria-label={t(PEOPLE, 'subnavLabel', locale)}>
           {PEOPLE_PAGES.map((other) => (
-            <a class="tab" href={localePath(locale, PEOPLE_PAGE_PATHS[other])} aria-current={other === page ? 'page' : undefined}>
+            <a class="tab" href={sitePath(PEOPLE_PAGE_PATHS[other])} aria-current={other === page ? 'page' : undefined}>
               {txt(peoplePageLabel(other), locale)}
             </a>
           ))}

@@ -1,13 +1,13 @@
 import { EVENT_CATEGORY_LABELS, formatTimeRange, timeStatus, wallDateOf, type SiteEvent } from '@msc-web/content';
 import type { PageContext } from '../context';
-import { DateBox, MediaImage, MetaItem, StatusChip, fallbackLang, txt } from '../components/common';
+import { Bi, DateBox, MediaImage, MetaItem, StatusChip, fallbackLang, txt } from '../components/common';
 import { BookMark } from '../components/Icon';
-import { localePath } from '../routing/paths';
+import { sitePath } from '../routing/paths';
 
-/** The address of an event's own page in the visitor's language. */
-/** 活动详情页在访问者语言下的地址。 */
-export function eventHref(event: Pick<SiteEvent, 'slug'>, ctx: PageContext): string {
-  return localePath(ctx.locale, `/events/${event.slug}`);
+/** The address of an event's own page. */
+/** 活动详情页的地址。 */
+export function eventHref(event: Pick<SiteEvent, 'slug'>): string {
+  return sitePath(`/events/${event.slug}`);
 }
 
 /**
@@ -21,7 +21,8 @@ export function EventCard(props: { event: SiteEvent; ctx: PageContext }) {
   const { locale } = ctx;
   const status = timeStatus(event.startsAt, event.endsAt, ctx.now);
   const location = txt(event.location, locale);
-  const summary = txt(event.summary, locale);
+  const summary = event.summary.en.trim() || event.summary.zh.trim();
+  const summaryZh = event.summary.en.trim() ? event.summary.zh.trim() : '';
   return (
     <article class="card card--link">
       <div class="card__media">
@@ -43,9 +44,9 @@ export function EventCard(props: { event: SiteEvent; ctx: PageContext }) {
         <div>
           <DateBox date={wallDateOf(event.startsAt)} locale={locale} />
         </div>
-        <h3 class="card__title" lang={fallbackLang(event.title, locale)}>
-          <a class="card__link" href={eventHref(event, ctx)}>
-            {txt(event.title, locale)}
+        <h3 class="card__title">
+          <a class="card__link" href={eventHref(event)}>
+            <Bi text={event.title} />
           </a>
         </h3>
         <div class="meta">
@@ -55,6 +56,11 @@ export function EventCard(props: { event: SiteEvent; ctx: PageContext }) {
         {summary && (
           <p class="card__text" lang={fallbackLang(event.summary, locale)}>
             {summary}
+          </p>
+        )}
+        {summaryZh && summaryZh !== summary && (
+          <p class="card__text zh-text" lang="zh-CN">
+            {summaryZh}
           </p>
         )}
       </div>

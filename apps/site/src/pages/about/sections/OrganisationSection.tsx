@@ -9,26 +9,27 @@ import {
   type LocalizedText,
 } from '@msc-web/content';
 import type { PageContext } from '../../context';
-import { SectionHeading, txt } from '../../components/common';
+import { Bi, BiText, SectionHeading, type Copy } from '../../components/common';
 import { t } from '../../i18n/strings';
-import { SECTION_PATHS, localePath } from '../../routing/paths';
+import { SECTION_PATHS, sitePath } from '../../routing/paths';
 import { ABOUT } from '../strings';
 
-function UnitGroup(props: { id: string; title: string; text: string; units: { name: LocalizedText; text: LocalizedText }[]; ctx: PageContext }) {
-  const { locale } = props.ctx;
+function UnitGroup(props: { id: string; title: Copy; text: Copy; units: { name: LocalizedText; text: LocalizedText }[] }) {
   return (
     <div class="dept" role="group" aria-labelledby={props.id}>
       <div class="dept__head">
         <h3 class="dept__name" id={props.id}>
-          {props.title}
+          <Bi text={props.title} />
         </h3>
-        <p class="dept__text">{props.text}</p>
+        <BiText text={props.text} class="dept__text" />
       </div>
       <div class="dept__people">
         {props.units.map((unit) => (
           <div class="pillar">
-            <h4 class="pillar__title">{txt(unit.name, locale)}</h4>
-            <p class="pillar__text">{txt(unit.text, locale)}</p>
+            <h4 class="pillar__title">
+              <Bi text={unit.name} />
+            </h4>
+            <BiText text={unit.text} class="pillar__text" />
           </div>
         ))}
       </div>
@@ -49,23 +50,21 @@ export function OrganisationSection({ ctx }: { ctx: PageContext }) {
         <SectionHeading
           id="about-organisation"
           eyebrow={t(ABOUT, 'organisationEyebrow', locale)}
-          title={t(ABOUT, 'organisationTitle', locale)}
-          lead={t(ABOUT, 'organisationLead', locale)}
-          link={{ href: localePath(locale, SECTION_PATHS.people), label: t(ABOUT, 'organisationLink', locale) }}
+          title={ABOUT.organisationTitle}
+          lead={ABOUT.organisationLead}
+          link={{ href: sitePath(SECTION_PATHS.people), label: t(ABOUT, 'organisationLink', locale) }}
         />
         <UnitGroup
           id="about-presidium"
-          title={txt(PEOPLE_SECTION_LABELS.presidium, locale)}
-          text={t(ABOUT, 'presidiumText', locale)}
+          title={PEOPLE_SECTION_LABELS.presidium}
+          text={ABOUT.presidiumText}
           units={PRESIDIUM_POSITIONS.map((position) => ({ name: PRESIDIUM_POSITION_LABELS[position], text: PRESIDIUM_POSITION_DUTIES[position] }))}
-          ctx={ctx}
         />
         <UnitGroup
           id="about-departments"
-          title={t(ABOUT, 'departmentsTitle', locale)}
-          text={t(ABOUT, 'departmentsText', locale)}
+          title={ABOUT.departmentsTitle}
+          text={ABOUT.departmentsText}
           units={DEPARTMENTS.map((department) => ({ name: DEPARTMENT_LABELS[department], text: DEPARTMENT_DESCRIPTIONS[department] }))}
-          ctx={ctx}
         />
       </div>
     </section>

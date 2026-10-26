@@ -1,6 +1,6 @@
 import type { SiteDocument } from '@msc-web/content';
 import type { PageContext } from '../context';
-import { PageHero, fallbackLang, txt } from '../components/common';
+import { PageHero } from '../components/common';
 import { hasContactDetails } from '../components/contact';
 import { COMMON, t } from '../i18n/strings';
 import { ContactSection } from './sections/ContactSection';
@@ -16,9 +16,8 @@ export function AboutPage({ ctx, documents }: { ctx: PageContext; documents: Sit
     <>
       <PageHero
         eyebrow={t(COMMON, 'siteName', locale)}
-        title={t(ABOUT, 'heroTitle', locale)}
-        lead={txt(ctx.settings.hero.intro, locale)}
-        leadLang={fallbackLang(ctx.settings.hero.intro, locale)}
+        title={ABOUT.heroTitle}
+        lead={ctx.settings.hero.intro}
       />
       <MissionSection ctx={ctx} />
       <MembershipSection ctx={ctx} />

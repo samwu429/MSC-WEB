@@ -1,7 +1,7 @@
 import { DOCUMENT_CATEGORY_LABELS, formatLongDate, mediaUrl, type SiteDocument } from '@msc-web/content';
 import type { PageContext } from '../../context';
 import { Icon } from '../../components/Icon';
-import { EmptyState, SectionHeading, fallbackLang, txt } from '../../components/common';
+import { Bi, EmptyState, SectionHeading } from '../../components/common';
 import { t } from '../../i18n/strings';
 import { groupDocuments } from '../document-groups';
 import { ABOUT } from '../strings';
@@ -17,13 +17,15 @@ export function RecordsSection({ ctx, documents }: { ctx: PageContext; documents
         <SectionHeading
           id="about-records"
           eyebrow={t(ABOUT, 'recordsEyebrow', locale)}
-          title={t(ABOUT, 'recordsTitle', locale)}
-          lead={t(ABOUT, 'recordsLead', locale)}
+          title={ABOUT.recordsTitle}
+          lead={ABOUT.recordsLead}
         />
         {groups.length > 0 ? (
           groups.map((group) => (
             <div class="doc-group">
-              <h3>{txt(DOCUMENT_CATEGORY_LABELS[group.category], locale)}</h3>
+              <h3>
+                <Bi text={DOCUMENT_CATEGORY_LABELS[group.category]} />
+              </h3>
               <ul class="doc-list">
                 {group.documents.map((document) => (
                   <li class="doc-item">
@@ -31,8 +33,8 @@ export function RecordsSection({ ctx, documents }: { ctx: PageContext; documents
                       <Icon name="file" />
                     </span>
                     <span class="doc-item__body">
-                      <a class="doc-item__title" href={mediaUrl(document.mediaKey)} type="application/pdf" lang={fallbackLang(document.title, locale)}>
-                        {txt(document.title, locale)}
+                      <a class="doc-item__title" href={mediaUrl(document.mediaKey)} type="application/pdf">
+                        <Bi text={document.title} />
                       </a>
                       <span class="doc-item__meta">
                         {formatLongDate(document.publishedOn, locale)} · {t(ABOUT, 'pdf', locale)}
@@ -44,7 +46,7 @@ export function RecordsSection({ ctx, documents }: { ctx: PageContext; documents
             </div>
           ))
         ) : (
-          <EmptyState title={t(ABOUT, 'recordsEmptyTitle', locale)} text={t(ABOUT, 'recordsEmptyText', locale)} />
+          <EmptyState title={ABOUT.recordsEmptyTitle} text={ABOUT.recordsEmptyText} />
         )}
       </div>
     </section>

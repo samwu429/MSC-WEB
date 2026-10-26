@@ -18,7 +18,7 @@ describe.skipIf(!sqlite)('sitemap.xml', () => {
     return [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((match) => match[1] ?? '');
   }
 
-  it('lists every section, the Our People pages, visible people, published events and reviewed courses in both languages', async () => {
+  it('lists every section, the Our People pages, visible people, published events and reviewed courses, once each', async () => {
     test.d1.exec(`
       INSERT INTO people (id, section, position, name_zh, name_en, visible, created_at, updated_at) VALUES
         ('per_wang', 'presidium', 'president', '王会长', 'Wang Hui', 1, '2026-09-01T00:00:00.000Z', '2026-09-05T00:00:00.000Z'),
@@ -38,33 +38,23 @@ describe.skipIf(!sqlite)('sitemap.xml', () => {
     expect(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBe(true);
     expect(locs(xml)).toEqual([
       'https://utmmsc.com/',
-      'https://utmmsc.com/en',
       'https://utmmsc.com/events',
-      'https://utmmsc.com/en/events',
       'https://utmmsc.com/reviews',
-      'https://utmmsc.com/en/reviews',
       'https://utmmsc.com/people',
-      'https://utmmsc.com/en/people',
       'https://utmmsc.com/about',
-      'https://utmmsc.com/en/about',
       'https://utmmsc.com/people/presidium',
-      'https://utmmsc.com/en/people/presidium',
       'https://utmmsc.com/people/advisors',
-      'https://utmmsc.com/en/people/advisors',
       'https://utmmsc.com/people/departments',
-      'https://utmmsc.com/en/people/departments',
       'https://utmmsc.com/people/per_wang',
-      'https://utmmsc.com/en/people/per_wang',
       'https://utmmsc.com/events/2026-10-mid-autumn',
-      'https://utmmsc.com/en/events/2026-10-mid-autumn',
       'https://utmmsc.com/reviews/csc108h5',
-      'https://utmmsc.com/en/reviews/csc108h5',
     ]);
     expect(xml).toContain('<loc>https://utmmsc.com/events/2026-10-mid-autumn</loc>\n    <lastmod>2026-10-04T08:00:00.000Z</lastmod>');
     expect(xml).toContain('<loc>https://utmmsc.com/reviews/csc108h5</loc>\n    <lastmod>2026-10-12T00:00:00.000Z</lastmod>');
-    expect(xml).toContain('<xhtml:link rel="alternate" hreflang="en" href="https://utmmsc.com/en/reviews/csc108h5"/>');
+    expect(xml).not.toContain('xhtml');
+    expect(xml).not.toContain('/en/');
     expect(xml).toContain('<loc>https://utmmsc.com/people/per_wang</loc>\n    <lastmod>2026-09-05T00:00:00.000Z</lastmod>');
-    expect(xml.match(/<lastmod>/g)).toHaveLength(6);
+    expect(xml.match(/<lastmod>/g)).toHaveLength(3);
   });
 
   it('builds absolute addresses from the configured origin and escapes them', async () => {

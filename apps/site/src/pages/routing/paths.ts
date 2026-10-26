@@ -1,38 +1,34 @@
-import type { Locale } from '@msc-web/content';
-
 /**
- * Chinese pages live at the root and English pages under /en, with the same path after the prefix: /events and
- * /en/events are one page in two languages. Page code works with the locale-neutral path ("/events") and turns it
- * into a link with localePath.
- * 中文页面位于根路径，英文页面位于 /en 之下，前缀之后的路径相同：/events 与 /en/events 是同一页面的两种语言。
- * 页面代码使用与语言无关的路径（"/events"），再用 localePath 转换成链接。
+ * The site has one set of pages at the root, written in English with the Chinese beside it. Pages used to have an
+ * English copy under /en; those addresses now redirect to the same path at the root, so old links keep working.
+ * Page code builds links with sitePath.
+ * 网站只有一套位于根路径的页面，以英文书写并附上中文。页面过去在 /en 之下有英文版本；这些地址现在会重定向到根路径下的相同路径，
+ * 旧链接因此依然有效。页面代码使用 sitePath 生成链接。
  */
 
-export const ENGLISH_PREFIX = '/en';
+export const LEGACY_ENGLISH_PREFIX = '/en';
 
 /**
  * A path with exactly one leading slash. A request for /en//evil.example must never turn into the link
  * "//evil.example", which a browser reads as another host.
  * 只带一个前导斜杠的路径。对 /en//evil.example 的请求绝不能变成链接 "//evil.example"，浏览器会把它当作另一个主机。
  */
-function rooted(path: string): string {
+export function rooted(path: string): string {
   return `/${path.replace(/^\/+/, '')}`;
 }
 
-/** "/events" in a locale: "/events" or "/en/events". The home page is "/" or "/en". */
-/** 某语言下的 "/events"：即 "/events" 或 "/en/events"。首页为 "/" 或 "/en"。 */
-export function localePath(locale: Locale, path: string): string {
-  const clean = rooted(path);
-  if (locale === 'zh') return clean;
-  return clean === '/' ? ENGLISH_PREFIX : `${ENGLISH_PREFIX}${clean}`;
+/** The link for a page path: "/events", or "/" for the home page. */
+/** 页面路径对应的链接："/events"；首页为 "/"。 */
+export function sitePath(path: string): string {
+  return rooted(path);
 }
 
-/** The locale and the locale-neutral path of a request path. */
-/** 请求路径对应的语言与语言无关的路径。 */
-export function splitLocalePath(pathname: string): { locale: Locale; path: string } {
-  if (pathname === ENGLISH_PREFIX || pathname === `${ENGLISH_PREFIX}/`) return { locale: 'en', path: '/' };
-  if (pathname.startsWith(`${ENGLISH_PREFIX}/`)) return { locale: 'en', path: rooted(pathname.slice(ENGLISH_PREFIX.length)) };
-  return { locale: 'zh', path: rooted(pathname) };
+/** Where an old /en address now lives, such as "/events" for "/en/events"; null for any other path. */
+/** 旧的 /en 地址现在的位置，例如 "/en/events" 对应 "/events"；其他路径返回 null。 */
+export function legacyEnglishTarget(pathname: string): string | null {
+  if (pathname === LEGACY_ENGLISH_PREFIX || pathname === `${LEGACY_ENGLISH_PREFIX}/`) return '/';
+  if (pathname.startsWith(`${LEGACY_ENGLISH_PREFIX}/`)) return rooted(pathname.slice(LEGACY_ENGLISH_PREFIX.length));
+  return null;
 }
 
 /** Site sections, for the header navigation and the current-page marker. */
@@ -86,18 +82,17 @@ export function sectionOfPath(path: string): NavSection | null {
 }
 
 /**
- * The href of a link an editor entered, such as the announcement or join link. A site path of a public page is
- * moved into the visitor's language; anything else (another site, /UTMMSC/, /download/, /media/, /admin, or a
- * path already under /en) is left as entered.
- * 编辑者填写的链接（例如公告链接或加入链接）的 href。指向公开页面的本站路径会换成访问者的语言；其他链接
- * （外部网站、/UTMMSC/、/download/、/media/、/admin，或已经位于 /en 之下的路径）保持原样。
+ * The href of a link an editor entered, such as the announcement or join link. A link written for the old English
+ * pages (/en/events) points at the page itself; anything else is left as entered.
+ * 编辑者填写的链接（例如公告链接或加入链接）的 href。为旧英文页面写的链接（/en/events）改为指向页面本身；其他链接保持原样。
  */
-export function siteHref(locale: Locale, url: string): string {
+export function siteHref(url: string): string {
   if (!url.startsWith('/') || url.startsWith('//')) return url;
   const cut = url.search(/[?#]/);
   const path = cut === -1 ? url : url.slice(0, cut);
-  if (sectionOfPath(path) === null) return url;
-  return `${localePath(locale, path)}${cut === -1 ? '' : url.slice(cut)}`;
+  const target = legacyEnglishTarget(path);
+  if (target === null || sectionOfPath(target) === null) return url;
+  return `${target}${cut === -1 ? '' : url.slice(cut)}`;
 }
 
 /** Adds query parameters to a path, skipping empty values. */

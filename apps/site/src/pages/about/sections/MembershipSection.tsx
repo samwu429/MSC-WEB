@@ -1,6 +1,6 @@
 import type { PageContext } from '../../context';
 import { Icon, type IconName } from '../../components/Icon';
-import { SectionHeading } from '../../components/common';
+import { Bi, BiText, SectionHeading } from '../../components/common';
 import { COMMON, t } from '../../i18n/strings';
 import { siteHref } from '../../routing/paths';
 import { ABOUT } from '../strings';
@@ -19,7 +19,7 @@ export function MembershipSection({ ctx }: { ctx: PageContext }) {
   return (
     <section class="section section--alt" aria-labelledby="about-membership">
       <div class="container">
-        <SectionHeading id="about-membership" eyebrow={t(ABOUT, 'membershipEyebrow', locale)} title={t(ABOUT, 'membershipTitle', locale)} />
+        <SectionHeading id="about-membership" eyebrow={t(ABOUT, 'membershipEyebrow', locale)} title={ABOUT.membershipTitle} />
         <div class="grid">
           <div class="pillars">
             {FACTS.map((fact) => (
@@ -27,13 +27,15 @@ export function MembershipSection({ ctx }: { ctx: PageContext }) {
                 <div class="pillar__icon">
                   <Icon name={fact.icon} />
                 </div>
-                <h3 class="pillar__title">{t(ABOUT, fact.title, locale)}</h3>
-                <p class="pillar__text">{t(ABOUT, fact.text, locale)}</p>
+                <h3 class="pillar__title">
+                  <Bi text={ABOUT[fact.title]} />
+                </h3>
+                <BiText text={ABOUT[fact.text]} class="pillar__text" />
               </div>
             ))}
           </div>
           <div class="btn-row">
-            <a class="btn btn--primary" href={siteHref(locale, ctx.settings.join.url)}>
+            <a class="btn btn--primary" href={siteHref(ctx.settings.join.url)}>
               {t(COMMON, 'joinUs', locale)}
             </a>
             <a class="btn btn--ghost" href={ctx.links.memberApp}>

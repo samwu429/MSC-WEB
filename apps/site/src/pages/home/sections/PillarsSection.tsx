@@ -1,15 +1,15 @@
 import { isSafeHttpUrl } from '@msc-web/content';
 import type { PageContext } from '../../context';
 import { Icon, type IconName } from '../../components/Icon';
-import { SectionHeading } from '../../components/common';
+import { Bi, BiText, SectionHeading, type Copy } from '../../components/common';
 import { t } from '../../i18n/strings';
-import { SECTION_PATHS, localePath, withQuery } from '../../routing/paths';
+import { SECTION_PATHS, sitePath, withQuery } from '../../routing/paths';
 import { HOME } from '../strings';
 
 interface Pillar {
   icon: IconName;
-  title: string;
-  text: string;
+  title: Copy;
+  text: Copy;
   link: { href: string; label: string; external: boolean } | null;
 }
 
@@ -21,30 +21,30 @@ interface Pillar {
 export function PillarsSection({ ctx }: { ctx: PageContext }) {
   const { locale } = ctx;
   const githubUrl = ctx.settings.contact.githubUrl;
-  const eventsPath = localePath(locale, SECTION_PATHS.events);
+  const eventsPath = sitePath(SECTION_PATHS.events);
   const pillars: Pillar[] = [
     {
       icon: 'note',
-      title: t(HOME, 'pillarReviewsTitle', locale),
-      text: t(HOME, 'pillarReviewsText', locale),
-      link: { href: localePath(locale, SECTION_PATHS.reviews), label: t(HOME, 'pillarReviewsLink', locale), external: false },
+      title: HOME.pillarReviewsTitle,
+      text: HOME.pillarReviewsText,
+      link: { href: sitePath(SECTION_PATHS.reviews), label: t(HOME, 'pillarReviewsLink', locale), external: false },
     },
     {
       icon: 'cap',
-      title: t(HOME, 'pillarAcademicTitle', locale),
-      text: t(HOME, 'pillarAcademicText', locale),
+      title: HOME.pillarAcademicTitle,
+      text: HOME.pillarAcademicText,
       link: { href: withQuery(eventsPath, { type: 'academic' }), label: t(HOME, 'pillarAcademicLink', locale), external: false },
     },
     {
       icon: 'users',
-      title: t(HOME, 'pillarExtracurricularTitle', locale),
-      text: t(HOME, 'pillarExtracurricularText', locale),
+      title: HOME.pillarExtracurricularTitle,
+      text: HOME.pillarExtracurricularText,
       link: { href: withQuery(eventsPath, { type: 'extracurricular' }), label: t(HOME, 'pillarExtracurricularLink', locale), external: false },
     },
     {
       icon: 'code',
-      title: t(HOME, 'pillarTechnologyTitle', locale),
-      text: t(HOME, 'pillarTechnologyText', locale),
+      title: HOME.pillarTechnologyTitle,
+      text: HOME.pillarTechnologyText,
       link: githubUrl && isSafeHttpUrl(githubUrl) ? { href: githubUrl, label: t(HOME, 'pillarTechnologyLink', locale), external: true } : null,
     },
   ];
@@ -55,8 +55,8 @@ export function PillarsSection({ ctx }: { ctx: PageContext }) {
         <SectionHeading
           id="home-pillars"
           eyebrow={t(HOME, 'pillarsEyebrow', locale)}
-          title={t(HOME, 'pillarsTitle', locale)}
-          lead={t(HOME, 'pillarsLead', locale)}
+          title={HOME.pillarsTitle}
+          lead={HOME.pillarsLead}
         />
         <div class="pillars">
           {pillars.map((pillar) => (
@@ -64,8 +64,10 @@ export function PillarsSection({ ctx }: { ctx: PageContext }) {
               <div class="pillar__icon">
                 <Icon name={pillar.icon} />
               </div>
-              <h3 class="pillar__title">{pillar.title}</h3>
-              <p class="pillar__text">{pillar.text}</p>
+              <h3 class="pillar__title">
+                <Bi text={pillar.title} />
+              </h3>
+              <BiText text={pillar.text} class="pillar__text" />
               {pillar.link && (
                 <p class="pillar__text">
                   <a

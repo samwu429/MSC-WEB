@@ -62,44 +62,52 @@ describe.skipIf(!sqlite)('About page', () => {
     `);
   }
 
-  it.each([
-    { path: '/about', title: '关于我们', mission: 'UTMMSC 致力于丰富多伦多大学的学业、娱乐、社交与文化生活。', empty: '暂无公开记录', office: '监督审计副主席' },
-    {
-      path: '/en/about',
-      title: 'About UTMMSC',
-      mission: 'UTMMSC contributes to the educational, recreational, social and cultural life of the University.',
-      empty: 'No records published yet',
-      office: 'Vice-President Supervision &amp; Audit',
-    },
-  ])('renders $path from an empty database with the default copy and no records', async ({ path, title, mission, empty, office }) => {
-    const html = await render(path);
+  it('renders /about from an empty database with the default copy in English and Chinese and no records', async () => {
+    const html = await render('/about');
+    const mission = 'UTMMSC contributes to the educational, recreational, social and cultural life of the University.';
 
     expect(occurrences(html, '<h1')).toBe(1);
-    expect(html).toContain(`<h1 class="page-hero__title">${title}</h1>`);
+    expect(html).toContain('<html lang="en-CA">');
+    expect(html).toContain('<h1 class="page-hero__title">About UTMMSC<span class="zh" lang="zh-CN">关于我们</span></h1>');
     expect(html).toContain(`<meta name="description" content="${mission}"/>`);
-    expect(html).toContain(`<p>${mission}</p>`);
+    expect(html).toContain(`<div class="prose"><p>${mission}</p>`);
+    expect(html).toContain('<div class="prose zh-text" lang="zh-CN"><p>UTMMSC 致力于丰富多伦多大学的学业、娱乐、社交与文化生活。</p>');
     expect(html).toContain('class="notice notice--integrity"');
     expect(html).toContain('src="/static/photos/community.jpg"');
-    expect(html).toContain(empty);
-    expect(html).toContain(office);
+    expect(html).toContain('<strong>No records published yet<span class="zh" lang="zh-CN">暂无公开记录</span></strong>');
+    expect(html).toContain('<h4 class="pillar__title">Vice-President Supervision &amp; Audit<span class="zh" lang="zh-CN">监督审计副主席</span></h4>');
     expect(occurrences(html, 'class="pillar"')).toBe(4 + 4 + 5);
     expect(html).toContain('href="/UTMMSC/"');
+    expect(html).toContain('<a class="section-link link-arrow" href="/people">');
     expect(html).not.toContain('aria-labelledby="about-contact"');
+  });
+
+  it('sends the old English address to /about', async () => {
+    const ctx = testExecutionContext();
+    const response = await app.request('/en/about', {}, test.env, ctx);
+    await ctx.settle();
+    expect(response.status).toBe(301);
+    expect(new URL(response.headers.get('location') ?? '', 'https://utmmsc.com').pathname).toBe('/about');
   });
 
   it('lists visible records grouped by category and shows the contact details', async () => {
     await seed();
     const html = await render('/about');
 
-    const groups = ['<h3>章程</h3>', '<h3>年度公开账目</h3>', '<h3>会议记录</h3>'].map((heading) => html.indexOf(heading));
+    const groups = [
+      '<h3>Constitution<span class="zh" lang="zh-CN">章程</span></h3>',
+      '<h3>Annual Public Accounts<span class="zh" lang="zh-CN">年度公开账目</span></h3>',
+      '<h3>Meeting Records<span class="zh" lang="zh-CN">会议记录</span></h3>',
+    ].map((heading) => html.indexOf(heading));
     expect(groups.every((index) => index > 0)).toBe(true);
     expect([...groups].sort((a, b) => a - b)).toEqual(groups);
-    expect(html).not.toContain('<h3>选举结果</h3>');
+    expect(html).not.toContain('Election Results');
+    expect(html).not.toContain('Hidden results');
     expect(html).not.toContain('隐藏的选举结果');
 
-    expect(html).toContain(`<a class="doc-item__title" href="${mediaUrl(PDF_KEY)}" type="application/pdf">联盟章程</a>`);
-    expect(html).toContain('2026年9月1日');
-    expect(html).toContain('十月会议纪要 &lt;b&gt;');
+    expect(html).toContain(`<a class="doc-item__title" href="${mediaUrl(PDF_KEY)}" type="application/pdf">Constitution<span class="zh" lang="zh-CN">联盟章程</span></a>`);
+    expect(html).toContain('September 1, 2026 · PDF');
+    expect(html).toContain('October minutes &lt;b&gt;<span class="zh" lang="zh-CN">十月会议纪要 &lt;b&gt;</span>');
 
     expect(html).toContain('aria-labelledby="about-contact"');
     expect(html).toContain('<a href="mailto:hello@utmmsc.com">hello@utmmsc.com</a>');
@@ -113,15 +121,7 @@ describe.skipIf(!sqlite)('About page', () => {
     expect(section).toContain('href="/download/android"');
   });
 
-  it('formats record dates for English readers', async () => {
-    await seed();
-    const html = await render('/en/about');
-    expect(html).toContain('<h3>Constitution</h3>');
-    expect(html).toContain('September 1, 2026');
-    expect(html).toContain('October minutes &lt;b&gt;');
-  });
-
-  it('marks the intro, mission and record titles shown in the other language with their lang', async () => {
+  it('shows the intro, mission and record titles written in one language once, with lang only on Chinese', async () => {
     await seed();
     test.d1.exec("UPDATE documents SET title_en = '' WHERE id = 'constitution'");
     await test.d1.db
@@ -129,15 +129,14 @@ describe.skipIf(!sqlite)('About page', () => {
       .bind(JSON.stringify({ hero: { intro: { zh: '联盟简介。', en: '' } }, about: { mission: { zh: '', en: 'Our mission.' } } }))
       .run();
 
-    const english = await render('/en/about');
-    expect(english).toContain('<p class="page-hero__lead" lang="zh-CN">联盟简介。</p>');
-    expect(english).toContain('<div class="prose"><p>Our mission.</p></div>');
-    expect(english).toContain(`<a class="doc-item__title" href="${mediaUrl(PDF_KEY)}" type="application/pdf" lang="zh-CN">联盟章程</a>`);
-    expect(english).toContain(`<a class="doc-item__title" href="${mediaUrl(PDF_KEY)}" type="application/pdf">2025 Public Accounts</a>`);
-
-    const chinese = await render('/about');
-    expect(chinese).toContain('<p class="page-hero__lead">联盟简介。</p>');
-    expect(chinese).toContain('<div class="prose" lang="en-CA"><p>Our mission.</p></div>');
-    expect(chinese).toContain(`<a class="doc-item__title" href="${mediaUrl(PDF_KEY)}" type="application/pdf">联盟章程</a>`);
+    const html = await render('/about');
+    expect(html).toContain('<p class="page-hero__lead" lang="zh-CN">联盟简介。</p>');
+    expect(html).not.toContain('page-hero__lead zh-text');
+    expect(html).toContain('<div class="prose"><p>Our mission.</p></div>');
+    expect(html).not.toContain('<div class="prose zh-text"');
+    expect(html).toContain(`<a class="doc-item__title" href="${mediaUrl(PDF_KEY)}" type="application/pdf"><span lang="zh-CN">联盟章程</span></a>`);
+    expect(html).toContain(
+      `<a class="doc-item__title" href="${mediaUrl(PDF_KEY)}" type="application/pdf">2025 Public Accounts<span class="zh" lang="zh-CN">2025 年度公开账目</span></a>`,
+    );
   });
 });

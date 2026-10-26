@@ -15,9 +15,9 @@ UTMMSC 国语学者联盟的公开网站（https://utmmsc.com/），附带供干
 | About | `/about` | Mission, membership, structure, academic integrity, and the public records the constitution requires |
 | Backend | `/admin/` | Editing for all of the above, site copy, contact links, sponsors and partners, and the announcement bar |
 
-Every page exists in Chinese (default) and English (`/en/...`).
+The site has one version of every page, in English with the Chinese in small type beneath headings and text. Our People is English only. Old `/en/...` addresses redirect to the same page.
 
-每个页面都有中文（默认）与英文（`/en/...`）两个版本。
+每个页面只有一个版本：以英文为主，标题与正文下方以小字附上中文。"我们的团队" 只显示英文。旧的 `/en/...` 地址会重定向到同一页面。
 
 ## Who can edit
 

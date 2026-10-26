@@ -12,7 +12,7 @@ import { renderPage } from '../../../../pages/render';
 import { CourseView, courseMeta } from '../../../../pages/reviews/course/CourseView';
 import { ReviewsView, reviewsMeta } from '../../../../pages/reviews/list/ReviewsView';
 import { selectTerm, termTabs } from '../../../../pages/reviews/review-terms';
-import { localePath } from '../../../../pages/routing/paths';
+import { sitePath } from '../../../../pages/routing/paths';
 import type { PageHandler } from '../page-handler';
 
 export const reviewsPage: PageHandler = async (c, locale) => {
@@ -33,10 +33,10 @@ export const reviewsPage: PageHandler = async (c, locale) => {
 export const coursePage: PageHandler = async (c, locale) => {
   const segment = c.req.param('course') ?? '';
   const code = segment.toUpperCase();
-  if (!isCourseCode(code)) return renderNotFound(c, locale);
-  if (segment !== courseSlug(code)) return c.redirect(localePath(locale, `/reviews/${courseSlug(code)}`), 301);
+  if (!isCourseCode(code)) return renderNotFound(c);
+  if (segment !== courseSlug(code)) return c.redirect(sitePath(`/reviews/${courseSlug(code)}`), 301);
   const course = await findVisibleCourse(c.env.DB, code);
-  if (!course) return renderNotFound(c, locale);
+  if (!course) return renderNotFound(c);
   const [ctx, sessions] = await Promise.all([loadPageContext(c, locale), listCourseSessions(c.env.DB, course.id)]);
   return renderPage(c, ctx, courseMeta(course, ctx), <CourseView ctx={ctx} course={course} sessions={sessions} />);
 };

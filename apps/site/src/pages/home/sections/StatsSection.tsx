@@ -1,5 +1,6 @@
 import type { Locale } from '@msc-web/content';
 import type { HomeStats } from '../../../infrastructure/d1/public/home';
+import { Bi, type Copy } from '../../components/common';
 import { Icon, type IconName } from '../../components/Icon';
 import { t } from '../../i18n/strings';
 import { HOME } from '../strings';
@@ -10,20 +11,20 @@ import { HOME } from '../strings';
  * 仍为零的数字不显示，新网站因此不会出现 "0 场活动"。会费始终显示，因为 "不收会费"（第 3.4 条）是一项承诺而不是统计数字。
  */
 export function StatsSection({ stats, locale }: { stats: HomeStats; locale: Locale }) {
-  const counts: { value: number; label: string; icon: IconName }[] = [
-    { value: stats.reviewSessions, label: t(HOME, 'statReviewSessions', locale), icon: 'note' },
-    { value: stats.events, label: t(HOME, 'statEvents', locale), icon: 'calendar' },
-    { value: stats.coursesWithReviews, label: t(HOME, 'statCourses', locale), icon: 'cap' },
+  const counts: { value: number; label: Copy; icon: IconName }[] = [
+    { value: stats.reviewSessions, label: HOME.statReviewSessions, icon: 'note' },
+    { value: stats.events, label: HOME.statEvents, icon: 'calendar' },
+    { value: stats.coursesWithReviews, label: HOME.statCourses, icon: 'cap' },
   ];
-  const items: { value: string; label: string; icon: IconName }[] = [
+  const items: { value: string; label: Copy; icon: IconName }[] = [
     ...counts.filter((item) => item.value > 0).map((item) => ({ ...item, value: String(item.value) })),
-    { value: t(HOME, 'statFeeValue', locale), label: t(HOME, 'statFee', locale), icon: 'users' },
+    { value: t(HOME, 'statFeeValue', locale), label: HOME.statFee, icon: 'users' },
   ];
   return (
     <section class="section section--tight" aria-labelledby="home-stats">
       <div class="container">
         <h2 class="stats__title" id="home-stats">
-          {t(HOME, 'statsTitle', locale)}
+          <Bi text={HOME.statsTitle} />
         </h2>
         <div class="stats">
           {items.map((item) => (
@@ -31,7 +32,9 @@ export function StatsSection({ stats, locale }: { stats: HomeStats; locale: Loca
               <Icon name={item.icon} class="stat__icon" />
               <div>
                 <div class="stat__value">{item.value}</div>
-                <div class="stat__label">{item.label}</div>
+                <div class="stat__label">
+                  <Bi text={item.label} />
+                </div>
               </div>
             </div>
           ))}

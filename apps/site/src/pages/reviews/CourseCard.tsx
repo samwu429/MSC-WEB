@@ -1,13 +1,13 @@
 import { courseSlug, type Course, type ReviewSessionDetail } from '@msc-web/content';
 import type { PageContext } from '../context';
-import { fallbackLang, txt } from '../components/common';
-import { localePath } from '../routing/paths';
+import { Bi, BiText } from '../components/common';
+import { sitePath } from '../routing/paths';
 import { SessionActions, SessionLabel, SessionWhen, sessionAnchor } from './session/SessionParts';
 
-/** The address of a course page in the visitor's language: /reviews/csc108h5. */
-/** 课程页面在访问者语言下的地址：/reviews/csc108h5。 */
-export function courseHref(course: Pick<Course, 'code'>, ctx: PageContext): string {
-  return localePath(ctx.locale, `/reviews/${courseSlug(course.code)}`);
+/** The address of a course page: /reviews/csc108h5. */
+/** 课程页面的地址：/reviews/csc108h5。 */
+export function courseHref(course: Pick<Course, 'code'>): string {
+  return sitePath(`/reviews/${courseSlug(course.code)}`);
 }
 
 /**
@@ -17,9 +17,7 @@ export function courseHref(course: Pick<Course, 'code'>, ctx: PageContext): stri
  */
 export function CourseCard(props: { course: Course; sessions: ReviewSessionDetail[]; ctx: PageContext }) {
   const { course, sessions, ctx } = props;
-  const { locale } = ctx;
-  const href = courseHref(course, ctx);
-  const description = txt(course.description, locale);
+  const href = courseHref(course);
   return (
     <article class="course">
       <div class="course__head">
@@ -28,15 +26,11 @@ export function CourseCard(props: { course: Course; sessions: ReviewSessionDetai
             {course.code}
           </a>
         </h3>
-        <p class="course__title" lang={fallbackLang(course.title, locale)}>
-          {txt(course.title, locale)}
+        <p class="course__title">
+          <Bi text={course.title} />
         </p>
       </div>
-      {description && (
-        <p class="course__text" lang={fallbackLang(course.description, locale)}>
-          {description}
-        </p>
-      )}
+      <BiText text={course.description} class="course__text" />
       <div class="course__sessions">
         {sessions.map((session) => (
           <div class="session-row">

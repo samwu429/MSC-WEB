@@ -2,7 +2,7 @@ import { PEOPLE_SECTION_LABELS, type Person } from '@msc-web/content';
 import type { PageContext } from '../../context';
 import { EmptyState, SectionHeading, txt } from '../../components/common';
 import { t } from '../../i18n/strings';
-import { PEOPLE_PAGE_PATHS, localePath } from '../../routing/paths';
+import { PEOPLE_PAGE_PATHS, sitePath } from '../../routing/paths';
 import { PersonCard } from '../../people/PersonCard';
 import { PEOPLE } from '../../people/strings';
 import { HOME } from '../strings';
@@ -23,7 +23,7 @@ export function AdvisorsPreviewSection({ ctx, advisors }: { ctx: PageContext; ad
           eyebrow={t(HOME, 'advisorsEyebrow', locale)}
           title={txt(PEOPLE_SECTION_LABELS.advisor, locale)}
           lead={t(PEOPLE, 'advisorsLead', locale)}
-          link={{ href: localePath(locale, PEOPLE_PAGE_PATHS.advisors), label: t(HOME, 'advisorsLink', locale) }}
+          link={{ href: sitePath(PEOPLE_PAGE_PATHS.advisors), label: t(HOME, 'advisorsLink', locale) }}
         />
         {advisors.length > 0 ? (
           <div class="people-grid">

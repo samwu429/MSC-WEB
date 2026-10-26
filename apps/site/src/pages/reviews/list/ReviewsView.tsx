@@ -1,10 +1,10 @@
 import { termLabel, type Course, type ReviewSessionDetail, type TermKey } from '@msc-web/content';
 import type { PageContext } from '../../context';
 import type { PageMeta } from '../../layout/Document';
-import { EmptyState, PageHero, SectionHeading, fallbackLang, txt } from '../../components/common';
+import { Bi, BiText, EmptyState, PageHero, SectionHeading, txt } from '../../components/common';
 import { Icon } from '../../components/Icon';
 import { COMMON, t } from '../../i18n/strings';
-import { localePath, withQuery } from '../../routing/paths';
+import { sitePath, withQuery } from '../../routing/paths';
 import { CourseCard, courseHref } from '../CourseCard';
 import { REVIEWS } from '../strings';
 
@@ -24,7 +24,7 @@ export interface ReviewsData {
 /** The current term is the plain /reviews address; other terms carry ?term=. */
 /** 当前学期使用不带参数的 /reviews 地址；其他学期带 ?term= 参数。 */
 function termHref(ctx: PageContext, term: TermKey, current: TermKey): string {
-  return localePath(ctx.locale, withQuery('/reviews', { term: term === current ? null : term }));
+  return sitePath(withQuery('/reviews', { term: term === current ? null : term }));
 }
 
 function TermTabs({ ctx, data }: { ctx: PageContext; data: ReviewsData }) {
@@ -45,14 +45,16 @@ function TermTabs({ ctx, data }: { ctx: PageContext; data: ReviewsData }) {
  * under the lead.
  * 章程第 2.3 条：复习是学习辅助，绝不替他人完成计分作业。它位于页首导语之下。
  */
-function IntegrityNotice({ ctx }: { ctx: PageContext }) {
-  const { locale } = ctx;
+function IntegrityNotice() {
   return (
     <div class="notice notice--integrity" role="note">
       <Icon name="shield" />
-      <p>
-        <strong>{t(REVIEWS, 'integrityTitle', locale)}</strong> {t(REVIEWS, 'integrityText', locale)}
-      </p>
+      <div>
+        <strong>
+          <Bi text={REVIEWS.integrityTitle} />
+        </strong>
+        <BiText text={REVIEWS.integrityText} />
+      </div>
     </div>
   );
 }
@@ -65,16 +67,16 @@ export function ReviewsView({ ctx, data }: { ctx: PageContext; data: ReviewsData
   const { locale } = ctx;
   return (
     <>
-      <PageHero eyebrow={t(REVIEWS, 'heroEyebrow', locale)} title={t(COMMON, 'navReviews', locale)} lead={t(REVIEWS, 'heroLead', locale)}>
-        <IntegrityNotice ctx={ctx} />
+      <PageHero eyebrow={t(REVIEWS, 'heroEyebrow', locale)} title={COMMON.navReviews} lead={REVIEWS.heroLead}>
+        <IntegrityNotice />
         <TermTabs ctx={ctx} data={data} />
       </PageHero>
       <section class="section" aria-labelledby={TERM_ID}>
         <div class="container">
           <SectionHeading
             id={TERM_ID}
-            title={txt(termLabel(data.selected), locale)}
-            lead={t(REVIEWS, data.selected === data.current ? 'termLead' : 'otherTermLead', locale)}
+            title={termLabel(data.selected)}
+            lead={REVIEWS[data.selected === data.current ? 'termLead' : 'otherTermLead']}
           />
           {data.termCourses.length > 0 ? (
             <div class="grid grid--2">
@@ -83,13 +85,13 @@ export function ReviewsView({ ctx, data }: { ctx: PageContext; data: ReviewsData
               ))}
             </div>
           ) : (
-            <EmptyState title={t(REVIEWS, 'termEmptyTitle', locale)} text={t(REVIEWS, 'termEmptyText', locale)} />
+            <EmptyState title={REVIEWS.termEmptyTitle} text={REVIEWS.termEmptyText} />
           )}
         </div>
       </section>
       <section class="section section--alt" aria-labelledby={ALL_COURSES_ID}>
         <div class="container">
-          <SectionHeading id={ALL_COURSES_ID} title={t(REVIEWS, 'allCoursesTitle', locale)} lead={t(REVIEWS, 'allCoursesLead', locale)} />
+          <SectionHeading id={ALL_COURSES_ID} title={REVIEWS.allCoursesTitle} lead={REVIEWS.allCoursesLead} />
           {data.allCourses.length > 0 ? (
             <ul class="doc-list grid--3">
               {data.allCourses.map((course) => (
@@ -98,18 +100,18 @@ export function ReviewsView({ ctx, data }: { ctx: PageContext; data: ReviewsData
                     <Icon name="book" />
                   </span>
                   <div class="doc-item__body">
-                    <a class="doc-item__title" href={courseHref(course, ctx)}>
+                    <a class="doc-item__title" href={courseHref(course)}>
                       {course.code}
                     </a>
-                    <span class="doc-item__meta" lang={fallbackLang(course.title, locale)}>
-                      {txt(course.title, locale)}
+                    <span class="doc-item__meta">
+                      <Bi text={course.title} />
                     </span>
                   </div>
                 </li>
               ))}
             </ul>
           ) : (
-            <EmptyState title={t(REVIEWS, 'allCoursesEmpty', locale)} />
+            <EmptyState title={REVIEWS.allCoursesEmpty} />
           )}
         </div>
       </section>

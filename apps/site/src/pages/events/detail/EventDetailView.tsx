@@ -1,10 +1,9 @@
 import { EVENT_CATEGORY_LABELS, formatTimeRange, mediaUrl, timeStatus, type SiteEventDetail } from '@msc-web/content';
 import type { PageContext } from '../../context';
-import { MediaImage, MetaItem, SectionHeading, StatusChip, fallbackLang, txt } from '../../components/common';
+import { Bi, BiRichText, BiText, MediaImage, MetaItem, SectionHeading, StatusChip, fallbackLang, txt } from '../../components/common';
 import { Icon } from '../../components/Icon';
-import { RichText } from '../../components/RichText';
 import { COMMON, t } from '../../i18n/strings';
-import { localePath } from '../../routing/paths';
+import { sitePath } from '../../routing/paths';
 import { EVENTS } from '../strings';
 
 const TITLE_ID = 'event-title';
@@ -28,7 +27,7 @@ function Gallery({ event, ctx }: { event: SiteEventDetail; ctx: PageContext }) {
   const title = txt(event.title, locale);
   return (
     <section aria-labelledby={PHOTOS_ID}>
-      <SectionHeading id={PHOTOS_ID} title={t(EVENTS, 'photosTitle', locale)} />
+      <SectionHeading id={PHOTOS_ID} title={EVENTS.photosTitle} />
       <div class="gallery">
         {event.photos.map((photo, index) => {
           const caption = txt(photo.caption, locale);
@@ -54,7 +53,6 @@ function Gallery({ event, ctx }: { event: SiteEventDetail; ctx: PageContext }) {
 export function EventDetailView({ ctx, event }: { ctx: PageContext; event: SiteEventDetail }) {
   const { locale } = ctx;
   const title = txt(event.title, locale);
-  const summary = txt(event.summary, locale);
   const location = txt(event.location, locale);
   const category = txt(EVENT_CATEGORY_LABELS[event.category], locale);
   const when = formatTimeRange(event.startsAt, event.endsAt, locale, ctx.currentYear);
@@ -64,7 +62,7 @@ export function EventDetailView({ ctx, event }: { ctx: PageContext; event: SiteE
     <article aria-labelledby={TITLE_ID}>
       <header class="page-hero">
         <div class="container">
-          <a class="backlink" href={localePath(locale, '/events')}>
+          <a class="backlink" href={sitePath('/events')}>
             <Icon name="arrow" />
             {t(EVENTS, 'backToEvents', locale)}
           </a>
@@ -74,18 +72,14 @@ export function EventDetailView({ ctx, event }: { ctx: PageContext; event: SiteE
             <span class={`chip chip--${event.category}`}>{category}</span>
             <StatusChip status={status} locale={locale} />
           </div>
-          <h1 class="page-hero__title" id={TITLE_ID} lang={fallbackLang(event.title, locale)}>
-            {title}
+          <h1 class="page-hero__title" id={TITLE_ID}>
+            <Bi text={event.title} />
           </h1>
           <div class="meta">
             <MetaItem icon="calendar" text={when} />
             {location && <MetaItem icon="pin" text={location} lang={fallbackLang(event.location, locale)} />}
           </div>
-          {summary && (
-            <p class="lead page-hero__lead" lang={fallbackLang(event.summary, locale)}>
-              {summary}
-            </p>
-          )}
+          <BiText text={event.summary} class="lead page-hero__lead" />
         </div>
       </header>
       <div class="section">
@@ -93,7 +87,7 @@ export function EventDetailView({ ctx, event }: { ctx: PageContext; event: SiteE
           <div class="detail">
             <div>
               {event.coverKey && <MediaImage class="detail__cover" mediaKey={event.coverKey} alt={title} lang={fallbackLang(event.title, locale)} eager />}
-              <RichText text={txt(event.body, locale)} lang={fallbackLang(event.body, locale)} />
+              <BiRichText text={event.body} />
               {event.photos.length > 0 && (
                 <>
                   <hr />
