@@ -6,7 +6,7 @@ import { COMMON, t } from '../../../../pages/i18n/strings';
 import { PEOPLE_PAGE_SECTIONS, peoplePageLabel } from '../../../../pages/layout/navigation';
 import { renderNotFound } from '../../../../pages/errors/ErrorPages';
 import { PersonPage } from '../../../../pages/people/detail/PersonPage';
-import { PeopleHubPage } from '../../../../pages/people/hub/PeopleHubPage';
+import { AllPeoplePage } from '../../../../pages/people/all/AllPeoplePage';
 import { peoplePageLead } from '../../../../pages/people/layout/PeopleSectionHero';
 import { buildRoster } from '../../../../pages/people/roster';
 import { AdvisorsPage } from '../../../../pages/people/sections/AdvisorsPage';
@@ -17,11 +17,16 @@ import { renderPage } from '../../../../pages/render';
 import { isPersonId, type PeoplePageKey } from '../../../../pages/routing/paths';
 import type { PageHandler } from '../page-handler';
 
-/** /people: the hub linking to the three Our People pages. */
-/** /people：链接到三个 "我们的团队" 页面的入口页。 */
+/** /people: every visible person, the Honorary Advisors first, then the Presidium, then the Department Leads. */
+/** /people：所有正在显示的成员，先荣誉顾问，再主席团，最后部长团。 */
 export const peoplePage: PageHandler = async (c, locale) => {
-  const ctx = await loadPageContext(c, locale);
-  return renderPage(c, ctx, { title: t(COMMON, 'navPeople', locale), description: t(PEOPLE, 'heroLead', locale) }, <PeopleHubPage ctx={ctx} />);
+  const [ctx, people] = await Promise.all([loadPageContext(c, locale), listVisiblePeople(c.env.DB)]);
+  return renderPage(
+    c,
+    ctx,
+    { title: t(COMMON, 'navPeople', locale), description: t(PEOPLE, 'heroLead', locale) },
+    <AllPeoplePage ctx={ctx} roster={buildRoster(people)} />,
+  );
 };
 
 const VIEWS: Record<PeoplePageKey, typeof PresidiumPage> = {

@@ -8,7 +8,7 @@ import type { PeopleRoster } from '../roster';
 export function PresidiumPage({ ctx, roster }: { ctx: PageContext; roster: PeopleRoster }) {
   return (
     <>
-      <PeopleSectionHero ctx={ctx} page="presidium" />
+      <PeopleSectionHero ctx={ctx} view="presidium" />
       <section class="section" aria-labelledby={PEOPLE_TITLE_ID}>
         <div class="container">
           <PresidiumCards presidium={roster.presidium} locale={ctx.locale} headingLevel={2} />

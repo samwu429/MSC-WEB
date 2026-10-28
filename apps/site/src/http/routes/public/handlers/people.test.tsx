@@ -74,24 +74,43 @@ describe.skipIf(!sqlite)('Our People pages', () => {
     expect(main).not.toMatch(/[一-鿿]/);
   }
 
-  describe('hub', () => {
-    it('links to the three pages in menu order, in English only', async () => {
+  describe('everyone', () => {
+    it('lists the Honorary Advisors, then the Presidium, then the Department Leads, in English only', async () => {
+      await seedPeople();
       const main = mainOf(await render('/people'));
-      expect(main).toContain('<h1 class="page-hero__title">Our People</h1>');
-      const links = ['/people/presidium', '/people/advisors', '/people/departments'];
-      const labels = ['Presidium', 'Honorary Advisors', 'Department Leads'];
-      const positions = links.map((link, index) => main.indexOf(`<a class="card__link" href="${link}">${labels[index]}</a>`));
-      expect(positions.every((position) => position > 0)).toBe(true);
-      expect([...positions].sort((a, b) => a - b)).toEqual(positions);
+      expect(main).toContain('<h1 class="page-hero__title" id="people-title">Our People</h1>');
+      const headings = ['people-advisors">Honorary Advisors', 'people-presidium">Presidium', 'people-departments">Department Leads'].map((heading) =>
+        main.indexOf(`<h2 class="section-title" id="${heading}</h2>`),
+      );
+      expect(headings.every((position) => position > 0)).toBe(true);
+      expect([...headings].sort((a, b) => a - b)).toEqual(headings);
+      const people = ['Prof. Chen', 'Wang Hui', 'Li Head', 'Qian Vice'].map((name) => main.indexOf(`>${name}</a>`));
+      expect(people.every((position) => position > 0)).toBe(true);
+      expect([...people].sort((a, b) => a - b)).toEqual(people);
+      expect(main).not.toContain('Hidden');
       expectNoChinese(main);
     });
 
+    it('nests headings under each group: people under h2, department names under h2 as h3', async () => {
+      await seedPeople();
+      const main = mainOf(await render('/people'));
+      expect(main).toContain('<h3 class="person__name"><a class="person__link" href="/people/advisor">Prof. Chen</a></h3>');
+      expect(main).toContain('<h3 class="dept__name" id="dept-academic">Academic Department</h3>');
+      expect(main).toContain('<h4 class="person__name"><a class="person__link" href="/people/head-academic">Li Head</a></h4>');
+      expect(occurrences(main, 'class="dept"')).toBe(5);
+    });
+
+    it('shows every vacancy and the advisors note from an empty database', async () => {
+      const main = mainOf(await render('/people'));
+      expect(main).toContain('Our Honorary Advisors will be announced soon');
+      expect(occurrences(main, 'class="person person--vacant"')).toBe(9);
+    });
+
     it('describes what the Group is made up of, in the lead and the description', async () => {
-      const lead = 'The Group is made up of the Presidium, the leads of its five Departments and its Honorary Advisors, as set out in Article 4 of the constitution.';
+      const lead = 'The Group is made up of its Honorary Advisors, the Presidium and the leads of its five Departments, as set out in Article 4 of the constitution.';
       const html = await render('/people');
       expect(html).toContain(`<p class="page-hero__lead">${lead}</p>`);
       expect(html).toContain(`<meta name="description" content="${lead}"/>`);
-      expect(html).not.toContain('The Group is led by');
     });
   });
 
@@ -260,29 +279,30 @@ describe.skipIf(!sqlite)('Our People pages', () => {
   });
 
   describe('navigation', () => {
-    it('marks the open page in the tabs and in the header dropdown, and its parent as current', async () => {
+    it('switches groups only from the tabs at the top: All, Honorary Advisors, Presidium, Department Leads', async () => {
+      for (const path of ['/people', '/people/advisors', '/people/presidium', '/people/departments']) {
+        const main = mainOf(await render(path));
+        const tabs = main.slice(main.indexOf('<nav class="tabs"'), main.indexOf('</nav>'));
+        const order = ['/people"', '/people/advisors"', '/people/presidium"', '/people/departments"'].map((href) => tabs.indexOf(`href="${href}`));
+        expect(order.every((index) => index >= 0)).toBe(true);
+        expect([...order].sort((a, b) => a - b)).toEqual(order);
+        expect(tabs).toContain(`href="${path}" aria-current="page"`);
+        expect(occurrences(tabs, 'aria-current')).toBe(1);
+        expect(main).not.toContain('class="backlink"');
+      }
+    });
+
+    it('has no Our People dropdown in the header or the phone menu', async () => {
       const html = await render('/people/advisors');
-      expect(html).toContain('<a class="site-nav__link site-nav__link--parent" href="/people" aria-current="true">');
-      expect(html).toContain('<a class="site-nav__menu-link" href="/people/advisors" aria-current="page">Honorary Advisors</a>');
-      expect(html).toContain('<a class="site-nav__menu-link" href="/people/presidium">Presidium</a>');
-      expect(html).toContain('<a class="tab" href="/people/advisors" aria-current="page">Honorary Advisors</a>');
-      expect(html).toContain('<a class="backlink" href="/people">');
+      const header = html.slice(html.indexOf('<header class="site-header"'), html.indexOf('<main'));
+      expect(header).not.toContain('/people/advisors');
+      expect(header).not.toContain('site-nav__menu');
+      expect(header).toContain('<a class="site-nav__link" href="/people" aria-current="true">');
     });
 
-    it('offers the dropdown on every page, in English only, and in the phone menu', async () => {
-      const html = await render('/events');
-      const menu = html.slice(html.indexOf('<div class="site-nav__panel">'));
-      const order = ['/people/presidium', '/people/advisors', '/people/departments'].map((href) => menu.indexOf(`href="${href}"`));
-      expect(order.every((index) => index >= 0)).toBe(true);
-      expect([...order].sort((a, b) => a - b)).toEqual(order);
-      expect(menu.slice(0, menu.indexOf('</div>'))).not.toMatch(/[一-鿿]/);
-      expect(html).toContain('<div class="mobile-nav__sub">');
-      expect(occurrences(html, 'href="/people/departments"')).toBe(2);
-    });
-
-    it('marks the hub itself as the current page', async () => {
+    it('marks Our People itself as the current page on /people', async () => {
       const html = await render('/people');
-      expect(html).toContain('<a class="site-nav__link site-nav__link--parent" href="/people" aria-current="page">');
+      expect(html).toContain('<a class="site-nav__link" href="/people" aria-current="page">');
     });
   });
 });

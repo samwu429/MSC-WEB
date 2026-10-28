@@ -6,14 +6,14 @@ import { sitePath, personPath } from '../routing/paths';
 import { PEOPLE } from './strings';
 
 /**
- * Cards sit directly under a page h1 (level 2), under a section h2 (level 3) or under a department h2 on the
- * Department Leads page (level 3).
- * 卡片直接位于页面 h1 之下（第 2 级）、板块 h2 之下（第 3 级），或位于部长团页面的部门 h2 之下（第 3 级）。
+ * Cards sit directly under a page h1 (level 2), under a section or department h2 (level 3), or under a department
+ * h3 on the page that lists everyone (level 4).
+ * 卡片直接位于页面 h1 之下（第 2 级）、板块或部门 h2 之下（第 3 级），或位于列出所有人的页面中的部门 h3 之下（第 4 级）。
  */
-export type CardHeadingLevel = 2 | 3;
+export type CardHeadingLevel = 2 | 3 | 4;
 
-function headingTag(level: CardHeadingLevel): 'h2' | 'h3' {
-  return level === 2 ? 'h2' : 'h3';
+function headingTag(level: CardHeadingLevel): 'h2' | 'h3' | 'h4' {
+  return level === 2 ? 'h2' : level === 3 ? 'h3' : 'h4';
 }
 
 /**

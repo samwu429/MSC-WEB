@@ -10,7 +10,7 @@
  *
  * Class vocabulary / 类名一览
  *   Shell       .skip-link .announcement .topbar .topbar__inner .topbar__links .site-header .site-header__inner .brand .brand__mark .brand__text .brand__name .brand__sub .header-actions .lang-switch
- *   Navigation  .site-nav .site-nav__item .site-nav__link .site-nav__link--parent .site-nav__menu .site-nav__panel .site-nav__menu-link .mobile-nav .mobile-nav__panel .mobile-nav__sub
+ *   Navigation  .site-nav .site-nav__link .mobile-nav .mobile-nav__panel
  *   Layout      .container .section .section--alt .section--tight .grid .grid--2 .grid--3 .split
  *   Headings    .section-head .eyebrow .section-title .section-lead .section-link .page-hero .page-hero__title .page-hero__lead
  *               (.meta, .notice, .tabs and .backlink inside the purple .page-hero get their own colours)
@@ -117,7 +117,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 :is(.hero__tagline, .lead, .section-lead, .page-hero__lead, .pillar__text, .card__text, .course__text, .dept__text, .ended-lead, .prose).zh-text { color: var(--zh); font-size: 0.75rem; font-weight: 400; line-height: 1.5; }
 p + .zh-text, .prose + .zh-text { margin-top: 2px; }
 .section-lead.zh-text, .page-hero__lead.zh-text { margin-top: 2px; }
-.stat__label .zh, .footer-col h2 .zh, .partner__name .zh, .doc-item__meta .zh, .course__title .zh, .site-nav__menu-link .zh, .mobile-nav__panel .zh, .pillar__title .zh, .card__title .zh, .dept__name .zh { font-size: 0.625rem; }
+.stat__label .zh, .footer-col h2 .zh, .partner__name .zh, .doc-item__meta .zh, .course__title .zh, .mobile-nav__panel .zh, .pillar__title .zh, .card__title .zh, .dept__name .zh { font-size: 0.625rem; }
 .empty .zh { font-size: 0.68rem; }
 .page-hero .zh, .page-hero .zh-text, .hero .zh, .hero .zh-text, .intro-band .zh-text, .announcement .zh-text { color: rgba(255, 255, 255, 0.5); }
 .cta-band .zh, .cta-band .zh-text { color: rgba(29, 11, 51, 0.5); }
@@ -208,17 +208,8 @@ p + .zh-text, .prose + .zh-text { margin-top: 2px; }
 .site-nav__link:hover { color: var(--purple-700); }
 .site-nav__link[aria-current] { color: var(--purple-700); }
 .site-nav__link[aria-current]::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; background: var(--purple-700); }
-.site-nav__item { position: relative; display: flex; }
-.site-nav__link--parent { gap: 3px; }
 .site-nav__label { display: inline-flex; flex-direction: column; line-height: 1.15; }
 .site-nav__label .zh { font-size: 0.6rem; }
-.site-nav__link--parent svg { width: 15px; height: 15px; }
-.site-nav__menu { position: absolute; left: -18px; top: 100%; z-index: 60; min-width: 230px; visibility: hidden; opacity: 0; transition: opacity 0.12s ease, visibility 0.12s; }
-.site-nav__item:hover .site-nav__menu, .site-nav__item:focus-within .site-nav__menu { visibility: visible; opacity: 1; }
-.site-nav__panel { display: grid; padding: 8px 0; background: var(--white); border-top: 3px solid var(--purple-700); box-shadow: 0 12px 28px rgba(43, 17, 73, 0.14); }
-.site-nav__menu-link { display: block; padding: 11px 20px; color: var(--ink); font-size: 0.98rem; font-weight: 600; text-decoration: none; white-space: nowrap; }
-.site-nav__menu-link:hover { background: var(--grey); color: var(--purple-700); }
-.site-nav__menu-link[aria-current="page"] { color: var(--purple-700); background: var(--purple-50); }
 .header-actions { display: none; align-items: center; gap: 10px; margin-left: auto; }
 .mobile-nav { position: relative; margin-left: auto; }
 .mobile-nav > summary { display: inline-flex; flex: none; align-items: center; white-space: nowrap; gap: 8px; padding: 8px 16px; border-radius: 999px; background: var(--purple-700); color: #fff; font-weight: 700; cursor: pointer; list-style: none; }
@@ -227,8 +218,6 @@ p + .zh-text, .prose + .zh-text { margin-top: 2px; }
 .mobile-nav__panel { position: absolute; right: 0; top: calc(100% + 12px); width: min(88vw, 330px); padding: 8px 0; background: var(--white); border-top: 3px solid var(--purple-700); box-shadow: 0 16px 36px rgba(43, 17, 73, 0.2); }
 .mobile-nav__panel a { display: block; padding: 12px 20px; color: var(--ink); font-weight: 600; text-decoration: none; }
 .mobile-nav__panel a:hover, .mobile-nav__panel a[aria-current] { background: var(--grey); color: var(--purple-700); }
-.mobile-nav__sub { display: grid; margin: 0 0 4px 20px; border-left: 2px solid var(--line); }
-.mobile-nav__sub a { padding: 9px 16px; font-size: 0.95rem; font-weight: 500; }
 .mobile-nav__panel hr { margin: 8px 0; }
 @media (min-width: 1080px) {
   .topbar { display: block; }

@@ -5,8 +5,8 @@ import type { LocalizedText } from '@msc-web/content';
 export const PEOPLE = {
   heroEyebrow: { zh: 'UTMMSC 团队', en: 'The UTMMSC team' },
   heroLead: {
-    zh: '联盟由主席团、五个部门的部长团与荣誉顾问组成，均依照章程第四条设立。',
-    en: 'The Group is made up of the Presidium, the leads of its five Departments and its Honorary Advisors, as set out in Article 4 of the constitution.',
+    zh: '联盟由荣誉顾问、主席团与五个部门的部长团组成，均依照章程第四条设立。',
+    en: 'The Group is made up of its Honorary Advisors, the Presidium and the leads of its five Departments, as set out in Article 4 of the constitution.',
   },
   presidiumEyebrow: { zh: '章程第 4.1 条', en: 'Article 4.1' },
   presidiumLead: {
@@ -24,8 +24,7 @@ export const PEOPLE = {
     en: 'Honorary Advisors are distinguished alumni, faculty and practitioners who support members through talks and mentorship. They hold no voting rights.',
   },
   subnavLabel: { zh: '团队页面', en: 'Team pages' },
-  hubCardLink: { zh: '查看', en: 'View' },
-  advisorsHubNote: { zh: '杰出校友 · 教师 · 业界人士', en: 'Alumni · Faculty · Practitioners' },
+  allTab: { zh: '全部', en: 'All' },
   advisorsEmptyTitle: { zh: '荣誉顾问名单即将公布', en: 'Our Honorary Advisors will be announced soon' },
   advisorsEmptyText: { zh: '欢迎关注联盟的讲座与活动。', en: 'Follow our talks and events in the meantime.' },
   profileLink: { zh: '个人主页', en: 'Profile' },

@@ -5,42 +5,15 @@ import { BookMark, Icon } from '../components/Icon';
 import { Bi, BiText } from '../components/common';
 import { navItems, type NavItem } from './navigation';
 
-/**
- * A section in the desktop bar, its label stacked over its Chinese. A section with pages of its own opens a
- * dropdown on hover or keyboard focus, in CSS alone because public pages run no script; its own link still leads to
- * the section's hub page, which is where a touch screen without hover lands.
- * 桌面导航栏中的一个板块，标签下方叠放中文。拥有子页面的板块在悬停或键盘聚焦时展开下拉菜单；由于公开页面不运行脚本，菜单完全由 CSS 实现。
- * 板块自身的链接仍指向该板块的入口页，没有悬停功能的触屏设备会进入该页面。
- */
+/** A section in the desktop bar, its label stacked over its Chinese. */
+/** 桌面导航栏中的一个板块，标签下方叠放中文。 */
 function DesktopNavItem({ item }: { item: NavItem }) {
-  const label = (
-    <span class="site-nav__label">
-      <Bi text={item.label} />
-    </span>
-  );
-  if (item.children.length === 0) {
-    return (
-      <a class="site-nav__link" href={item.href} aria-current={item.current}>
-        {label}
-      </a>
-    );
-  }
   return (
-    <div class="site-nav__item">
-      <a class="site-nav__link site-nav__link--parent" href={item.href} aria-current={item.current}>
-        {label}
-        <Icon name="chevron" />
-      </a>
-      <div class="site-nav__menu">
-        <div class="site-nav__panel">
-          {item.children.map((child) => (
-            <a class="site-nav__menu-link" href={child.href} aria-current={child.current}>
-              <Bi text={child.label} />
-            </a>
-          ))}
-        </div>
-      </div>
-    </div>
+    <a class="site-nav__link" href={item.href} aria-current={item.current}>
+      <span class="site-nav__label">
+        <Bi text={item.label} />
+      </span>
+    </a>
   );
 }
 
@@ -128,20 +101,9 @@ export function SiteHeader({ ctx }: { ctx: PageContext }) {
             <div class="mobile-nav__panel">
               <nav aria-label="Main">
                 {items.map((item) => (
-                  <>
-                    <a href={item.href} aria-current={item.current}>
-                      <Bi text={item.label} />
-                    </a>
-                    {item.children.length > 0 && (
-                      <div class="mobile-nav__sub">
-                        {item.children.map((child) => (
-                          <a href={child.href} aria-current={child.current}>
-                            <Bi text={child.label} />
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </>
+                  <a href={item.href} aria-current={item.current}>
+                    <Bi text={item.label} />
+                  </a>
                 ))}
               </nav>
               <hr />

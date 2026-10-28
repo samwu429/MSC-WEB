@@ -46,11 +46,11 @@ export const SECTION_PATHS: Record<NavSection, string> = {
 };
 
 /**
- * Our People is split into three pages, listed in the order the header menu shows them: the Presidium, Honorary
- * Advisors, then the Department Leads. /people itself is a hub that links to all three.
- * "我们的团队" 分为三个页面，按页眉菜单中的顺序排列：主席团、荣誉顾问、部长团。/people 本身是链接到这三个页面的入口页。
+ * Our People shows everyone at /people: the Honorary Advisors, then the Presidium, then the Department Leads. Each
+ * group also has a page of its own, reached from the tabs at the top, in the same order.
+ * "我们的团队" 在 /people 显示所有人：先荣誉顾问，再主席团，最后部长团。每个团体也有自己的页面，从顶部的标签进入，顺序相同。
  */
-export const PEOPLE_PAGES = ['presidium', 'advisors', 'departments'] as const;
+export const PEOPLE_PAGES = ['advisors', 'presidium', 'departments'] as const;
 
 export type PeoplePageKey = (typeof PEOPLE_PAGES)[number];
 
