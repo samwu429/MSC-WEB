@@ -82,6 +82,14 @@ describe('personInitials', () => {
     expect(personInitials('Ada')).toBe('A');
   });
 
+  it('leaves out a nickname in brackets and punctuation in front of a word', () => {
+    expect(personInitials('Yuan (Andrew) Lai')).toBe('YL');
+    expect(personInitials('Xinyi (Cindy Li) Zhou-Andersson')).toBe('XZ');
+    expect(personInitials('Mei [May] Chen')).toBe('MC');
+    expect(personInitials('"Ada" Lin')).toBe('AL');
+    expect(personInitials('(Andrew)')).toBe('A');
+  });
+
   it('gives an empty string for an empty name', () => {
     expect(personInitials('')).toBe('');
     expect(personInitials('   ')).toBe('');

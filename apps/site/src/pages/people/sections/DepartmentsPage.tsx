@@ -11,7 +11,7 @@ export function DepartmentsPage({ ctx, roster }: { ctx: PageContext; roster: Peo
       <PeopleSectionHero ctx={ctx} view="departments" />
       <section class="section" aria-labelledby={PEOPLE_TITLE_ID}>
         <div class="container">
-          <DepartmentBlocks roster={roster} locale={ctx.locale} nameLevel={2} />
+          <DepartmentBlocks departments={roster.departments} locale={ctx.locale} nameLevel={2} />
         </div>
       </section>
     </>

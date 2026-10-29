@@ -124,11 +124,17 @@ export function personDisplayTitle(person: Pick<Person, 'title' | 'position' | '
 
 /**
  * The monogram shown in place of a missing photo: the first character of a Chinese name, otherwise the initials of
- * the first two words, such as "SZ" for "San Zhang". An empty name gives an empty string.
- * 没有照片时显示的姓名首字：中文姓名取第一个字，其他姓名取前两个词的首字母，例如 "San Zhang" 为 "SZ"。姓名为空时返回空字符串。
+ * the first two words, such as "SZ" for "San Zhang". A nickname in brackets and punctuation in front of a word are left
+ * out first, so "Yuan (Andrew) Lai" gives "YL". An empty name gives an empty string.
+ * 没有照片时显示的姓名首字：中文姓名取第一个字，其他姓名取前两个词的首字母，例如 "San Zhang" 为 "SZ"。括号中的昵称和词前的标点先被去掉，
+ * 因此 "Yuan (Andrew) Lai" 为 "YL"。姓名为空时返回空字符串。
  */
 export function personInitials(name: string): string {
-  const trimmed = name.trim();
+  const trimmed = (name.replace(/\([^)]*\)|\[[^\]]*\]/g, ' ').trim() || name)
+    .split(/\s+/)
+    .map((word) => word.replace(/^[^\p{L}\p{N}]+/u, ''))
+    .filter(Boolean)
+    .join(' ');
   if (!trimmed) return '';
   if (/^[\u3400-\u9fff]/.test(trimmed)) return Array.from(trimmed)[0] ?? '';
   return trimmed

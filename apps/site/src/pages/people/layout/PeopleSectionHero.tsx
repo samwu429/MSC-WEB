@@ -2,7 +2,7 @@ import type { PageContext } from '../../context';
 import { txt } from '../../components/common';
 import { COMMON, t } from '../../i18n/strings';
 import { peoplePageLabel } from '../../layout/navigation';
-import { PEOPLE_PAGES, PEOPLE_PAGE_PATHS, SECTION_PATHS, sitePath, type PeoplePageKey } from '../../routing/paths';
+import type { PeoplePageKey } from '../../routing/paths';
 import { PEOPLE } from '../strings';
 
 /** The h1 of each Our People page, which also labels the page's main section. */
@@ -25,7 +25,7 @@ const LEADS = {
   departments: 'departmentsLead',
 } as const satisfies Record<PeoplePageKey, keyof typeof PEOPLE>;
 
-export function peoplePageEyebrow(page: PeoplePageKey, ctx: Pick<PageContext, 'locale'>): string {
+function peoplePageEyebrow(page: PeoplePageKey, ctx: Pick<PageContext, 'locale'>): string {
   return t(PEOPLE, EYEBROWS[page], ctx.locale);
 }
 
@@ -34,16 +34,13 @@ export function peoplePageLead(page: PeoplePageKey, ctx: Pick<PageContext, 'loca
 }
 
 /**
- * The header of every Our People page. Its tabs are the one way between them: All, then each group in the order
- * /people lists them.
- * 每个 "我们的团队" 页面的页首。页面之间只通过这里的标签切换：先是 "全部"，再按 /people 的排列顺序列出各团体。
+ * The header of every Our People page: eyebrow, title and lead. It carries no links between the pages: a single group
+ * is reached only from the Our People dropdown in the site header, and the header link itself shows everyone.
+ * 每个 "我们的团队" 页面的页首：眉标、标题与导语。页首不含页面之间的链接：单个团体只能从网站页眉的 "我们的团队" 下拉菜单进入，
+ * 页眉链接本身显示所有人。
  */
 export function PeopleSectionHero({ ctx, view }: { ctx: PageContext; view: PeopleView }) {
   const { locale } = ctx;
-  const tabs = [
-    { key: 'all', href: SECTION_PATHS.people, label: t(PEOPLE, 'allTab', locale) },
-    ...PEOPLE_PAGES.map((page) => ({ key: page, href: PEOPLE_PAGE_PATHS[page], label: txt(peoplePageLabel(page), locale) })),
-  ];
   return (
     <header class="page-hero">
       <div class="container">
@@ -52,13 +49,6 @@ export function PeopleSectionHero({ ctx, view }: { ctx: PageContext; view: Peopl
           {view === 'all' ? t(COMMON, 'navPeople', locale) : txt(peoplePageLabel(view), locale)}
         </h1>
         <p class="page-hero__lead">{view === 'all' ? t(PEOPLE, 'heroLead', locale) : peoplePageLead(view, ctx)}</p>
-        <nav class="tabs" aria-label={t(PEOPLE, 'subnavLabel', locale)}>
-          {tabs.map((tab) => (
-            <a class="tab" href={sitePath(tab.href)} aria-current={tab.key === view ? 'page' : undefined}>
-              {tab.label}
-            </a>
-          ))}
-        </nav>
       </div>
     </header>
   );

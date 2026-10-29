@@ -47,8 +47,8 @@ export const SECTION_PATHS: Record<NavSection, string> = {
 
 /**
  * Our People shows everyone at /people: the Honorary Advisors, then the Presidium, then the Department Leads. Each
- * group also has a page of its own, reached from the tabs at the top, in the same order.
- * "我们的团队" 在 /people 显示所有人：先荣誉顾问，再主席团，最后部长团。每个团体也有自己的页面，从顶部的标签进入，顺序相同。
+ * group also has a page of its own, reached from the Our People dropdown in the site header, in the same order.
+ * "我们的团队" 在 /people 显示所有人：先荣誉顾问，再主席团，最后部长团。每个团体也有自己的页面，从网站页眉的 "我们的团队" 下拉菜单进入，顺序相同。
  */
 export const PEOPLE_PAGES = ['advisors', 'presidium', 'departments'] as const;
 

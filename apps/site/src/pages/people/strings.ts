@@ -23,11 +23,8 @@ export const PEOPLE = {
     zh: '荣誉顾问由杰出校友、教师与业界人士担任，通过讲座与指导支持成员成长。荣誉顾问不享有表决权。',
     en: 'Honorary Advisors are distinguished alumni, faculty and practitioners who support members through talks and mentorship. They hold no voting rights.',
   },
-  subnavLabel: { zh: '团队页面', en: 'Team pages' },
-  allTab: { zh: '全部', en: 'All' },
   advisorsEmptyTitle: { zh: '荣誉顾问名单即将公布', en: 'Our Honorary Advisors will be announced soon' },
   advisorsEmptyText: { zh: '欢迎关注联盟的讲座与活动。', en: 'Follow our talks and events in the meantime.' },
   profileLink: { zh: '个人主页', en: 'Profile' },
-  viewProfile: { zh: '查看简介', en: 'View profile' },
   contactTitle: { zh: '联系方式', en: 'Contact' },
 } satisfies Record<string, LocalizedText>;

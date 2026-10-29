@@ -86,6 +86,10 @@ describe('photoPlaceholder', () => {
     expect(photoPlaceholder({ zh: '  ', en: 'Ada' })).toBe('A');
   });
 
+  it('leaves out a nickname in brackets, as the site does', () => {
+    expect(photoPlaceholder({ zh: '', en: 'Yuan (Andrew) Lai' })).toBe('YL');
+  });
+
   it('falls back to the Chinese field when no English name was written', () => {
     expect(photoPlaceholder({ zh: 'Ada Lin', en: '' })).toBe('AL');
   });
