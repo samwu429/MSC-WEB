@@ -12,7 +12,7 @@ UTMMSC 国语学者联盟的公开网站（https://utmmsc.com/），附带供干
 | Events | `/events` | Academic and extracurricular activities, upcoming and past, each with details and a photo gallery |
 | Test Reviews | `/reviews` | Midterm and final reviews per course and term, with times, places, registration and materials |
 | Our People | `/people` | Everyone, in this order: the Honorary Advisors, the Presidium, and the Department Leads, the Heads and Vice Heads of the five departments. The header's Our People dropdown opens one group on its own page: Honorary Advisors (`/people/advisors`), Presidium (`/people/presidium`), Department Leads (`/people/departments`). Each person opens to their own page with bio and contact links (`/people/<id>`) |
-| About | `/about` | Mission, membership, structure, academic integrity, and the public records the constitution requires |
+| About | `/about` | The University's recognition of the Group with a link to its listing on the Student Organization Portal (also linked in every footer), mission, membership, structure, academic integrity, and the public records the constitution requires |
 | Backend | `/admin/` | Editing for all of the above, site copy, contact links, sponsors and partners, and the announcement bar |
 
 The site has one version of every page, in English with the Chinese in small type beneath headings and text. Our People is English only. Old `/en/...` addresses redirect to the same page.

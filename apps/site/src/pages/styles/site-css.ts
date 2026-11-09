@@ -37,7 +37,7 @@
  *   Footer      .site-footer .footer-grid .footer-brand .footer-col .footer-qr .footer-bottom .footer-bottom__row .footer-admin
  *   Member net  .mobile-note (beside member-network links) .topbar__note .cta-band__action
  *   Ended       .past-list .past-list__date .past-list__title .past-list__tag .ended-title .ended-lead .ended-list .ended-list__code .ended-list__name
- *   Docs        .doc-link (a small link to a PDF, such as the Code of Behaviour)
+ *   Docs        .doc-link (a small link to a PDF, such as the Code of Behaviour, or to the University's listing of UTMMSC)
  *   Misc        .notice .notice--integrity .empty .cta-band .cta-band__inner .pager
  */
 export const SITE_CSS = `
@@ -508,6 +508,7 @@ a.partner:hover { border-color: var(--purple-700); color: var(--purple-700); }
 .footer-qr { width: 112px; margin-top: 12px; padding: 6px; background: #fff; }
 .footer-bottom { display: grid; gap: 10px; margin-top: 44px; padding-top: 20px; border-top: 1px solid var(--line-strong); color: var(--muted); font-size: 0.82rem; }
 .footer-bottom__row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; }
+.site-footer .doc-link { justify-self: start; margin-top: 0; color: var(--purple-700); }
 .site-footer .footer-admin { display: inline-flex; align-items: center; gap: 6px; padding: 4px 14px; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--ink-soft); font-weight: 700; }
 .site-footer .footer-admin:hover { border-color: var(--purple-700); color: var(--purple-700); text-decoration: none; }
 .footer-admin svg { width: 14px; height: 14px; }

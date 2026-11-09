@@ -2,13 +2,15 @@ import type { PageContext } from '../context';
 import { COMMON, t } from '../i18n/strings';
 import { SECTION_PATHS, sitePath } from '../routing/paths';
 import { BookMark, Icon, type IconName } from '../components/Icon';
-import { Bi, BiText, MediaImage, MobileOnlyNote } from '../components/common';
+import { Bi, BiText, MediaImage, MobileOnlyNote, RecognitionLink } from '../components/common';
 import { hasContactDetails } from '../components/contact';
 
 /**
  * The footer carries the statement Article 1.3 of the constitution requires wherever the Group represents itself:
- * UTMMSC is a student group, not an office of the University. It uses no University crest or word mark (Article 1.4).
- * 页脚载有章程第 1.3 条要求在联盟对外展示时必须说明的内容：UTMMSC 是学生社团，而非学校的办公室。页脚不使用任何学校徽章或字标（第 1.4 条）。
+ * UTMMSC is a student group, not an office of the University. Under it is the University's own listing of UTMMSC as a
+ * recognized student group. It uses no University crest or word mark (Article 1.4).
+ * 页脚载有章程第 1.3 条要求在联盟对外展示时必须说明的内容：UTMMSC 是学生社团，而非学校的办公室。其下是学校将 UTMMSC
+ * 列为认可学生社团的页面链接。页脚不使用任何学校徽章或字标（第 1.4 条）。
  */
 export function SiteFooter({ ctx }: { ctx: PageContext }) {
   const { locale, settings } = ctx;
@@ -107,6 +109,7 @@ export function SiteFooter({ ctx }: { ctx: PageContext }) {
         </div>
         <div class="footer-bottom">
           <BiText text={COMMON.footerDisclaimer} />
+          <RecognitionLink />
           <div class="footer-bottom__row">
             <p>
               © {ctx.currentYear} UTMMSC · {t(COMMON, 'campus', locale)}

@@ -4,6 +4,11 @@ import type { LocalizedText } from '@msc-web/content';
 /** 关于页面的固定文字。宗旨与联系方式来自网站设置。 */
 export const ABOUT = {
   heroTitle: { zh: '关于我们', en: 'About UTMMSC' },
+  recognitionTitle: { zh: '多伦多大学认可的学生社团', en: 'Recognized by the University of Toronto' },
+  recognitionText: {
+    zh: '学校在学生组织门户（SOP）上将 UTMMSC 列为认可的学生社团，并公开联盟的章程与干部名单。',
+    en: "The University lists UTMMSC as a Recognized Student Group on its Student Organization Portal, along with the Group's constitution and officers.",
+  },
 
   missionEyebrow: { zh: '我们的宗旨', en: 'Our mission' },
   missionTitle: { zh: '为什么有 UTMMSC', en: 'Why UTMMSC exists' },

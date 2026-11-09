@@ -128,6 +128,19 @@ describe.skipIf(!sqlite)('site shell', () => {
       expect(after).toContain('<a href="mailto:hello@utmmsc.com">hello@utmmsc.com</a>');
     });
 
+    it.each(['/', '/events', '/people'])('says on %s that UTMMSC is a recognized student group and links its University listing', async (path) => {
+      const footer = footerOf((await get(path)).html);
+      expect(footer).toContain('UTMMSC is a recognized student group at the University of Toronto Mississauga. It is not an official department');
+      expect(footer).toContain('UTMMSC 是多伦多大学密西沙加校区认可的学生社团');
+      expect(footer).toContain(
+        '<a class="doc-link" href="https://sop.utoronto.ca/group/mandarin-scholars-coalition-at-the-university-of-toronto-mississaugautmmsc/" target="_blank" rel="noopener noreferrer">',
+      );
+      expect(footer).toContain(
+        '<span>View UTMMSC on the University&#39;s Student Organization Portal<span class="zh" lang="zh-CN">在多伦多大学学生组织门户（SOP）查看 UTMMSC</span></span></a>',
+      );
+      expect(occurrences(footer, 'href="https://sop.utoronto.ca/')).toBe(1);
+    });
+
     it.each(['/', '/events'])('links %s to the editing backend at /admin/', async (path) => {
       const footer = footerOf((await get(path)).html);
       expect(footer).toMatch(/<a class="footer-admin" href="\/admin\/" rel="nofollow"><svg[^]*?<\/svg>Officer sign-in<\/a>/);

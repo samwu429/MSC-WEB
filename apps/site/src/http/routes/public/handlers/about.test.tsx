@@ -82,6 +82,19 @@ describe.skipIf(!sqlite)('About page', () => {
     expect(html).not.toContain('aria-labelledby="about-contact"');
   });
 
+  it("shows the University's recognition in the hero, with the link to its listing of UTMMSC", async () => {
+    const html = await render('/about');
+    const start = html.indexOf('<header class="page-hero">');
+    const hero = html.slice(start, html.indexOf('</header>', start));
+    expect(hero).toContain('<div class="notice" role="note">');
+    expect(hero).toContain('<strong>Recognized by the University of Toronto<span class="zh" lang="zh-CN">多伦多大学认可的学生社团</span></strong>');
+    expect(hero).toContain(
+      '<p>The University lists UTMMSC as a Recognized Student Group on its Student Organization Portal, along with the Group&#39;s constitution and officers.</p>',
+    );
+    expect(hero).toContain('<p class="zh-text" lang="zh-CN">学校在学生组织门户（SOP）上将 UTMMSC 列为认可的学生社团，并公开联盟的章程与干部名单。</p>');
+    expect(occurrences(hero, 'href="https://sop.utoronto.ca/group/mandarin-scholars-coalition-at-the-university-of-toronto-mississaugautmmsc/"')).toBe(1);
+  });
+
   it('sends the old English address to /about', async () => {
     const ctx = testExecutionContext();
     const response = await app.request('/en/about', {}, test.env, ctx);

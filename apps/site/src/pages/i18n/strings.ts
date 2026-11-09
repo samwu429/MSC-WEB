@@ -32,9 +32,10 @@ export const COMMON = {
   past: { zh: '已结束', en: 'Past' },
   happeningNow: { zh: '进行中', en: 'Happening now' },
   footerDisclaimer: {
-    zh: 'UTMMSC 是多伦多大学密西沙加校区的学生社团，并非多伦多大学或其密西沙加校区的官方部门、项目或办公室。',
-    en: 'UTMMSC is a student group at the University of Toronto Mississauga. It is not an official department, program or office of the University of Toronto or the University of Toronto Mississauga.',
+    zh: 'UTMMSC 是多伦多大学密西沙加校区认可的学生社团，并非多伦多大学或其密西沙加校区的官方部门、项目或办公室。',
+    en: 'UTMMSC is a recognized student group at the University of Toronto Mississauga. It is not an official department, program or office of the University of Toronto or the University of Toronto Mississauga.',
   },
+  recognitionLink: { zh: '在多伦多大学学生组织门户（SOP）查看 UTMMSC', en: "View UTMMSC on the University's Student Organization Portal" },
   footerContact: { zh: '联系我们', en: 'Contact' },
   footerExplore: { zh: '浏览', en: 'Explore' },
   footerMembers: { zh: '成员', en: 'Members' },

@@ -91,6 +91,23 @@ export function CodeOfBehaviourLink() {
   );
 }
 
+/** UTMMSC's page on the University of Toronto's Student Organization Portal, which lists it as a Recognized Student Group. */
+/** UTMMSC 在多伦多大学学生组织门户（SOP）上的页面，学校在那里将其列为认可的学生社团。 */
+export const SOP_GROUP_URL = 'https://sop.utoronto.ca/group/mandarin-scholars-coalition-at-the-university-of-toronto-mississaugautmmsc/';
+
+/** The link to the University's listing of UTMMSC, in the footer of every page and on the About page. */
+/** 指向学校所列 UTMMSC 页面的链接，位于每个页面的页脚以及关于页面。 */
+export function RecognitionLink() {
+  return (
+    <a class="doc-link" href={SOP_GROUP_URL} target="_blank" rel="noopener noreferrer">
+      <Icon name="external" />
+      <span>
+        <Bi text={COMMON.recognitionLink} />
+      </span>
+    </a>
+  );
+}
+
 /** The note shown beside links into the member network: it has been made for phone screens only. */
 /** 成员网络链接旁的说明：成员网络只适配了手机屏幕。 */
 export function MobileOnlyNote() {
