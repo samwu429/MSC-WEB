@@ -8,7 +8,7 @@ UTMMSC 国语学者联盟的公开网站（https://utmmsc.com/），附带供干
 
 | Page | Address | Content |
 | --- | --- | --- |
-| Home | `/` | Introduction, upcoming events, this term's test reviews, sponsors, partners and partner clubs, the Honorary Advisors, how to join |
+| Home | `/` | Introduction, upcoming events, this term's test reviews, the Honorary Advisors, sponsors, partners and partner clubs, how to join |
 | Events | `/events` | Academic and extracurricular activities, interest classes among them, upcoming and past, each with details and a photo gallery |
 | Academic Activities | `/academics` | The Academic Department's activities: this term's test reviews, the next interest classes, and a link to its talks and workshops among the academic events. The header's Academic Activities dropdown opens Test Reviews and Interest Classes, in that order, each on its own page |
 | Test Reviews | `/reviews` | Midterm and final reviews per course and term, with times, places, registration and materials. Each course has its own page (`/reviews/<course>`) |

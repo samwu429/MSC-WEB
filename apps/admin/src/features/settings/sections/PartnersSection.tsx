@@ -29,7 +29,7 @@ export function PartnersSection({
   return (
     <Panel
       title="赞助商、合作商与联动社团"
-      description="显示在首页的荣誉顾问上方，按类别分组，每组内按这里的顺序排列。没有 Logo 时首页显示名称。"
+      description="显示在首页的荣誉顾问下方，按类别分组，每组内按这里的顺序排列。没有 Logo 时首页显示名称。"
       actions={
         <Button variant="secondary" size="sm" disabled={full} onClick={() => onChange(addPartner(crypto.randomUUID()))}>
           添加一项
