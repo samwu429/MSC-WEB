@@ -18,10 +18,10 @@ import {
 import { readSlug } from './slug';
 
 /**
- * Events are split the way members look for them: academic activities (talks, workshops, research and writing
- * mentorship) and extracurricular activities (socials, cultural and interest events). Test reviews have their
- * own section of the site and are not events.
- * 活动按成员查找的方式分为两类：学术活动（讲座、工作坊、科研与写作指导）与课外活动（社交、文化与兴趣活动）。
+ * Events are split the way members look for them: academic activities (talks, workshops, interest classes, research
+ * and writing mentorship) and extracurricular activities (socials, cultural and interest events). Test reviews have
+ * their own section of the site and are not events.
+ * 活动按成员查找的方式分为两类：学术活动（讲座、工作坊、兴趣课、科研与写作指导）与课外活动（社交、文化与兴趣活动）。
  * 考前复习在网站上有独立板块，不属于活动。
  */
 export const EVENT_CATEGORIES = ['academic', 'extracurricular'] as const;
@@ -32,6 +32,27 @@ export const EVENT_CATEGORY_LABELS: Record<EventCategory, LocalizedText> = {
   academic: { zh: '学术活动', en: 'Academic' },
   extracurricular: { zh: '课外活动', en: 'Extracurricular' },
 };
+
+/**
+ * Interest classes are academic events marked as such: talks in Mandarin on things many students are curious about,
+ * such as economics or computer science, that follow no course. They stay events, and the site also lists them under
+ * Academic Activities → Interest Classes.
+ * 兴趣课是被标记为兴趣课的学术活动：用中文讲授许多同学感兴趣的知识，例如经济学或计算机，不跟随任何课程。它们仍是活动，
+ * 网站同时在「学术活动 → 兴趣课」中列出它们。
+ */
+export const INTEREST_CLASS_LABEL: LocalizedText = { zh: '兴趣课', en: 'Interest Class' };
+
+/** Whether an event is an interest class: marked as one, and academic, the only category that may carry the mark. */
+/** 活动是否为兴趣课：带有兴趣课标记，并且属于学术活动，即唯一可以带有该标记的类别。 */
+export function isInterestClass(event: Pick<SiteEvent, 'category' | 'interestClass'>): boolean {
+  return event.interestClass && event.category === 'academic';
+}
+
+/** What kind of event the chips and lists name: "Interest Class" for an interest class, otherwise its category. */
+/** 标签与列表中显示的活动类型：兴趣课显示 "兴趣课"，其他活动显示其类别。 */
+export function eventKindLabel(event: Pick<SiteEvent, 'category' | 'interestClass'>): LocalizedText {
+  return isInterestClass(event) ? INTEREST_CLASS_LABEL : EVENT_CATEGORY_LABELS[event.category];
+}
 
 export interface SiteEvent {
   id: string;
@@ -53,6 +74,9 @@ export interface SiteEvent {
   /** Marked as ended by an officer: listed with past events whatever its date, and no longer taking sign-ups. */
   /** 由干部标记为已结束：无论日期如何都列在往期活动中，并且不再接受报名。 */
   archived: boolean;
+  /** Marked by an officer as an interest class, which only an academic event may be; the site also lists it under Interest Classes. */
+  /** 由干部标记为兴趣课（只有学术活动可以是兴趣课）；网站同时把它列在 "兴趣课" 页面中。 */
+  interestClass: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -114,7 +138,9 @@ export function validateEventInput(raw: unknown): ValidationResult<EventInput> {
     coverKey: readOptionalMediaKey(issues, body.coverKey, 'coverKey', 'image', '封面图片'),
     registrationUrl: readOptionalUrl(issues, body.registrationUrl, 'registrationUrl', { label: '报名链接' }),
     archived: readBoolean(issues, body.archived, 'archived', '是否已结束', false),
+    interestClass: readBoolean(issues, body.interestClass, 'interestClass', '是否为兴趣课', false),
   };
+  if (value.interestClass && value.category !== 'academic') issues.add('interestClass', '只有学术活动可以标为兴趣课');
   return issues.result(value);
 }
 

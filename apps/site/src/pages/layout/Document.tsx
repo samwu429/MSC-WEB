@@ -15,6 +15,9 @@ export interface PageMeta {
   /** 链接预览图片的本站路径或绝对网址。 */
   image?: string;
   noindex?: boolean;
+  /** Where the header navigation places the page when that is not its own path: an interest class's page sits under Interest Classes. */
+  /** 页面在页眉导航中的位置（与其自身路径不同时填写）：兴趣课的页面位于 "兴趣课" 之下。 */
+  navPath?: string;
 }
 
 export const DEFAULT_SHARE_IMAGE = '/static/photos/review-session.jpg';
@@ -58,7 +61,7 @@ export function Document({ ctx, meta, children }: { ctx: PageContext; meta: Page
         <link rel="stylesheet" href={STYLESHEET_PATH} />
       </head>
       <body>
-        <SiteHeader ctx={ctx} />
+        <SiteHeader ctx={ctx} navPath={meta.navPath ?? ctx.path} />
         <main id="main">{children}</main>
         <SiteFooter ctx={ctx} />
       </body>

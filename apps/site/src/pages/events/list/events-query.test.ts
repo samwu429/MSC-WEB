@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { readEventsQuery } from './events-query';
+import { readEventsQuery, readPageNumber } from './events-query';
 
 describe('readEventsQuery', () => {
   it('reads a known category and page', () => {
@@ -21,5 +21,13 @@ describe('readEventsQuery', () => {
   it('keeps very large pages past the end without letting the offset grow unbounded', () => {
     expect(readEventsQuery({ page: '250' }).page).toBe(250);
     expect(readEventsQuery({ page: '99999999' }).page).toBe(100_000);
+  });
+});
+
+describe('readPageNumber', () => {
+  it('reads the page of past interest classes by the same rules', () => {
+    expect(readPageNumber('3')).toBe(3);
+    for (const page of [undefined, '', '0', '-2', '1.5', 'two']) expect(readPageNumber(page), String(page)).toBe(1);
+    expect(readPageNumber('99999999')).toBe(100_000);
   });
 });

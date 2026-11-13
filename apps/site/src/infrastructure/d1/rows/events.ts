@@ -21,6 +21,7 @@ export interface EventRow {
   cover_key: string | null;
   registration_url: string | null;
   archived: number;
+  interest_class: number;
   created_at: string;
   updated_at: string;
 }
@@ -40,6 +41,7 @@ export function toSiteEvent(row: EventRow): SiteEvent {
     coverKey: row.cover_key,
     registrationUrl: row.registration_url,
     archived: fromFlag(row.archived),
+    interestClass: fromFlag(row.interest_class),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

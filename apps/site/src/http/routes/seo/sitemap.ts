@@ -3,7 +3,16 @@ import type { Env } from '../../../env';
 import { listPublishedEventLinks } from '../../../infrastructure/d1/public/events';
 import { listVisiblePeople } from '../../../infrastructure/d1/public/people';
 import { listReviewedCourseLinks } from '../../../infrastructure/d1/public/reviews';
-import { NAV_SECTIONS, PEOPLE_PAGES, PEOPLE_PAGE_PATHS, SECTION_PATHS, personPath, sitePath } from '../../../pages/routing/paths';
+import {
+  ACADEMIC_PAGES,
+  ACADEMIC_PAGE_PATHS,
+  NAV_SECTIONS,
+  PEOPLE_PAGES,
+  PEOPLE_PAGE_PATHS,
+  SECTION_PATHS,
+  personPath,
+  sitePath,
+} from '../../../pages/routing/paths';
 
 interface SitemapPage {
   /** Page path, such as "/events/2026-10-mid-autumn". */
@@ -29,13 +38,17 @@ function urlEntry(origin: string, page: SitemapPage): string {
   ].join('\n');
 }
 
-/** The sitemap of every public page: the sections, the Our People pages, every visible person, every published event and every reviewed course. */
-/** 包含全部公开页面的站点地图：各板块、"我们的团队" 各页面、每位正在显示的成员、每个已发布的活动以及每门有复习的课程。 */
+/**
+ * The sitemap of every public page: the sections, the Academic Activities and Our People pages, every visible person,
+ * every published event and every reviewed course.
+ * 包含全部公开页面的站点地图：各板块、"学术活动" 与 "我们的团队" 各页面、每位正在显示的成员、每个已发布的活动以及每门有复习的课程。
+ */
 export async function sitemapXml(env: Env): Promise<string> {
   const origin = env.PUBLIC_ORIGIN.replace(/\/+$/, '');
   const [people, events, courses] = await Promise.all([listVisiblePeople(env.DB), listPublishedEventLinks(env.DB), listReviewedCourseLinks(env.DB)]);
   const pages: SitemapPage[] = [
     ...NAV_SECTIONS.map((section) => ({ path: SECTION_PATHS[section] })),
+    ...ACADEMIC_PAGES.map((page) => ({ path: ACADEMIC_PAGE_PATHS[page] })),
     ...PEOPLE_PAGES.map((page) => ({ path: PEOPLE_PAGE_PATHS[page] })),
     ...people.map((person) => ({ path: personPath(person.id), lastmod: person.updatedAt })),
     ...events.map((event) => ({ path: `/events/${event.slug}`, lastmod: event.updatedAt })),

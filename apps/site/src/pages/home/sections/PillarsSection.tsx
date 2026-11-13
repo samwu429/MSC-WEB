@@ -3,7 +3,7 @@ import type { PageContext } from '../../context';
 import { Icon, type IconName } from '../../components/Icon';
 import { Bi, BiText, SectionHeading, type Copy } from '../../components/common';
 import { t } from '../../i18n/strings';
-import { SECTION_PATHS, sitePath, withQuery } from '../../routing/paths';
+import { ACADEMIC_PAGE_PATHS, SECTION_PATHS, sitePath, withQuery } from '../../routing/paths';
 import { HOME } from '../strings';
 
 interface Pillar {
@@ -27,13 +27,13 @@ export function PillarsSection({ ctx }: { ctx: PageContext }) {
       icon: 'note',
       title: HOME.pillarReviewsTitle,
       text: HOME.pillarReviewsText,
-      link: { href: sitePath(SECTION_PATHS.reviews), label: t(HOME, 'pillarReviewsLink', locale), external: false },
+      link: { href: sitePath(ACADEMIC_PAGE_PATHS.reviews), label: t(HOME, 'pillarReviewsLink', locale), external: false },
     },
     {
       icon: 'cap',
       title: HOME.pillarAcademicTitle,
       text: HOME.pillarAcademicText,
-      link: { href: withQuery(eventsPath, { type: 'academic' }), label: t(HOME, 'pillarAcademicLink', locale), external: false },
+      link: { href: sitePath(SECTION_PATHS.academics), label: t(HOME, 'pillarAcademicLink', locale), external: false },
     },
     {
       icon: 'users',

@@ -9,8 +9,10 @@ UTMMSC 国语学者联盟的公开网站（https://utmmsc.com/），附带供干
 | Page | Address | Content |
 | --- | --- | --- |
 | Home | `/` | Introduction, upcoming events, this term's test reviews, sponsors, partners and partner clubs, the Honorary Advisors, how to join |
-| Events | `/events` | Academic and extracurricular activities, upcoming and past, each with details and a photo gallery |
-| Test Reviews | `/reviews` | Midterm and final reviews per course and term, with times, places, registration and materials |
+| Events | `/events` | Academic and extracurricular activities, interest classes among them, upcoming and past, each with details and a photo gallery |
+| Academic Activities | `/academics` | The Academic Department's activities: this term's test reviews, the next interest classes, and a link to its talks and workshops among the academic events. The header's Academic Activities dropdown opens Test Reviews and Interest Classes, in that order, each on its own page |
+| Test Reviews | `/reviews` | Midterm and final reviews per course and term, with times, places, registration and materials. Each course has its own page (`/reviews/<course>`) |
+| Interest Classes | `/interest-classes` | Talks in Mandarin on topics many students are curious about, which follow no course: upcoming and past. An interest class is an academic event marked as one in the backend, so it is also listed under Events and has its page there (`/events/<slug>`) |
 | Our People | `/people` | Everyone, in this order: the Honorary Advisors, the Presidium, and the Department Leads, the Heads and Vice Heads of the five departments. The header's Our People dropdown opens one group on its own page: Honorary Advisors (`/people/advisors`), Presidium (`/people/presidium`), Department Leads (`/people/departments`). Each person opens to their own page with bio and contact links (`/people/<id>`) |
 | About | `/about` | The University's recognition of the Group with a link to its listing on the Student Organization Portal (also linked in every footer), mission, membership, structure, academic integrity, and the public records the constitution requires |
 | Backend | `/admin/` | Editing for all of the above, site copy, contact links, sponsors and partners, and the announcement bar |

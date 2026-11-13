@@ -45,6 +45,11 @@ describe('sectionOfPath', () => {
     expect(sectionOfPath('/eventsx')).toBeNull();
     expect(sectionOfPath('/en/events')).toBeNull();
   });
+
+  it('counts Test Reviews, its courses and Interest Classes as Academic Activities', () => {
+    for (const path of ['/academics', '/reviews', '/reviews/csc108h5', '/interest-classes']) expect(sectionOfPath(path), path).toBe('academics');
+    for (const path of ['/reviewsx', '/interest-classesx', '/academicsx', '/en/reviews']) expect(sectionOfPath(path), path).toBeNull();
+  });
 });
 
 describe('siteHref', () => {
@@ -54,6 +59,8 @@ describe('siteHref', () => {
     expect(siteHref('/en')).toBe('/');
     expect(siteHref('/en/events?type=academic#past-events')).toBe('/events?type=academic#past-events');
     expect(siteHref('/en?from=announcement')).toBe('/?from=announcement');
+    expect(siteHref('/en/reviews/csc108h5')).toBe('/reviews/csc108h5');
+    expect(siteHref('/en/interest-classes')).toBe('/interest-classes');
   });
 
   it('leaves page links as entered', () => {

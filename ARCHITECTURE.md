@@ -1,8 +1,8 @@
 # Architecture
 
-MSC-WEB is the public website of UTMMSC at `utmmsc.com`: a home page, events (academic and extracurricular), test reviews (midterm and final, per course and term), Our People (Presidium, Department Leads, Honorary Advisors), an About page with the public records the constitution requires, and an editing backend at `/admin/`.
+MSC-WEB is the public website of UTMMSC at `utmmsc.com`: a home page, events (academic and extracurricular), Academic Activities with test reviews (midterm and final, per course and term) and interest classes (academic events marked as such), Our People (Presidium, Department Leads, Honorary Advisors), an About page with the public records the constitution requires, and an editing backend at `/admin/`.
 
-MSC-WEB 是 UTMMSC 在 `utmmsc.com` 的公开网站：首页、活动（学术活动与课外活动）、考前复习（按课程与学期的期中、期末复习）、我们的团队（主席团、部长团、荣誉顾问）、载有章程要求公开记录的关于页面，以及位于 `/admin/` 的编辑后台。
+MSC-WEB 是 UTMMSC 在 `utmmsc.com` 的公开网站：首页、活动（学术活动与课外活动）、学术活动板块（考前复习，即按课程与学期的期中、期末复习；以及兴趣课，即被标记为兴趣课的学术活动）、我们的团队（主席团、部长团、荣誉顾问）、载有章程要求公开记录的关于页面，以及位于 `/admin/` 的编辑后台。
 
 ## Deployment shape
 

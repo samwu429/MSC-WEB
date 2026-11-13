@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { validateEventInput, type SiteEventDetail } from '@msc-web/content';
-import { emptyEventInput, publicEventPath, toEventInput } from './event-form';
+import { categoryChange, emptyEventInput, publicEventPath, toEventInput } from './event-form';
 
 const detail: SiteEventDetail = {
   ...emptyEventInput(),
@@ -39,11 +39,45 @@ describe('toEventInput', () => {
     const input = toEventInput(detail);
     expect(validateEventInput(input)).toEqual({ ok: true, value: input });
   });
+
+  it('keeps the interest class mark, and the validator accepts it on an academic event', () => {
+    const interestClass = { ...detail, category: 'academic' as const, interestClass: true };
+    const input = toEventInput(interestClass);
+    expect(input.interestClass).toBe(true);
+    expect(validateEventInput(input)).toEqual({ ok: true, value: input });
+  });
+
+  it('drops a mark left on an event of another category, so the form can still save it', () => {
+    const stray = toEventInput({ ...detail, category: 'extracurricular', interestClass: true });
+    expect(stray.interestClass).toBe(false);
+    expect(validateEventInput(stray)).toEqual({ ok: true, value: stray });
+  });
+});
+
+describe('categoryChange', () => {
+  it('keeps the interest class mark while the event stays academic', () => {
+    expect(categoryChange('academic')).toEqual({ category: 'academic' });
+  });
+
+  it('clears the mark when the event becomes extracurricular, so the form never sends what the validator refuses', () => {
+    const marked = { ...emptyEventInput(), title: { zh: '讲座', en: '' }, startsAt: '2026-11-01T18:00', interestClass: true };
+    const changed = { ...marked, ...categoryChange('extracurricular') };
+    expect(changed).toMatchObject({ category: 'extracurricular', interestClass: false });
+    expect(validateEventInput(changed).ok).toBe(true);
+    const back = { ...changed, ...categoryChange('academic') };
+    expect(back).toMatchObject({ category: 'academic', interestClass: false });
+  });
+
+  it('reports a mark left on an extracurricular event at the checkbox the form shows', () => {
+    const result = validateEventInput({ ...emptyEventInput(), title: { zh: '讲座', en: '' }, startsAt: '2026-11-01T18:00', category: 'extracurricular', interestClass: true });
+    expect(result).toEqual({ ok: false, issues: [{ field: 'interestClass', message: '只有学术活动可以标为兴趣课' }] });
+  });
 });
 
 describe('emptyEventInput', () => {
   it('starts as a draft and asks only for the title and start time, at paths the form controls show', () => {
     expect(emptyEventInput().status).toBe('draft');
+    expect(emptyEventInput().interestClass).toBe(false);
     const result = validateEventInput(emptyEventInput());
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.issues.map((issue) => issue.field).sort()).toEqual(['startsAt', 'title.zh']);

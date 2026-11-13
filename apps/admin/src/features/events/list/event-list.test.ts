@@ -1,7 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import { emptyText, type SiteEvent } from '@msc-web/content';
 import { filterSearchParams } from '../../../shared/api/endpoints';
-import { eventListTitle, formatWallTime, hasEnded, parseEventFilter, sortNewestFirst } from './event-list';
+import {
+  CATEGORY_FILTERS,
+  eventListSearchParams,
+  eventListTitle,
+  formatWallTime,
+  hasEnded,
+  inCategoryFilter,
+  parseArchiveView,
+  parseCategoryFilter,
+  parseEventFilter,
+  sortNewestFirst,
+} from './event-list';
 
 function event(overrides: Partial<SiteEvent>): SiteEvent {
   return {
@@ -18,6 +29,7 @@ function event(overrides: Partial<SiteEvent>): SiteEvent {
     coverKey: null,
     registrationUrl: null,
     archived: false,
+    interestClass: false,
     createdAt: '2026-09-01T00:00:00.000Z',
     updatedAt: '2026-09-01T00:00:00.000Z',
     ...overrides,
@@ -39,6 +51,37 @@ describe('parseEventFilter and filterSearchParams', () => {
     expect(filterSearchParams({ status: 'published' }).toString()).toBe('status=published');
     const filter = { category: 'extracurricular', status: 'published' } as const;
     expect(parseEventFilter(filterSearchParams(filter))).toEqual(filter);
+  });
+});
+
+describe('the 兴趣课 filter', () => {
+  it('offers 兴趣课 after the two categories', () => {
+    expect(CATEGORY_FILTERS.map((option) => option.label)).toEqual(['全部', '学术活动', '课外活动', '兴趣课']);
+  });
+
+  it('asks the server for academic events and keeps only the interest classes among them', () => {
+    const params = new URLSearchParams('category=interest&status=published');
+    expect(parseCategoryFilter(params)).toBe('interest');
+    expect(parseEventFilter(params)).toEqual({ category: 'academic', status: 'published' });
+    expect(inCategoryFilter(event({ category: 'academic', interestClass: true }), 'interest')).toBe(true);
+    expect(inCategoryFilter(event({ category: 'academic', interestClass: false }), 'interest')).toBe(false);
+    expect(inCategoryFilter(event({ category: 'extracurricular', interestClass: true }), 'interest')).toBe(false);
+  });
+
+  it('keeps every event the server sent under the other buttons', () => {
+    for (const filter of [undefined, 'academic', 'extracurricular'] as const) {
+      expect(inCategoryFilter(event({ category: 'academic', interestClass: false }), filter)).toBe(true);
+      expect(inCategoryFilter(event({ category: 'academic', interestClass: true }), filter)).toBe(true);
+    }
+  });
+
+  it('writes the list address with only the filters that are set and reads it back unchanged', () => {
+    expect(eventListSearchParams({}).toString()).toBe('');
+    const params = eventListSearchParams({ category: 'interest', status: 'draft', archive: 'all' });
+    expect(params.toString()).toBe('category=interest&status=draft&archive=all');
+    expect(parseCategoryFilter(params)).toBe('interest');
+    expect(parseArchiveView(params)).toBe('all');
+    expect(parseCategoryFilter(new URLSearchParams('category=interests'))).toBeUndefined();
   });
 });
 

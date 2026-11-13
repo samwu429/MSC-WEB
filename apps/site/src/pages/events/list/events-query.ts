@@ -19,8 +19,14 @@ export interface EventsQuery {
   page: number;
 }
 
+/** The ?page= of a list of past events, here and on the Interest Classes page. */
+/** 往期活动列表的 ?page= 参数，本页面与 "兴趣课" 页面共用。 */
+export function readPageNumber(raw: string | undefined): number {
+  const page = readInteger(new IssueCollector(), raw, 'page', { label: '页码', min: 1, max: Number.MAX_SAFE_INTEGER, fallback: 1 });
+  return Math.min(page, MAX_PAGE);
+}
+
 export function readEventsQuery(raw: { type?: string; page?: string }): EventsQuery {
   const category = EVENT_CATEGORIES.find((candidate) => candidate === raw.type) ?? null;
-  const page = readInteger(new IssueCollector(), raw.page, 'page', { label: '页码', min: 1, max: Number.MAX_SAFE_INTEGER, fallback: 1 });
-  return { category, page: Math.min(page, MAX_PAGE) };
+  return { category, page: readPageNumber(raw.page) };
 }

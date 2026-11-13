@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
-import { EVENT_CATEGORY_LABELS, PUBLISH_STATUS_LABELS, type SiteEvent, type WallTime } from '@msc-web/content';
+import { EVENT_CATEGORY_LABELS, INTEREST_CLASS_LABEL, PUBLISH_STATUS_LABELS, isInterestClass, type SiteEvent, type WallTime } from '@msc-web/content';
 import { Badge } from '../../../shared/ui/feedback';
 import { eventListTitle, formatWallTime, hasEnded } from './event-list';
 
-const COLUMNS = 'md:grid md:grid-cols-[9.5rem_minmax(0,1fr)_15rem] md:items-center md:gap-4';
+const COLUMNS = 'md:grid md:grid-cols-[9.5rem_minmax(0,1fr)_16rem] md:items-center md:gap-4';
 
 /** A table on wide screens; on phones each row stacks its time, title and badges. */
 /** 宽屏上为表格；在手机上每行把时间、标题与标记上下排列。 */
@@ -23,6 +23,7 @@ export function EventRows({ events, now }: { events: readonly SiteEvent[]; now: 
               <span className="mt-0.5 block font-semibold text-ink md:mt-0 md:truncate">{eventListTitle(event)}</span>
               <span className="mt-2 flex flex-wrap gap-1.5 md:mt-0">
                 <Badge tone={event.category === 'academic' ? 'purple' : 'gold'}>{EVENT_CATEGORY_LABELS[event.category].zh}</Badge>
+                {isInterestClass(event) && <Badge tone="outline">{INTEREST_CLASS_LABEL.zh}</Badge>}
                 <Badge tone={event.status === 'published' ? 'green' : 'gray'}>{PUBLISH_STATUS_LABELS[event.status].zh}</Badge>
                 {event.archived ? <Badge tone="red">已归档</Badge> : hasEnded(event, now) && <Badge>已结束</Badge>}
               </span>

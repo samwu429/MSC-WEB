@@ -30,6 +30,7 @@ function eventInput(overrides: Partial<EventInput> = {}): EventInput {
     coverKey: null,
     registrationUrl: null,
     archived: false,
+    interestClass: false,
     ...overrides,
   };
 }
@@ -112,6 +113,29 @@ describe.skipIf(!sqlite)('events repository', () => {
     expect(await updateEvent(d1.db, OFFICER, event.id, eventInput(), event.updatedAt)).toBe('stale');
     expect(await updateEvent(d1.db, OFFICER, 'evt_missing', eventInput(), event.updatedAt)).toBe('missing');
     expect((await findEvent(d1.db, event.id))?.coverKey).toBe(IMAGE_KEY);
+  });
+
+  it('saves and reads back whether an event is an interest class', async () => {
+    const talk = await insertEvent(d1.db, OFFICER, eventInput({ slug: 'why-prices-rise', category: 'academic', interestClass: true }));
+    expect(talk.interestClass).toBe(true);
+    expect((await findEvent(d1.db, talk.id))?.interestClass).toBe(true);
+    expect(d1.rows('SELECT interest_class FROM events WHERE id = ?', talk.id)).toEqual([{ interest_class: 1 }]);
+    expect((await listEvents(d1.db, { category: 'academic' })).map((event) => event.interestClass)).toEqual([true]);
+
+    const unmarked = eventInput({ slug: 'why-prices-rise', category: 'academic', interestClass: false });
+    expect(await updateEvent(d1.db, OFFICER, talk.id, unmarked, talk.updatedAt)).toBe('updated');
+    expect((await findEvent(d1.db, talk.id))?.interestClass).toBe(false);
+    expect((await insertEvent(d1.db, OFFICER, eventInput({ slug: 'gala' }))).interestClass).toBe(false);
+  });
+
+  it('holds the column to 0 and 1, and gives rows written without it 0', async () => {
+    const gala = await insertEvent(d1.db, OFFICER, eventInput({ slug: 'gala' }));
+    expect(() => d1.exec("UPDATE events SET interest_class = 2 WHERE slug = 'gala'")).toThrow(/CHECK constraint failed/);
+    d1.raw
+      .prepare('INSERT INTO events (id, slug, category, status, starts_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
+      .run('evt_old', 'old-row', 'academic', 'published', '2026-09-01T18:00', '2026-09-01T00:00:00.000Z', '2026-09-01T00:00:00.000Z');
+    expect((await findEvent(d1.db, 'evt_old'))?.interestClass).toBe(false);
+    expect((await findEvent(d1.db, gala.id))?.interestClass).toBe(false);
   });
 
   it('removes the gallery together with the event', async () => {

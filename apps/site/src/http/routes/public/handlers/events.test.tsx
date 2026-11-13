@@ -210,6 +210,75 @@ describe.skipIf(!sqlite)('events pages', () => {
     expect(detail).not.toContain('https://forms.example.com/called-off');
   });
 
+  describe('interest classes', () => {
+    const CHIP = '<span class="chip chip--interest">Interest Class</span>';
+
+    function seedInterestClasses(): void {
+      seedEvent(test.d1, { slug: 'why-prices-rise', startsAt: '2026-11-27T18:00', title: { zh: '物价为什么会上涨', en: 'Why Prices Rise' }, interestClass: true });
+      seedEvent(test.d1, { slug: 'tea-history', startsAt: '2026-10-02T18:00', endsAt: '2026-10-02T19:30', interestClass: true });
+      seedEvent(test.d1, { slug: 'research-workshop', startsAt: '2026-11-08T18:00', category: 'academic' });
+      seedEvent(test.d1, { slug: 'board-games', startsAt: '2026-11-15T19:00', category: 'extracurricular' });
+    }
+
+    it('still lists interest classes under All and Academic, naming them on their chip and in the past list', async () => {
+      seedInterestClasses();
+      for (const path of ['/events', '/events?type=academic']) {
+        const { upcoming, past } = sections((await get(path)).html);
+        expect(upcoming, path).toContain(`${CHIP}</div></div><div class="card__body"><div><span class="datebox"><span class="datebox__month">NOV</span><span class="datebox__day">27</span>`);
+        expect(occurrences(upcoming, CHIP), path).toBe(1);
+        expect(upcoming, path).toContain('<span class="chip chip--academic">Academic</span>');
+        expect(past, path).toMatch(/href="\/events\/tea-history">[^]*?<span class="past-list__tag">Interest Class<\/span>/);
+      }
+      const extracurricular = (await get('/events?type=extracurricular')).html;
+      expect(extracurricular).not.toContain('why-prices-rise');
+      expect(extracurricular).not.toContain(CHIP);
+    });
+
+    it('keeps the category tabs as they were', async () => {
+      const { html } = await get('/events');
+      expect(html.match(/<a class="tab" href="[^"]*"/g)).toEqual(['<a class="tab" href="/events"', '<a class="tab" href="/events?type=academic"', '<a class="tab" href="/events?type=extracurricular"']);
+    });
+
+    it('places an interest class under Academic Activities → Interest Classes and leads back there', async () => {
+      seedInterestClasses();
+      const { status, html } = await get('/events/why-prices-rise');
+      expect(status).toBe(200);
+      expect(html).toContain(`<div class="eyebrow">${CHIP}<span class="chip chip--upcoming">Upcoming</span></div>`);
+      expect(html).toContain('<span class="info-list__label">Category</span><span class="info-list__value">Interest Class</span>');
+      expect(html).toMatch(/<a class="backlink" href="\/interest-classes"><svg[^]*?<\/svg>All interest classes<\/a>/);
+      expect(html).not.toContain('class="backlink" href="/events"');
+      expect(html).toContain('<a class="site-nav__link site-nav__link--parent" href="/academics" aria-current="true">');
+      expect(html).toContain('<a class="site-nav__menu-link" href="/interest-classes" aria-current="true">');
+      expect(html).toContain('<a class="site-nav__menu-link" href="/reviews">');
+      expect(html).toContain('<a class="site-nav__link" href="/events">');
+      expect(html).not.toContain('href="/events" aria-current');
+      expect(html).toContain('<link rel="canonical" href="https://utmmsc.com/events/why-prices-rise"/>');
+      // An interest class is academic, so its page links the Code like every other academic event.
+      // 兴趣课属于学术活动，因此其页面与其他学术活动一样链接守则。
+      expect(html).toContain('href="/static/docs/code-of-behaviour-on-academic-matters.pdf"');
+    });
+
+    it('keeps every other event under Events, with its category and the way back to all events', async () => {
+      seedInterestClasses();
+      const { html } = await get('/events/research-workshop');
+      expect(html).toContain('<div class="eyebrow"><span class="chip chip--academic">Academic</span>');
+      expect(html).toContain('<span class="info-list__label">Category</span><span class="info-list__value">Academic</span>');
+      expect(html).toMatch(/<a class="backlink" href="\/events"><svg[^]*?<\/svg>All events<\/a>/);
+      expect(html).toContain('<a class="site-nav__link" href="/events" aria-current="true">');
+      expect(html).toContain('<a class="site-nav__link site-nav__link--parent" href="/academics">');
+      expect(html).not.toContain('<a class="site-nav__menu-link" href="/interest-classes" aria-current');
+    });
+
+    it('names an extracurricular event by its category even with the mark left on it', async () => {
+      seedEvent(test.d1, { slug: 'mislabelled-social', startsAt: '2026-11-20T18:00', category: 'extracurricular', interestClass: true });
+      const { html } = await get('/events/mislabelled-social');
+      expect(html).toContain('<span class="chip chip--extracurricular">Extracurricular</span>');
+      expect(html).not.toContain('chip--interest');
+      expect(html).toMatch(/<a class="backlink" href="\/events">/);
+      expect(sections((await get('/events')).html).upcoming).not.toContain('chip--interest');
+    });
+  });
+
   it('answers 404 for drafts, unknown slugs and malformed slugs', async () => {
     seedEvent(test.d1, { slug: 'secret-plan', startsAt: '2026-11-01T18:00', status: 'draft' });
     for (const path of ['/events/secret-plan', '/events/nothing-here', '/events/Not_A_Slug']) {

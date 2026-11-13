@@ -1,6 +1,6 @@
 import type { PageContext } from '../context';
 import { COMMON, t } from '../i18n/strings';
-import { SECTION_PATHS, sitePath } from '../routing/paths';
+import { ACADEMIC_PAGE_PATHS, SECTION_PATHS, sitePath } from '../routing/paths';
 import { BookMark, Icon, type IconName } from '../components/Icon';
 import { Bi, BiText, MediaImage, MobileOnlyNote, RecognitionLink } from '../components/common';
 import { hasContactDetails } from '../components/contact';
@@ -22,9 +22,12 @@ export function SiteFooter({ ctx }: { ctx: PageContext }) {
     contact.githubUrl ? { href: contact.githubUrl, label: 'GitHub', icon: 'github' } : null,
   ].filter((item): item is { href: string; label: string; icon: IconName } => item !== null);
 
+  // The two academic pages stand on their own here, so a visitor scanning the footer finds each in one step.
+  // 两个学术页面在这里各自单列，浏览页脚的访客一步就能找到其中任何一个。
   const explore = [
     { href: sitePath(SECTION_PATHS.events), label: t(COMMON, 'navEvents', locale) },
-    { href: sitePath(SECTION_PATHS.reviews), label: t(COMMON, 'navReviews', locale) },
+    { href: sitePath(ACADEMIC_PAGE_PATHS.reviews), label: t(COMMON, 'navReviews', locale) },
+    { href: sitePath(ACADEMIC_PAGE_PATHS.interestClasses), label: t(COMMON, 'navInterestClasses', locale) },
     { href: sitePath(SECTION_PATHS.people), label: t(COMMON, 'navPeople', locale) },
     { href: sitePath(SECTION_PATHS.about), label: t(COMMON, 'navAbout', locale) },
   ];

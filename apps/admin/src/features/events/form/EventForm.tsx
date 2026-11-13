@@ -12,9 +12,11 @@ import { UPLOADING_STATUS, useUploadsInProgress } from '../../../shared/media/us
 import { Button, buttonClass } from '../../../shared/ui/Button';
 import { useConfirm } from '../../../shared/ui/confirm';
 import { Notice } from '../../../shared/ui/feedback';
-import { LocalizedInput, Select, TextInput, WallTimeInput } from '../../../shared/ui/fields';
+import { Checkbox, LocalizedInput, Select, TextInput, WallTimeInput } from '../../../shared/ui/fields';
 import { FormActions, Panel } from '../../../shared/ui/layout';
-import { CATEGORY_OPTIONS, STATUS_OPTIONS, emptyEventInput, publicEventPath, toEventInput } from './event-form';
+import { CATEGORY_OPTIONS, STATUS_OPTIONS, categoryChange, emptyEventInput, publicEventPath, toEventInput } from './event-form';
+
+const INTEREST_CLASS_HINT = '勾选后，这场活动会出现在网站「学术活动 → 兴趣课」页面，并标为兴趣课。兴趣课用中文讲大家感兴趣的知识，不跟随任何课程。';
 
 /**
  * The editor for one event's own fields. The public link follows the last saved record rather than the form, so
@@ -135,12 +137,21 @@ export function EventForm(props: { event: SiteEvent | null; onReload: () => void
               label="类别"
               value={value.category}
               options={CATEGORY_OPTIONS}
-              onChange={(category) => change({ category })}
+              onChange={(category) => change(categoryChange(category))}
               issues={issues}
               field="category"
               required
             />
           </div>
+          <Checkbox
+            label="兴趣课"
+            checked={value.interestClass}
+            disabled={value.category !== 'academic'}
+            onChange={(interestClass) => change({ interestClass })}
+            issues={issues}
+            field="interestClass"
+            hint={value.category === 'academic' ? INTEREST_CLASS_HINT : `类别为「学术活动」时才能勾选。${INTEREST_CLASS_HINT}`}
+          />
           <LocalizedInput
             label="标题"
             value={value.title}

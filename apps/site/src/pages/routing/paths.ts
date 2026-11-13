@@ -33,16 +33,32 @@ export function legacyEnglishTarget(pathname: string): string | null {
 
 /** Site sections, for the header navigation and the current-page marker. */
 /** 网站板块，用于页眉导航与当前页标记。 */
-export const NAV_SECTIONS = ['home', 'events', 'reviews', 'people', 'about'] as const;
+export const NAV_SECTIONS = ['home', 'events', 'academics', 'people', 'about'] as const;
 
 export type NavSection = (typeof NAV_SECTIONS)[number];
 
 export const SECTION_PATHS: Record<NavSection, string> = {
   home: '/',
   events: '/events',
-  reviews: '/reviews',
+  academics: '/academics',
   people: '/people',
   about: '/about',
+};
+
+/**
+ * Academic Activities at /academics shows test reviews, then interest classes. Each also has a page of its own,
+ * reached from the Academic Activities dropdown in the site header, in the same order. Test reviews keep the address
+ * they have always had, so links to /reviews keep working.
+ * "学术活动" 在 /academics 先展示考前复习，再展示兴趣课。两者也各有自己的页面，从网站页眉的 "学术活动" 下拉菜单进入，
+ * 顺序相同。考前复习保留一直以来的地址，因此指向 /reviews 的链接依然有效。
+ */
+export const ACADEMIC_PAGES = ['reviews', 'interestClasses'] as const;
+
+export type AcademicPageKey = (typeof ACADEMIC_PAGES)[number];
+
+export const ACADEMIC_PAGE_PATHS: Record<AcademicPageKey, string> = {
+  reviews: '/reviews',
+  interestClasses: '/interest-classes',
 };
 
 /**
@@ -72,11 +88,22 @@ export function isPersonId(value: string | undefined): value is string {
   return value !== undefined && /^[A-Za-z0-9_-]{1,64}$/.test(value);
 }
 
+/** Whether a path is `base` itself or a page under it, such as /reviews/csc108h5 under /reviews. */
+/** 路径是否为 `base` 本身或其下的页面，例如 /reviews 之下的 /reviews/csc108h5。 */
+export function isWithin(path: string, base: string): boolean {
+  return path === base || path.startsWith(`${base}/`);
+}
+
+/** Where a section's pages live: under its own path, and for Academic Activities also under the paths of its two pages. */
+/** 板块页面所在的位置：板块自身路径之下；"学术活动" 还包括其两个页面的路径之下。 */
+function sectionBases(section: NavSection): string[] {
+  return section === 'academics' ? [SECTION_PATHS.academics, ...ACADEMIC_PAGES.map((page) => ACADEMIC_PAGE_PATHS[page])] : [SECTION_PATHS[section]];
+}
+
 export function sectionOfPath(path: string): NavSection | null {
   if (path === '/') return 'home';
   for (const section of NAV_SECTIONS) {
-    const base = SECTION_PATHS[section];
-    if (base !== '/' && (path === base || path.startsWith(`${base}/`))) return section;
+    if (sectionBases(section).some((base) => base !== '/' && isWithin(path, base))) return section;
   }
   return null;
 }

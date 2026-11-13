@@ -43,6 +43,7 @@ const BADGE_TONES = {
   green: 'bg-emerald-50 text-emerald-800 ring-emerald-200',
   gray: 'bg-canvas text-ink-muted ring-line-strong',
   purple: 'bg-brand-50 text-brand-800 ring-brand-200',
+  outline: 'bg-white text-brand-800 ring-brand-700/50',
   gold: 'bg-gold-100 text-gold-700 ring-gold-600/30',
   red: 'bg-red-50 text-red-700 ring-red-200',
 } as const;

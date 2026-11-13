@@ -201,6 +201,21 @@ describe.skipIf(!sqlite)('admin events API', () => {
       expect(saved.createdAt).toBe(event.createdAt);
     });
 
+    it('marks an academic event as an interest class, refuses the mark on any other category, and treats a missing mark as none', async () => {
+      const talk = await createEvent({ category: 'academic', interestClass: true, title: { zh: '物价为什么会上涨', en: 'Why Prices Rise' } });
+      expect(talk.interestClass).toBe(true);
+      expect((await getEvent(talk.id)).interestClass).toBe(true);
+      expect((await createEvent()).interestClass).toBe(false);
+
+      const refused = await call('', send('POST', eventBody({ category: 'extracurricular', interestClass: true })));
+      expect(refused.status).toBe(400);
+      expect((await errorOf(refused)).issues).toEqual([{ field: 'interestClass', message: '只有学术活动可以标为兴趣课' }]);
+
+      const moved = await call(`/${talk.id}`, send('PUT', { value: eventBody({ category: 'extracurricular', interestClass: true }), expectedUpdatedAt: talk.updatedAt }));
+      expect(moved.status).toBe(400);
+      expect((await getEvent(talk.id)).interestClass).toBe(true);
+    });
+
     it('lets an event keep its own slug but not take another one', async () => {
       const first = await createEvent({ slug: 'first' });
       const second = await createEvent({ slug: 'second' });

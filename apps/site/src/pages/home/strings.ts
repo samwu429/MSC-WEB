@@ -28,10 +28,10 @@ export const HOME = {
   pillarReviewsLink: { zh: '查看复习安排', en: 'See test reviews' },
   pillarAcademicTitle: { zh: '学术活动', en: 'Academic activities' },
   pillarAcademicText: {
-    zh: '举办讲座与工作坊，在课外科研与学术写作方面提供同伴指导。我们坚守学术诚信，绝不代写。',
-    en: 'Talks, workshops and peer mentorship in extracurricular research and scholarly writing. We uphold academic integrity and never ghostwrite.',
+    zh: '用中文讲授大家感兴趣的知识的兴趣课，以及讲座、工作坊与科研写作方面的同伴指导。我们坚守学术诚信，绝不代写。',
+    en: 'Interest classes in Mandarin on topics many students are curious about, plus talks, workshops and peer mentorship in research and writing. We uphold academic integrity and never ghostwrite.',
   },
-  pillarAcademicLink: { zh: '浏览学术活动', en: 'Browse academic events' },
+  pillarAcademicLink: { zh: '查看学术活动', en: 'See academic activities' },
   pillarExtracurricularTitle: { zh: '课外活动', en: 'Extracurricular activities' },
   pillarExtracurricularText: {
     zh: '以兴趣为主题的活动、文化交流与中文学习，欢迎不同背景的同学一起参与。',

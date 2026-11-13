@@ -117,7 +117,17 @@ describe.skipIf(!sqlite)('home page', () => {
     expect(html).toContain('<h2 class="section-title" id="home-reviews">Test reviews this term<span class="zh" lang="zh-CN">本学期考前复习</span></h2>');
     expect(html).not.toContain('class="person');
     expect(html).not.toContain('class="gallery');
-    expect(html).toContain('href="/events?type=academic"');
+    // The academic pillar leads to Academic Activities and names interest classes first; the extracurricular one still filters the events page.
+    // 学术活动支柱链接到 "学术活动" 页面，并首先提到兴趣课；课外活动支柱仍链接到筛选后的活动页面。
+    const academic = html.slice(html.indexOf('Academic activities<span class="zh" lang="zh-CN">学术活动</span>'), html.indexOf('Extracurricular activities'));
+    expect(academic).toContain(
+      '<p class="pillar__text">Interest classes in Mandarin on topics many students are curious about, plus talks, workshops and peer mentorship in research and writing. We uphold academic integrity and never ghostwrite.</p>',
+    );
+    expect(academic).toContain('<p class="pillar__text zh-text" lang="zh-CN">用中文讲授大家感兴趣的知识的兴趣课，以及讲座、工作坊与科研写作方面的同伴指导。我们坚守学术诚信，绝不代写。</p>');
+    expect(academic).toMatch(/<a class="link-arrow" href="\/academics">See academic activities<svg/);
+    expect(html).toContain('<a class="link-arrow" href="/reviews">See test reviews<svg');
+    expect(html).toContain('href="/events?type=extracurricular"');
+    expect(html).not.toContain('href="/events?type=academic"');
     expect(html).not.toContain('href="/en');
     expect(html).not.toContain('github.com');
     expect(html).toContain('class="cta-band"');

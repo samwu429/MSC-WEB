@@ -52,10 +52,10 @@ function DesktopNavItem({ item }: { item: NavItem }) {
  * 吸顶页眉。桌面端直接显示导航；窄屏使用 <details> 菜单，并把各板块的子页面列在其下方，因此页眉无需任何脚本即可工作。
  * 网站只有一种语言版本（英文并附中文），因此没有语言切换。
  */
-export function SiteHeader({ ctx }: { ctx: PageContext }) {
+export function SiteHeader({ ctx, navPath }: { ctx: PageContext; navPath: string }) {
   const { locale } = ctx;
   const announcement = ctx.settings.announcement;
-  const items = navItems(ctx.path);
+  const items = navItems(navPath);
 
   return (
     <>

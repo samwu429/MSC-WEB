@@ -6,8 +6,9 @@ import { Icon } from '../../components/Icon';
 import { COMMON, t } from '../../i18n/strings';
 import { sitePath, withQuery } from '../../routing/paths';
 import { EventCard, PastEventList } from '../EventCard';
-import { EVENTS, pageStatus } from '../strings';
-import { PAST_EVENTS_PAGE_SIZE, type EventsQuery } from './events-query';
+import { EVENTS } from '../strings';
+import type { EventsQuery } from './events-query';
+import { PastPager } from './PastPager';
 
 const UPCOMING_ID = 'upcoming-events';
 const PAST_ID = 'past-events';
@@ -48,37 +49,22 @@ function EventGrid({ ctx, events }: { ctx: PageContext; events: SiteEvent[] }) {
   );
 }
 
-/**
- * Previous and next links for past events. They keep the category and jump to the past section, so paging does
- * not scroll the visitor back above the upcoming events. A page beyond the end links back to the last real page.
- * 往期活动的上一页与下一页链接。链接保留类别并跳转到往期板块，翻页时访问者不必重新越过近期活动。
- * 超出末页的页面会链接回最后一个实际存在的页面。
- */
+/** The pager of past events keeps the category. */
+/** 往期活动的分页保留所选类别。 */
 function Pager({ ctx, query, pastTotal }: { ctx: PageContext; query: EventsQuery; pastTotal: number }) {
-  const { locale } = ctx;
-  const totalPages = Math.max(1, Math.ceil(pastTotal / PAST_EVENTS_PAGE_SIZE));
-  const previous = query.page > 1 ? Math.min(query.page - 1, totalPages) : null;
-  const next = query.page < totalPages ? query.page + 1 : null;
-  if (previous === null && next === null) return null;
   return (
-    <nav class="pager" aria-label={t(EVENTS, 'pagerLabel', locale)}>
-      {previous !== null && (
-        <a class="btn btn--ghost btn--small" rel="prev" href={`${listHref(ctx, query.category, previous)}#${PAST_ID}`}>
-          {t(EVENTS, 'previousPage', locale)}
-        </a>
-      )}
-      {query.page <= totalPages && <span class="muted small">{pageStatus(query.page, totalPages, locale)}</span>}
-      {next !== null && (
-        <a class="btn btn--ghost btn--small" rel="next" href={`${listHref(ctx, query.category, next)}#${PAST_ID}`}>
-          {t(EVENTS, 'nextPage', locale)}
-        </a>
-      )}
-    </nav>
+    <PastPager
+      locale={ctx.locale}
+      label={t(EVENTS, 'pagerLabel', ctx.locale)}
+      page={query.page}
+      total={pastTotal}
+      href={(page) => `${listHref(ctx, query.category, page)}#${PAST_ID}`}
+    />
   );
 }
 
-/** On the Academic tab: the Group's academic activities follow the University's Code. */
-/** 学术活动标签页上：联盟的学术活动遵守学校的守则。 */
+/** On the Academic tab and the Academic Activities page: the Group's academic activities follow the University's Code. */
+/** 学术活动标签页与 "学术活动" 页面上：联盟的学术活动遵守学校的守则。 */
 export function AcademicIntegrityNotice() {
   return (
     <div class="notice notice--integrity" role="note">

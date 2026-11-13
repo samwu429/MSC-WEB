@@ -32,6 +32,8 @@ export interface EventSeed {
   location?: Partial<LocalizedText>;
   coverKey?: string | null;
   registrationUrl?: string | null;
+  archived?: boolean;
+  interestClass?: boolean;
   updatedAt?: string;
 }
 
@@ -44,8 +46,8 @@ export function seedEvent(d1: SqliteD1, seed: EventSeed): string {
   d1.raw
     .prepare(
       `INSERT INTO events (id, slug, category, status, title_zh, title_en, summary_zh, summary_en, body_zh, body_en, location_zh, location_en,
-         starts_at, ends_at, cover_key, registration_url, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         starts_at, ends_at, cover_key, registration_url, archived, interest_class, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .run(
       id,
@@ -64,6 +66,8 @@ export function seedEvent(d1: SqliteD1, seed: EventSeed): string {
       seed.endsAt ?? null,
       seed.coverKey ?? null,
       seed.registrationUrl ?? null,
+      seed.archived ? 1 : 0,
+      seed.interestClass ? 1 : 0,
       CREATED_AT,
       seed.updatedAt ?? CREATED_AT,
     );

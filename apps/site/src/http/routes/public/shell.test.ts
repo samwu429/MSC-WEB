@@ -115,6 +115,18 @@ describe.skipIf(!sqlite)('site shell', () => {
   });
 
   describe('footer', () => {
+    it('lists Events, Test Reviews, Interest Classes, Our People and About under Explore, in that order', async () => {
+      const footer = footerOf((await get('/academics')).html);
+      const explore = footer.slice(footer.indexOf('<h2>Explore'), footer.indexOf('</ul>', footer.indexOf('<h2>Explore')));
+      expect([...explore.matchAll(/<li><a href="([^"]*)">([^<]*)<\/a><\/li>/g)].map((match) => [match[1], match[2]])).toEqual([
+        ['/events', 'Events'],
+        ['/reviews', 'Test Reviews'],
+        ['/interest-classes', 'Interest Classes'],
+        ['/people', 'Our People'],
+        ['/about', 'About'],
+      ]);
+    });
+
     it('leaves the Contact column out until a contact detail is set', async () => {
       const before = footerOf((await get('/')).html);
       expect(occurrences(before, 'class="footer-col"')).toBe(2);

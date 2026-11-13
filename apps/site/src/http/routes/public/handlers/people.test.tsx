@@ -353,7 +353,8 @@ describe.skipIf(!sqlite)('Our People pages', () => {
 
     it('offers the dropdown on every page in the order /people lists the groups, in English only, and in the phone menu', async () => {
       const html = await render('/events');
-      const menu = html.slice(html.indexOf('<div class="site-nav__panel">'));
+      const people = html.slice(html.indexOf('<a class="site-nav__link site-nav__link--parent" href="/people"'));
+      const menu = people.slice(people.indexOf('<div class="site-nav__panel">'));
       const order = ['/people/advisors', '/people/presidium', '/people/departments'].map((href) => menu.indexOf(`href="${href}"`));
       expect(order.every((index) => index >= 0)).toBe(true);
       expect([...order].sort((a, b) => a - b)).toEqual(order);

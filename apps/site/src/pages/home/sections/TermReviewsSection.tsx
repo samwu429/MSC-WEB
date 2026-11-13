@@ -3,7 +3,7 @@ import type { CourseReviews } from '../../../infrastructure/d1/public/reviews';
 import type { PageContext } from '../../context';
 import { EmptyState, SectionHeading, txt } from '../../components/common';
 import { t } from '../../i18n/strings';
-import { SECTION_PATHS, sitePath } from '../../routing/paths';
+import { ACADEMIC_PAGE_PATHS, sitePath } from '../../routing/paths';
 import { CourseCard } from '../../reviews/CourseCard';
 import { HOME } from '../strings';
 
@@ -17,7 +17,7 @@ export function TermReviewsSection({ ctx, term, courses }: { ctx: PageContext; t
           eyebrow={txt(termLabel(term), locale)}
           title={HOME.reviewsTitle}
           lead={HOME.reviewsLead}
-          link={{ href: sitePath(SECTION_PATHS.reviews), label: t(HOME, 'reviewsLink', locale) }}
+          link={{ href: sitePath(ACADEMIC_PAGE_PATHS.reviews), label: t(HOME, 'reviewsLink', locale) }}
         />
         {courses.length > 0 ? (
           <div class="grid grid--2">

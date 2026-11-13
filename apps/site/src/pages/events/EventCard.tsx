@@ -1,4 +1,4 @@
-import { EVENT_CATEGORY_LABELS, eventStatus, formatTimeRange, formatLongDate, wallDateOf, type SiteEvent } from '@msc-web/content';
+import { eventKindLabel, eventStatus, formatTimeRange, formatLongDate, isInterestClass, wallDateOf, type SiteEvent } from '@msc-web/content';
 import type { PageContext } from '../context';
 import { Bi, DateBox, MediaImage, MetaItem, StatusChip, fallbackLang, txt } from '../components/common';
 import { BookMark } from '../components/Icon';
@@ -8,6 +8,13 @@ import { sitePath } from '../routing/paths';
 /** 活动详情页的地址。 */
 export function eventHref(event: Pick<SiteEvent, 'slug'>): string {
   return sitePath(`/events/${event.slug}`);
+}
+
+/** The chip naming an event's kind: an interest class has a colour of its own, every other event its category's. */
+/** 标明活动类型的标签：兴趣课有自己的颜色，其他活动使用其类别的颜色。 */
+export function EventKindChip(props: { event: Pick<SiteEvent, 'category' | 'interestClass'>; ctx: PageContext }) {
+  const { event } = props;
+  return <span class={`chip chip--${isInterestClass(event) ? 'interest' : event.category}`}>{txt(eventKindLabel(event), props.ctx.locale)}</span>;
 }
 
 /**
@@ -34,7 +41,7 @@ export function EventCard(props: { event: SiteEvent; ctx: PageContext }) {
           </div>
         )}
         <div class="card__badges">
-          <span class={`chip chip--${event.category}`}>{txt(EVENT_CATEGORY_LABELS[event.category], locale)}</span>
+          <EventKindChip event={event} ctx={ctx} />
           {(status === 'ongoing' || status === 'past') && <StatusChip status={status} locale={locale} />}
         </div>
       </div>
@@ -69,12 +76,14 @@ export function EventCard(props: { event: SiteEvent; ctx: PageContext }) {
 }
 
 /**
- * Events that have ended, as a compact list: the date, the title and its category on one line each. They show the
- * Group has held them without taking the room the upcoming events need.
- * 已结束的活动，以紧凑列表显示：每个活动一行，包括日期、标题与类别。它们说明联盟举办过这些活动，又不会占用近期活动所需的版面。
+ * Events that have ended, as a compact list: the date, the title and its kind on one line each. They show the
+ * Group has held them without taking the room the upcoming events need. A list of one kind only, such as past
+ * interest classes, leaves the kind out.
+ * 已结束的活动，以紧凑列表显示：每个活动一行，包括日期、标题与类型。它们说明联盟举办过这些活动，又不会占用近期活动所需的版面。
+ * 只含一种类型的列表（例如往期兴趣课）不显示类型。
  */
-export function PastEventList(props: { events: SiteEvent[]; ctx: PageContext }) {
-  const { ctx } = props;
+export function PastEventList(props: { events: SiteEvent[]; ctx: PageContext; showKind?: boolean }) {
+  const { ctx, showKind = true } = props;
   return (
     <ul class="past-list">
       {props.events.map((event) => (
@@ -85,7 +94,7 @@ export function PastEventList(props: { events: SiteEvent[]; ctx: PageContext }) 
           <a class="past-list__title" href={eventHref(event)}>
             <Bi text={event.title} />
           </a>
-          <span class="past-list__tag">{txt(EVENT_CATEGORY_LABELS[event.category], ctx.locale)}</span>
+          {showKind && <span class="past-list__tag">{txt(eventKindLabel(event), ctx.locale)}</span>}
         </li>
       ))}
     </ul>

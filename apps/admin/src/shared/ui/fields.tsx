@@ -88,7 +88,17 @@ export function Select<T extends string>(props: {
   );
 }
 
-export function Checkbox(props: { label: string; checked: boolean; onChange: (checked: boolean) => void; hint?: ReactNode; issues?: IssueMap; field?: string }) {
+/** A checkbox with its label and hint; `disabled` greys it out while the rest of the form makes it not apply. */
+/** 带标签与说明的复选框；表单其他内容使其不适用时，用 `disabled` 将其置灰。 */
+export function Checkbox(props: {
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  hint?: ReactNode;
+  issues?: IssueMap;
+  field?: string;
+  disabled?: boolean;
+}) {
   const id = useId();
   const error = props.field ? props.issues?.get(props.field) : undefined;
   return (
@@ -96,13 +106,14 @@ export function Checkbox(props: { label: string; checked: boolean; onChange: (ch
       <input
         id={id}
         type="checkbox"
-        className="mt-0.5 h-4 w-4 rounded border-line-strong text-brand-700 focus:ring-brand-200"
+        className="mt-0.5 h-4 w-4 rounded border-line-strong text-brand-700 focus:ring-brand-200 disabled:cursor-not-allowed disabled:opacity-50"
         checked={props.checked}
+        disabled={props.disabled}
         aria-invalid={Boolean(error)}
         onChange={(event) => props.onChange(event.target.checked)}
       />
       <label htmlFor={id} className="text-sm">
-        <span className="font-semibold text-ink">{props.label}</span>
+        <span className={`font-semibold ${props.disabled ? 'text-ink-muted' : 'text-ink'}`}>{props.label}</span>
         {props.hint && !error && <span className="mt-0.5 block text-xs text-ink-muted">{props.hint}</span>}
         {error && (
           <span className="mt-0.5 block text-xs font-medium text-red-700" role="alert">

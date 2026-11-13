@@ -3,6 +3,7 @@ import { SITE_LOCALE } from '../../../pages/context';
 import { PEOPLE_PAGE_PATHS, legacyEnglishTarget } from '../../../pages/routing/paths';
 import type { AppEnv } from '../../context';
 import { aboutPage } from './handlers/about';
+import { academicsPage, interestClassesPage } from './handlers/academics';
 import { coursePage, reviewsPage } from './handlers/reviews';
 import { eventDetailPage, eventsPage } from './handlers/events';
 import { homePage } from './handlers/home';
@@ -15,8 +16,10 @@ export const PUBLIC_PAGES: readonly { path: string; handler: PageHandler }[] = [
   { path: '/', handler: homePage },
   { path: '/events', handler: eventsPage },
   { path: '/events/:slug', handler: eventDetailPage },
+  { path: '/academics', handler: academicsPage },
   { path: '/reviews', handler: reviewsPage },
   { path: '/reviews/:course', handler: coursePage },
+  { path: '/interest-classes', handler: interestClassesPage },
   { path: '/people', handler: peoplePage },
   { path: PEOPLE_PAGE_PATHS.presidium, handler: presidiumPage },
   { path: PEOPLE_PAGE_PATHS.advisors, handler: advisorsPage },

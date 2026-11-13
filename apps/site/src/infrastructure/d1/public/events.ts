@@ -2,13 +2,14 @@ import type { EventCategory, PublishStatus, SiteEvent, SiteEventDetail, WallTime
 import { toEventPhoto, toSiteEvent, type EventPhotoRow, type EventRow } from '../rows/events';
 
 /**
- * Read queries behind the public event pages. Only published events ever leave the database. An event is upcoming
- * until it starts and has ended once "now" is past its end, or past the end of its start day when it has no end:
- * the same rule eventStatus applies on the page, so a card never shows "past" in the upcoming list. An event an
- * officer marked as ended (archived) has ended whatever its date.
- * 公开活动页面背后的读取查询。只有已发布的活动会被读出数据库。活动在开始前为即将开始；当现在晚于其结束时间
+ * Read queries behind the public event pages and the interest class lists. Only published events ever leave the
+ * database. An event is upcoming until it starts and has ended once "now" is past its end, or past the end of its
+ * start day when it has no end: the same rule eventStatus applies on the page, so a card never shows "past" in the
+ * upcoming list. An event an officer marked as ended (archived) has ended whatever its date. Interest classes follow
+ * the same rules.
+ * 公开活动页面与兴趣课列表背后的读取查询。只有已发布的活动会被读出数据库。活动在开始前为即将开始；当现在晚于其结束时间
  * （没有结束时间时为开始当天结束）即为已结束。这与页面上 eventStatus 的规则一致，因此近期列表中的卡片永远不会显示 "已结束"。
- * 被干部标记为已结束（已归档）的活动无论日期如何都视为已结束。
+ * 被干部标记为已结束（已归档）的活动无论日期如何都视为已结束。兴趣课遵循同样的规则。
  */
 
 const PUBLISHED: PublishStatus = 'published';
@@ -20,6 +21,13 @@ const EVENT_END = "COALESCE(ends_at, substr(starts_at, 1, 10) || 'T23:59')";
 const NOT_ENDED = `status = ?1 AND (?2 IS NULL OR category = ?2) AND archived = 0 AND (starts_at > ?3 OR ${EVENT_END} >= ?3)`;
 const ENDED = `status = ?1 AND (?2 IS NULL OR category = ?2) AND (archived = 1 OR (starts_at <= ?3 AND ${EVENT_END} < ?3))`;
 
+/**
+ * Interest classes: academic events marked as such. The category is checked with the mark, as isInterestClass does,
+ * so a mark left on an event of another category never lists it here.
+ * 兴趣课：被标记为兴趣课的学术活动。与 isInterestClass 一样，标记与类别一起检查，因此留在其他类别活动上的标记永远不会让它出现在这里。
+ */
+const INTEREST_CLASS = "category = 'academic' AND interest_class = 1";
+
 export interface UpcomingEventsOptions {
   category?: EventCategory | null;
   /** Omitted for every upcoming event. */
@@ -27,14 +35,26 @@ export interface UpcomingEventsOptions {
   limit?: number;
 }
 
+/** Published events matching `where` that have not ended, earliest start first. */
+/** 符合 `where` 且尚未结束的已发布活动，按开始时间从早到晚排列。 */
+async function selectUpcoming(db: D1Database, where: string, now: WallTime, category: EventCategory | null, limit: number | undefined): Promise<SiteEvent[]> {
+  const { results } = await db
+    .prepare(`SELECT * FROM events WHERE ${where} ORDER BY starts_at, id LIMIT ?4`)
+    .bind(PUBLISHED, category, now, limit ?? -1)
+    .all<EventRow>();
+  return results.map(toSiteEvent);
+}
+
 /** Published events that have not ended, ongoing ones included, earliest start first. */
 /** 尚未结束的已发布活动（包括进行中的），按开始时间从早到晚排列。 */
 export async function listUpcomingEvents(db: D1Database, now: WallTime, options: UpcomingEventsOptions = {}): Promise<SiteEvent[]> {
-  const { results } = await db
-    .prepare(`SELECT * FROM events WHERE ${NOT_ENDED} ORDER BY starts_at, id LIMIT ?4`)
-    .bind(PUBLISHED, options.category ?? null, now, options.limit ?? -1)
-    .all<EventRow>();
-  return results.map(toSiteEvent);
+  return selectUpcoming(db, NOT_ENDED, now, options.category ?? null, options.limit);
+}
+
+/** Published interest classes that have not ended, ongoing ones included, earliest start first. */
+/** 尚未结束的已发布兴趣课（包括进行中的），按开始时间从早到晚排列。 */
+export async function listUpcomingInterestClasses(db: D1Database, now: WallTime, options: { limit?: number } = {}): Promise<SiteEvent[]> {
+  return selectUpcoming(db, `${NOT_ENDED} AND ${INTEREST_CLASS}`, now, null, options.limit);
 }
 
 export interface PastEventsPage {
@@ -44,22 +64,52 @@ export interface PastEventsPage {
   total: number;
 }
 
+export interface PastPageOptions {
+  page: number;
+  pageSize: number;
+}
+
+/** How many published events match `where`. */
+/** 符合 `where` 的已发布活动数量。 */
+async function countWhere(db: D1Database, where: string, now: WallTime, category: EventCategory | null): Promise<number> {
+  const row = await db.prepare(`SELECT COUNT(*) AS total FROM events WHERE ${where}`).bind(PUBLISHED, category, now).first<{ total: number }>();
+  return Number(row?.total ?? 0);
+}
+
+/** One page of published events matching `where` that have ended, latest start first, and how many there are. */
+/** 符合 `where` 且已结束的已发布活动中的一页（按开始时间从晚到早排列），以及其总数。 */
+async function selectPast(db: D1Database, where: string, now: WallTime, category: EventCategory | null, options: PastPageOptions): Promise<PastEventsPage> {
+  const offset = (options.page - 1) * options.pageSize;
+  const [total, page] = await Promise.all([
+    countWhere(db, where, now, category),
+    db
+      .prepare(`SELECT * FROM events WHERE ${where} ORDER BY starts_at DESC, id DESC LIMIT ?4 OFFSET ?5`)
+      .bind(PUBLISHED, category, now, options.pageSize, offset)
+      .all<EventRow>(),
+  ]);
+  return { events: page.results.map(toSiteEvent), total };
+}
+
 /** One page of published events that have ended, latest start first. Pages count from 1. */
 /** 已结束的已发布活动中的一页，按开始时间从晚到早排列。页码从 1 开始。 */
 export async function listPastEvents(
   db: D1Database,
   now: WallTime,
-  options: { category: EventCategory | null; page: number; pageSize: number },
+  options: PastPageOptions & { category: EventCategory | null },
 ): Promise<PastEventsPage> {
-  const offset = (options.page - 1) * options.pageSize;
-  const [count, page] = await Promise.all([
-    db.prepare(`SELECT COUNT(*) AS total FROM events WHERE ${ENDED}`).bind(PUBLISHED, options.category, now).first<{ total: number }>(),
-    db
-      .prepare(`SELECT * FROM events WHERE ${ENDED} ORDER BY starts_at DESC, id DESC LIMIT ?4 OFFSET ?5`)
-      .bind(PUBLISHED, options.category, now, options.pageSize, offset)
-      .all<EventRow>(),
-  ]);
-  return { events: page.results.map(toSiteEvent), total: Number(count?.total ?? 0) };
+  return selectPast(db, ENDED, now, options.category, options);
+}
+
+/** One page of published interest classes that have ended, latest start first. Pages count from 1. */
+/** 已结束的已发布兴趣课中的一页，按开始时间从晚到早排列。页码从 1 开始。 */
+export async function listPastInterestClasses(db: D1Database, now: WallTime, options: PastPageOptions): Promise<PastEventsPage> {
+  return selectPast(db, `${ENDED} AND ${INTEREST_CLASS}`, now, null, options);
+}
+
+/** How many published interest classes have ended; none means the first ones are still to come. */
+/** 已结束的已发布兴趣课数量；为零表示第一批兴趣课尚未举办。 */
+export async function countPastInterestClasses(db: D1Database, now: WallTime): Promise<number> {
+  return countWhere(db, `${ENDED} AND ${INTEREST_CLASS}`, now, null);
 }
 
 /** A published event by its slug, with its gallery in display order; null for drafts and unknown slugs. */

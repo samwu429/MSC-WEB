@@ -1,7 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createSqliteD1, sqlite, type SqliteD1 } from '../testing/sqlite-d1';
 import { createMemoryBucket } from '../../r2/testing/memory-bucket';
-import { findPublishedEvent, listPastEvents, listPublishedEventLinks, listUpcomingEvents } from './events';
+import {
+  countPastInterestClasses,
+  findPublishedEvent,
+  listPastEvents,
+  listPastInterestClasses,
+  listPublishedEventLinks,
+  listUpcomingEvents,
+  listUpcomingInterestClasses,
+} from './events';
 import { TEST_NOW, seedEvent, seedEventPhoto, seedMedia } from './testing/seed';
 
 const PHOTO_A = 'img/2026/0123456789abcdef0123456789abcdef.jpg';
@@ -72,6 +80,54 @@ describe.skipIf(!sqlite)('public event queries', () => {
     expect(slugs(await listUpcomingEvents(d1.db, TEST_NOW, { category: 'extracurricular' }))).toEqual(['party']);
     const past = await listPastEvents(d1.db, TEST_NOW, { category: 'academic', page: 1, pageSize: 12 });
     expect(past).toEqual({ events: [], total: 0 });
+  });
+
+  describe('interest classes', () => {
+    /** Interest classes on both sides of now, with everything that must stay out of their lists. */
+    /** 现在前后的兴趣课，以及所有不应出现在兴趣课列表中的活动。 */
+    function seedInterestClasses(): void {
+      seedEvent(d1, { slug: 'prices', startsAt: '2026-11-27T18:00', interestClass: true });
+      seedEvent(d1, { slug: 'today-class', startsAt: '2026-10-25T10:00', endsAt: '2026-10-25T13:00', interestClass: true });
+      seedEvent(d1, { slug: 'later-class', startsAt: '2026-12-04T18:00', interestClass: true });
+      seedEvent(d1, { slug: 'old-class', startsAt: '2026-09-18T18:00', endsAt: '2026-09-18T19:30', interestClass: true });
+      seedEvent(d1, { slug: 'chinese-text', startsAt: '2026-10-16T18:00', interestClass: true });
+      seedEvent(d1, { slug: 'called-off-class', startsAt: '2026-11-13T18:00', interestClass: true, archived: true });
+      seedEvent(d1, { slug: 'draft-class', startsAt: '2026-11-06T18:00', interestClass: true, status: 'draft' });
+      seedEvent(d1, { slug: 'old-draft-class', startsAt: '2026-09-06T18:00', interestClass: true, status: 'draft' });
+      seedEvent(d1, { slug: 'mislabelled-social', startsAt: '2026-11-20T18:00', category: 'extracurricular', interestClass: true });
+      seedEvent(d1, { slug: 'old-mislabelled-social', startsAt: '2026-09-20T18:00', category: 'extracurricular', interestClass: true });
+      seedEvent(d1, { slug: 'workshop', startsAt: '2026-11-08T18:00', category: 'academic' });
+      seedEvent(d1, { slug: 'old-talk', startsAt: '2026-10-18T17:00', category: 'academic' });
+    }
+
+    it('lists published academic interest classes that have not ended, earliest first, and nothing else', async () => {
+      seedInterestClasses();
+      expect(slugs(await listUpcomingInterestClasses(d1.db, TEST_NOW))).toEqual(['today-class', 'prices', 'later-class']);
+      expect(slugs(await listUpcomingInterestClasses(d1.db, TEST_NOW, { limit: 2 }))).toEqual(['today-class', 'prices']);
+    });
+
+    it('pages through ended interest classes newest first, counting one marked as ended whatever its date', async () => {
+      seedInterestClasses();
+      const first = await listPastInterestClasses(d1.db, TEST_NOW, { page: 1, pageSize: 2 });
+      expect(slugs(first.events)).toEqual(['called-off-class', 'chinese-text']);
+      expect(first.total).toBe(3);
+      expect(slugs((await listPastInterestClasses(d1.db, TEST_NOW, { page: 2, pageSize: 2 })).events)).toEqual(['old-class']);
+      expect(await countPastInterestClasses(d1.db, TEST_NOW)).toBe(3);
+    });
+
+    it('still lists interest classes among all events and among academic events', async () => {
+      seedInterestClasses();
+      expect(slugs(await listUpcomingEvents(d1.db, TEST_NOW, { category: 'academic' }))).toEqual(['today-class', 'workshop', 'prices', 'later-class']);
+      expect(slugs(await listUpcomingEvents(d1.db, TEST_NOW))).toContain('prices');
+      const past = await listPastEvents(d1.db, TEST_NOW, { category: 'academic', page: 1, pageSize: 12 });
+      expect(slugs(past.events)).toEqual(['called-off-class', 'old-talk', 'chinese-text', 'old-class']);
+    });
+
+    it('finds none in an empty database', async () => {
+      expect(await listUpcomingInterestClasses(d1.db, TEST_NOW)).toEqual([]);
+      expect(await listPastInterestClasses(d1.db, TEST_NOW, { page: 1, pageSize: 12 })).toEqual({ events: [], total: 0 });
+      expect(await countPastInterestClasses(d1.db, TEST_NOW)).toBe(0);
+    });
   });
 
   it('finds a published event with its photos in order, never a draft', async () => {

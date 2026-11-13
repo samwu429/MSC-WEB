@@ -2,6 +2,7 @@ import {
   EVENT_CATEGORIES,
   EVENT_CATEGORY_LABELS,
   emptyText,
+  isInterestClass,
   type EventCategory,
   type EventInput,
   type PublishStatus,
@@ -34,6 +35,7 @@ export function emptyEventInput(): EventInput {
     coverKey: null,
     registrationUrl: null,
     archived: false,
+    interestClass: false,
   };
 }
 
@@ -53,7 +55,20 @@ export function toEventInput(event: SiteEvent): EventInput {
     coverKey: event.coverKey,
     registrationUrl: event.registrationUrl,
     archived: event.archived,
+    // A mark left on an event of another category (possible only through a direct database edit) is dropped, so the
+    // form can still save the event.
+    // 其他类别活动上残留的兴趣课标记（只可能来自直接修改数据库）会被去掉，表单因此仍可保存该活动。
+    interestClass: isInterestClass(event),
   };
+}
+
+/**
+ * The fields a change of category sets. Only an academic event can be an interest class, so choosing another
+ * category also clears the mark; choosing 学术活动 again leaves it cleared.
+ * 更改类别时设置的字段。只有学术活动可以是兴趣课，因此选择其他类别时会同时取消兴趣课标记；再次选择学术活动时标记保持取消。
+ */
+export function categoryChange(category: EventCategory): Pick<EventInput, 'category'> & Partial<Pick<EventInput, 'interestClass'>> {
+  return category === 'academic' ? { category } : { category, interestClass: false };
 }
 
 /** The Chinese public page of an event; the English page is the same path under /en. */

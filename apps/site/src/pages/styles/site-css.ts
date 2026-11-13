@@ -17,7 +17,7 @@
  *   Text        .lead .muted .prose .small .sr-only
  *   Chinese     .zh (a Chinese line under English in a heading or label) .zh-text (a Chinese paragraph under the English one)
  *   Buttons     .btn .btn--primary .btn--gold .btn--ghost .btn--light .btn--small .btn-row .link-arrow
- *   Chips       .chip .chip--academic .chip--extracurricular .chip--midterm .chip--final .chip--upcoming .chip--ongoing .chip--past .chip--tba .chip--quiet
+ *   Chips       .chip .chip--academic .chip--interest .chip--extracurricular .chip--midterm .chip--final .chip--upcoming .chip--ongoing .chip--past .chip--tba .chip--quiet
  *   Cards       .card .card--link .card__media .card__placeholder .card__placeholder--teal .card__badges .card__body .card__title .card__text .card__meta .card__link
  *   Meta        .meta .meta__item (an Icon followed by text)
  *   Date        .datebox .datebox__month .datebox__day
@@ -38,7 +38,7 @@
  *   Member net  .mobile-note (beside member-network links) .topbar__note .cta-band__action
  *   Ended       .past-list .past-list__date .past-list__title .past-list__tag .ended-title .ended-lead .ended-list .ended-list__code .ended-list__name
  *   Docs        .doc-link (a small link to a PDF, such as the Code of Behaviour, or to the University's listing of UTMMSC)
- *   Misc        .notice .notice--integrity .empty .cta-band .cta-band__inner .pager
+ *   Misc        .notice .notice--integrity .notice__links (a row of links under a notice's text) .empty .cta-band .cta-band__inner .pager
  */
 export const SITE_CSS = `
 :root {
@@ -127,6 +127,7 @@ p + .zh-text, .prose + .zh-text { margin-top: 2px; }
 .eyebrow { margin-bottom: 8px; color: var(--purple-600); font-size: 0.9rem; font-weight: 700; letter-spacing: 0.02em; }
 .section-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 32px; margin-bottom: 36px; }
 .section-head > div { max-width: 720px; }
+.section-head:last-child { margin-bottom: 0; }
 .section-title { margin: 0; }
 .section-lead { margin-top: 10px; color: var(--muted); font-size: 1.02rem; }
 .section-link { font-weight: 700; white-space: nowrap; }
@@ -149,6 +150,7 @@ p + .zh-text, .prose + .zh-text { margin-top: 2px; }
 
 .chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 3px; background: var(--grey); color: var(--ink-soft); font-size: 0.75rem; font-weight: 700; line-height: 1.6; white-space: nowrap; }
 .chip--academic { background: var(--purple-700); color: #fff; }
+.chip--interest { background: var(--white); color: var(--purple-800); }
 .chip--extracurricular { background: var(--teal-700); color: #fff; }
 .chip--midterm { background: var(--gold-500); color: var(--purple-950); }
 .chip--final { background: var(--purple-900); color: #fff; }
@@ -215,12 +217,13 @@ p + .zh-text, .prose + .zh-text { margin-top: 2px; }
 .site-nav__label { display: inline-flex; flex-direction: column; line-height: 1.15; }
 .site-nav__label .zh { font-size: 0.6rem; }
 .site-nav__link--parent svg { width: 15px; height: 15px; }
+.site-nav__link--parent:has(.zh) svg { margin-bottom: calc(0.78rem + 1px); }
 .site-nav__menu { position: absolute; left: -18px; top: 100%; z-index: 60; min-width: 230px; visibility: hidden; opacity: 0; transition: opacity 0.12s ease, visibility 0.12s; }
 .site-nav__item:hover .site-nav__menu, .site-nav__item:focus-within .site-nav__menu { visibility: visible; opacity: 1; }
 .site-nav__panel { display: grid; padding: 8px 0; background: var(--white); border-top: 3px solid var(--purple-700); box-shadow: 0 12px 28px rgba(43, 17, 73, 0.14); }
 .site-nav__menu-link { display: block; padding: 11px 20px; color: var(--ink); font-size: 0.98rem; font-weight: 600; text-decoration: none; white-space: nowrap; }
 .site-nav__menu-link:hover { background: var(--grey); color: var(--purple-700); }
-.site-nav__menu-link[aria-current="page"] { color: var(--purple-700); background: var(--purple-50); }
+.site-nav__menu-link[aria-current] { color: var(--purple-700); background: var(--purple-50); }
 .header-actions { display: none; align-items: center; gap: 10px; margin-left: auto; }
 .mobile-nav { position: relative; margin-left: auto; }
 .mobile-nav > summary { display: inline-flex; flex: none; align-items: center; white-space: nowrap; gap: 8px; padding: 8px 16px; border-radius: 999px; background: var(--purple-700); color: #fff; font-weight: 700; cursor: pointer; list-style: none; }
@@ -286,6 +289,7 @@ p + .zh-text, .prose + .zh-text { margin-top: 2px; }
 .page-hero__lead { margin-top: 14px; max-width: 760px; color: rgba(255, 255, 255, 0.85); font-size: 1.08rem; }
 .page-hero .tabs { margin-top: 32px; margin-bottom: -48px; }
 .page-hero .meta { margin-top: 16px; }
+.page-hero .eyebrow .chip + .chip { margin-left: 8px; }
 .page-hero .meta__item { color: rgba(255, 255, 255, 0.85); }
 .page-hero .meta__item svg { color: var(--gold-500); }
 .page-hero .notice { margin-top: 24px; max-width: 880px; background: rgba(255, 255, 255, 0.08); border-left-color: var(--gold-500); color: #fff; }
@@ -451,6 +455,7 @@ a.partner:hover { border-color: var(--purple-700); color: var(--purple-700); }
 .notice { display: flex; gap: 14px; padding: 18px 20px; background: var(--gold-100); color: var(--ink); border-left: 4px solid var(--gold-500); }
 .notice svg { flex: none; width: 22px; height: 22px; color: var(--purple-700); margin-top: 2px; }
 .notice--integrity { background: var(--purple-50); border-left-color: var(--purple-700); }
+.notice__links { display: flex; flex-wrap: wrap; gap: 0 24px; }
 .doc-link { display: inline-flex; align-items: flex-start; gap: 6px; margin-top: 8px; color: var(--purple-700); font-size: 0.85rem; font-weight: 700; text-decoration: none; }
 .doc-link:hover { text-decoration: underline; }
 .notice .doc-link svg { width: 15px; height: 15px; margin-top: 2px; color: currentColor; }
@@ -531,6 +536,9 @@ a.partner:hover { border-color: var(--purple-700); color: var(--purple-700); }
   .course__head, .session-row { padding-left: 18px; padding-right: 18px; }
   .course__text { padding: 14px 18px 0; }
   .tab { padding: 10px 14px; }
+  .past-list li { flex-wrap: wrap; column-gap: 12px; row-gap: 0; }
+  .past-list__date { width: auto; }
+  .past-list__title { flex: 1 0 100%; order: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {

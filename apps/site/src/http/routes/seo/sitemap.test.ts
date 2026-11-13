@@ -18,7 +18,7 @@ describe.skipIf(!sqlite)('sitemap.xml', () => {
     return [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((match) => match[1] ?? '');
   }
 
-  it('lists every section, the Our People pages, visible people, published events and reviewed courses, once each', async () => {
+  it('lists every section, the Academic Activities and Our People pages, visible people, published events and reviewed courses, once each', async () => {
     test.d1.exec(`
       INSERT INTO people (id, section, position, name_zh, name_en, visible, created_at, updated_at) VALUES
         ('per_wang', 'presidium', 'president', '王会长', 'Wang Hui', 1, '2026-09-01T00:00:00.000Z', '2026-09-05T00:00:00.000Z'),
@@ -39,9 +39,11 @@ describe.skipIf(!sqlite)('sitemap.xml', () => {
     expect(locs(xml)).toEqual([
       'https://utmmsc.com/',
       'https://utmmsc.com/events',
-      'https://utmmsc.com/reviews',
+      'https://utmmsc.com/academics',
       'https://utmmsc.com/people',
       'https://utmmsc.com/about',
+      'https://utmmsc.com/reviews',
+      'https://utmmsc.com/interest-classes',
       'https://utmmsc.com/people/advisors',
       'https://utmmsc.com/people/presidium',
       'https://utmmsc.com/people/departments',

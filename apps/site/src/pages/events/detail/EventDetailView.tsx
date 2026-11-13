@@ -1,9 +1,11 @@
-import { EVENT_CATEGORY_LABELS, eventStatus, formatTimeRange, mediaUrl, type SiteEventDetail } from '@msc-web/content';
+import { eventKindLabel, eventStatus, formatTimeRange, isInterestClass, mediaUrl, type SiteEventDetail } from '@msc-web/content';
+import { ACADEMICS } from '../../academics/strings';
 import type { PageContext } from '../../context';
 import { Bi, BiRichText, BiText, CodeOfBehaviourLink, MediaImage, MetaItem, SectionHeading, StatusChip, fallbackLang, txt } from '../../components/common';
 import { Icon } from '../../components/Icon';
 import { COMMON, t } from '../../i18n/strings';
-import { sitePath } from '../../routing/paths';
+import { ACADEMIC_PAGE_PATHS, SECTION_PATHS, sitePath } from '../../routing/paths';
+import { EventKindChip } from '../EventCard';
 import { EVENTS } from '../strings';
 
 const TITLE_ID = 'event-title';
@@ -45,6 +47,19 @@ function Gallery({ event, ctx }: { event: SiteEventDetail; ctx: PageContext }) {
   );
 }
 
+/** The way back from an event's page: an interest class goes back to Interest Classes, every other event to Events. */
+/** 从活动页面返回的去处：兴趣课返回 "兴趣课" 页面，其他活动返回活动页面。 */
+function BackLink({ ctx, event }: { ctx: PageContext; event: SiteEventDetail }) {
+  const { locale } = ctx;
+  const interestClass = isInterestClass(event);
+  return (
+    <a class="backlink" href={sitePath(interestClass ? ACADEMIC_PAGE_PATHS.interestClasses : SECTION_PATHS.events)}>
+      <Icon name="arrow" />
+      {interestClass ? t(ACADEMICS, 'allInterestClasses', locale) : t(EVENTS, 'backToEvents', locale)}
+    </a>
+  );
+}
+
 /**
  * The page of one event. Registration is offered only until the event ends; afterwards the page stays as a record
  * with its photos.
@@ -54,7 +69,7 @@ export function EventDetailView({ ctx, event }: { ctx: PageContext; event: SiteE
   const { locale } = ctx;
   const title = txt(event.title, locale);
   const location = txt(event.location, locale);
-  const category = txt(EVENT_CATEGORY_LABELS[event.category], locale);
+  const kind = txt(eventKindLabel(event), locale);
   const when = formatTimeRange(event.startsAt, event.endsAt, locale, ctx.currentYear);
   const status = eventStatus(event, ctx.now);
   const registrationUrl = status === 'past' ? null : event.registrationUrl;
@@ -62,14 +77,11 @@ export function EventDetailView({ ctx, event }: { ctx: PageContext; event: SiteE
     <article aria-labelledby={TITLE_ID}>
       <header class="page-hero">
         <div class="container">
-          <a class="backlink" href={sitePath('/events')}>
-            <Icon name="arrow" />
-            {t(EVENTS, 'backToEvents', locale)}
-          </a>
+          <BackLink ctx={ctx} event={event} />
           {/* The chips take the eyebrow slot above the title. */}
           {/* 标签占用标题上方的眉标位置。 */}
           <div class="eyebrow">
-            <span class={`chip chip--${event.category}`}>{category}</span>
+            <EventKindChip event={event} ctx={ctx} />
             <StatusChip status={status} locale={locale} />
           </div>
           <h1 class="page-hero__title" id={TITLE_ID}>
@@ -100,7 +112,7 @@ export function EventDetailView({ ctx, event }: { ctx: PageContext; event: SiteE
               <div class="info-list">
                 <InfoRow label={t(EVENTS, 'dateAndTime', locale)} value={when} />
                 <InfoRow label={t(EVENTS, 'location', locale)} value={location || t(COMMON, 'toBeAnnounced', locale)} lang={fallbackLang(event.location, locale)} />
-                <InfoRow label={t(EVENTS, 'category', locale)} value={category} />
+                <InfoRow label={t(EVENTS, 'category', locale)} value={kind} />
               </div>
               {registrationUrl && (
                 <a class="btn btn--primary" href={registrationUrl} target="_blank" rel="noopener noreferrer">

@@ -1,6 +1,7 @@
-import { mediaUrl, pickText, type Locale, type SiteEvent } from '@msc-web/content';
+import { isInterestClass, mediaUrl, pickText, type Locale, type SiteEvent } from '@msc-web/content';
 import type { PageMeta } from '../../layout/Document';
 import { t } from '../../i18n/strings';
+import { ACADEMIC_PAGE_PATHS } from '../../routing/paths';
 import { EVENTS } from '../strings';
 
 /** Search engines show about this many characters of a description. */
@@ -22,10 +23,16 @@ export function eventDescription(event: Pick<SiteEvent, 'summary' | 'body'>, loc
   return excerpt(pickText(event.summary, locale), DESCRIPTION_LENGTH) || excerpt(pickText(event.body, locale), DESCRIPTION_LENGTH) || t(EVENTS, 'heroLead', locale);
 }
 
+/**
+ * The meta of an event's page. An interest class keeps its address under /events, where the events page links it,
+ * but the header places it under Academic Activities → Interest Classes, where its back link leads.
+ * 活动页面的元信息。兴趣课的地址仍在 /events 之下，活动页面也链接到那里；但页眉把它放在「学术活动 → 兴趣课」之下，与其返回链接一致。
+ */
 export function eventDetailMeta(event: SiteEvent, locale: Locale): PageMeta {
   return {
     title: pickText(event.title, locale),
     description: eventDescription(event, locale),
     image: event.coverKey ? mediaUrl(event.coverKey) : undefined,
+    navPath: isInterestClass(event) ? `${ACADEMIC_PAGE_PATHS.interestClasses}/${event.slug}` : undefined,
   };
 }
