@@ -24,25 +24,26 @@ function GroupSection(props: { ctx: PageContext; page: PeoplePageKey; alt?: bool
 }
 
 /**
- * /people: everyone at once, read from the top down: the Honorary Advisors, the Presidium, then the Department Leads,
- * every person as a tile of the same size, so no group outweighs another by its photos. Vacant offices are quiet lines
- * under their group. A single group is reached from the Our People dropdown in the site header.
- * /people：一次显示所有人，自上而下依次为荣誉顾问、主席团与部长团。每位成员都是同样大小的方块，任何团体都不会因照片更大而显得更重。
- * 空缺的职位是其团体下方安静的一行文字。单个团体从网站页眉的 "我们的团队" 下拉菜单进入。
+ * /people: everyone at once, read from the top down in the order of Article 4 of the constitution: the Presidium, the
+ * Department Leads, then the Honorary Advisors, every person as a tile of the same size, so no group outweighs another
+ * by its photos. Vacant offices are quiet lines under their group. A single group is reached from the Our People
+ * dropdown in the site header.
+ * /people：一次显示所有人，按章程第四条的顺序自上而下依次为主席团、部长团与荣誉顾问。每位成员都是同样大小的方块，
+ * 任何团体都不会因照片更大而显得更重。空缺的职位是其团体下方安静的一行文字。单个团体从网站页眉的 "我们的团队" 下拉菜单进入。
  */
 export function AllPeoplePage({ ctx, roster }: { ctx: PageContext; roster: PeopleRoster }) {
   const { locale } = ctx;
   return (
     <>
       <PeopleSectionHero ctx={ctx} view="all" />
-      <GroupSection ctx={ctx} page="advisors">
-        <AdvisorCards advisors={roster.advisors} locale={locale} headingLevel={3} />
-      </GroupSection>
-      <GroupSection ctx={ctx} page="presidium" alt>
+      <GroupSection ctx={ctx} page="presidium">
         <PresidiumCards presidium={roster.presidium} locale={locale} headingLevel={3} />
       </GroupSection>
-      <GroupSection ctx={ctx} page="departments" more={<DepartmentsMoreLink locale={locale} />}>
+      <GroupSection ctx={ctx} page="departments" alt more={<DepartmentsMoreLink locale={locale} />}>
         <DepartmentLeads departments={roster.departments} locale={locale} headingLevel={3} />
+      </GroupSection>
+      <GroupSection ctx={ctx} page="advisors">
+        <AdvisorCards advisors={roster.advisors} locale={locale} headingLevel={3} />
       </GroupSection>
     </>
   );

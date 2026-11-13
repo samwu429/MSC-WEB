@@ -30,7 +30,7 @@ describe('navItems', () => {
   it('keeps Our People and its groups in English only', () => {
     const people = item('/', '/people');
     expect(people.label).toBe('Our People');
-    expect(people.children.map((child) => child.label)).toEqual(['Honorary Advisors', 'Presidium', 'Department Leads']);
+    expect(people.children.map((child) => child.label)).toEqual(['Presidium', 'Department Leads', 'Honorary Advisors']);
   });
 
   it('marks Academic Activities as the page on /academics, with no dropdown page marked', () => {

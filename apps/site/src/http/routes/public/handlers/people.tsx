@@ -17,8 +17,8 @@ import { renderPage } from '../../../../pages/render';
 import { isPersonId, type PeoplePageKey } from '../../../../pages/routing/paths';
 import type { PageHandler } from '../page-handler';
 
-/** /people: every visible person, the Honorary Advisors first, then the Presidium, then the Department Leads. */
-/** /people：所有正在显示的成员，先荣誉顾问，再主席团，最后部长团。 */
+/** /people: every visible person, the Presidium first, then the Department Leads, then the Honorary Advisors. */
+/** /people：所有正在显示的成员，先主席团，再部长团，最后荣誉顾问。 */
 export const peoplePage: PageHandler = async (c, locale) => {
   const [ctx, people] = await Promise.all([loadPageContext(c, locale), listVisiblePeople(c.env.DB)]);
   return renderPage(

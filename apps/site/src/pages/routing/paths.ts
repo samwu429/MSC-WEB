@@ -71,11 +71,13 @@ export const ACADEMIC_PAGE_PATHS: Record<AcademicPageKey, string> = {
 };
 
 /**
- * Our People shows everyone at /people: the Honorary Advisors, then the Presidium, then the Department Leads. Each
- * group also has a page of its own, reached from the Our People dropdown in the site header, in the same order.
- * "我们的团队" 在 /people 显示所有人：先荣誉顾问，再主席团，最后部长团。每个团体也有自己的页面，从网站页眉的 "我们的团队" 下拉菜单进入，顺序相同。
+ * Our People shows everyone at /people in the order of Article 4 of the constitution: the Presidium, then the
+ * Department Leads, then the Honorary Advisors. Each group also has a page of its own, reached from the Our People
+ * dropdown in the site header, in the same order.
+ * "我们的团队" 在 /people 按章程第四条的顺序显示所有人：先主席团，再部长团，最后荣誉顾问。每个团体也有自己的页面，
+ * 从网站页眉的 "我们的团队" 下拉菜单进入，顺序相同。
  */
-export const PEOPLE_PAGES = ['advisors', 'presidium', 'departments'] as const;
+export const PEOPLE_PAGES = ['presidium', 'departments', 'advisors'] as const;
 
 export type PeoplePageKey = (typeof PEOPLE_PAGES)[number];
 

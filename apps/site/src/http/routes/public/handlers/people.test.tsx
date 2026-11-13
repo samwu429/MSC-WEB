@@ -103,18 +103,23 @@ describe.skipIf(!sqlite)('Our People pages', () => {
   }
 
   describe('everyone', () => {
-    it('lists the Honorary Advisors, then the Presidium, then the Department Leads, in English only', async () => {
+    it('lists the Presidium, then the Department Leads, then the Honorary Advisors, in English only', async () => {
       await seedPeople();
       const main = mainOf(await render('/people'));
       expect(main).toContain('<h1 class="page-hero__title" id="people-title">Our People</h1>');
       expectInOrder(
         main,
-        ['people-advisors">Honorary Advisors', 'people-presidium">Presidium', 'people-departments">Department Leads'].map((heading) => `<h2 class="section-title" id="${heading}</h2>`),
+        ['people-presidium">Presidium', 'people-departments">Department Leads', 'people-advisors">Honorary Advisors'].map((heading) => `<h2 class="section-title" id="${heading}</h2>`),
       );
       expectInOrder(
         main,
-        ['Prof. Chen', 'Wang Hui', 'Li Head', 'Qian Vice'].map((name) => `>${name}</a>`),
+        ['Wang Hui', 'Li Head', 'Qian Vice', 'Prof. Chen'].map((name) => `>${name}</a>`),
       );
+      // The groups alternate white and grey bands from the hero down: the Department Leads are the grey one.
+      // 各团体从页首往下交替使用白色与灰色色带：部长团是灰色的那一条。
+      expect(main).toContain('<section class="section section--tight people-tier" aria-labelledby="people-presidium">');
+      expect(main).toContain('<section class="section section--tight section--alt people-tier" aria-labelledby="people-departments">');
+      expect(main).toContain('<section class="section section--tight people-tier" aria-labelledby="people-advisors">');
       // Everyone listed links to their own page exactly once.
       // 每位列出的成员都恰好有一个指向其个人页面的链接。
       for (const id of ['advisor', 'president', 'finance', 'head-academic', 'vice-early', 'vice-late']) {
@@ -149,8 +154,10 @@ describe.skipIf(!sqlite)('Our People pages', () => {
       expect(occurrences(main, '<li class="person')).toBe(6);
       expect(occurrences(main, ADVISORS_LIST)).toBe(1);
       expect(occurrences(main, OFFICERS_LIST)).toBe(2);
-      expectInOrder(main, [ADVISORS_LIST, 'id="people-presidium"', OFFICERS_LIST, 'id="people-departments"']);
-      expect(main.indexOf(OFFICERS_LIST, main.indexOf('id="people-departments"'))).toBeGreaterThan(0);
+      expectInOrder(main, ['id="people-presidium"', OFFICERS_LIST, 'id="people-departments"', 'id="people-advisors"', ADVISORS_LIST]);
+      const departmentsList = main.indexOf(OFFICERS_LIST, main.indexOf('id="people-departments"'));
+      expect(departmentsList).toBeGreaterThan(main.indexOf('id="people-departments"'));
+      expect(departmentsList).toBeLessThan(main.indexOf('id="people-advisors"'));
       // The president has a photo, which still loads lazily; everyone else has a monogram in the same frame.
       // 主席有照片，照片仍然延迟加载；其他人在同样的框中显示姓名首字。
       expect(main).toContain(`<img class="person__photo" src="${mediaUrl(PHOTO_KEY)}" alt="" loading="lazy" decoding="async"/>`);
@@ -164,7 +171,7 @@ describe.skipIf(!sqlite)('Our People pages', () => {
       await seedPeople();
       const main = mainOf(await render('/people'));
       const presidium = main.slice(main.indexOf('id="people-presidium"'), main.indexOf('id="people-departments"'));
-      const departments = main.slice(main.indexOf('id="people-departments"'));
+      const departments = main.slice(main.indexOf('id="people-departments"'), main.indexOf('id="people-advisors"'));
       // The Secretary-General is hidden and nobody holds the VP Audit office; they follow the holders in office order.
       // 秘书长已隐藏，监督审计副主席无人担任；两者按职位顺序排在担任者之后。
       expectInOrder(presidium, ['Wang Hui', '&lt;script&gt;', '<ul class="vacancies" role="list">', vacancy('Secretary-General'), vacancy('Vice-President Supervision &amp; Audit')]);
@@ -182,7 +189,14 @@ describe.skipIf(!sqlite)('Our People pages', () => {
     it('shows four Presidium lines, five Head lines and the advisors note from an empty database', async () => {
       const main = mainOf(await render('/people'));
       expect(main).toContain('Our Honorary Advisors will be announced soon');
-      expectInOrder(main, ['id="people-presidium"', ...PRESIDIUM_OFFICES.map(vacancy), 'id="people-departments"', ...HEADS.map(vacancy)]);
+      expectInOrder(main, [
+        'id="people-presidium"',
+        ...PRESIDIUM_OFFICES.map(vacancy),
+        'id="people-departments"',
+        ...HEADS.map(vacancy),
+        'id="people-advisors"',
+        'Our Honorary Advisors will be announced soon',
+      ]);
       expect(occurrences(main, '<ul class="vacancies" role="list">')).toBe(2);
       expect(occurrences(main, '<li><span class="vacancies__office">')).toBe(9);
       expectNoTiles(main);
@@ -204,7 +218,7 @@ describe.skipIf(!sqlite)('Our People pages', () => {
     });
 
     it('describes what the Group is made up of, in the lead and the description', async () => {
-      const lead = 'The Group is made up of its Honorary Advisors, the Presidium and the leads of its five Departments, as set out in Article 4 of the constitution.';
+      const lead = 'The Group is made up of the Presidium, the leads of its five Departments and its Honorary Advisors, as set out in Article 4 of the constitution.';
       const html = await render('/people');
       expect(html).toContain('<div class="eyebrow">The UTMMSC team</div>');
       expect(html).toContain(`<p class="page-hero__lead">${lead}</p>`);
@@ -472,7 +486,7 @@ describe.skipIf(!sqlite)('Our People pages', () => {
       const html = await render('/events');
       const people = html.slice(html.indexOf('<a class="site-nav__link site-nav__link--parent" href="/people"'));
       const menu = people.slice(people.indexOf('<div class="site-nav__panel">'));
-      const order = ['/people/advisors', '/people/presidium', '/people/departments'].map((href) => menu.indexOf(`href="${href}"`));
+      const order = ['/people/presidium', '/people/departments', '/people/advisors'].map((href) => menu.indexOf(`href="${href}"`));
       expect(order.every((index) => index >= 0)).toBe(true);
       expect([...order].sort((a, b) => a - b)).toEqual(order);
       expect(menu.slice(0, menu.indexOf('</div>'))).not.toMatch(/[一-鿿]/);

@@ -5,8 +5,8 @@ import type { LocalizedText } from '@msc-web/content';
 export const PEOPLE = {
   heroEyebrow: { zh: 'UTMMSC 团队', en: 'The UTMMSC team' },
   heroLead: {
-    zh: '联盟由荣誉顾问、主席团与五个部门的部长团组成，均依照章程第四条设立。',
-    en: 'The Group is made up of its Honorary Advisors, the Presidium and the leads of its five Departments, as set out in Article 4 of the constitution.',
+    zh: '联盟由主席团、五个部门的部长团与荣誉顾问组成，均依照章程第四条设立。',
+    en: 'The Group is made up of the Presidium, the leads of its five Departments and its Honorary Advisors, as set out in Article 4 of the constitution.',
   },
   presidiumLead: {
     zh: '主席团由四位干部组成，共同统筹联盟的运作。',
