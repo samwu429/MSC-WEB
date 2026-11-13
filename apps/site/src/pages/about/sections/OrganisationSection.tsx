@@ -11,7 +11,7 @@ import {
 import type { PageContext } from '../../context';
 import { Bi, BiText, SectionHeading, type Copy } from '../../components/common';
 import { t } from '../../i18n/strings';
-import { SECTION_PATHS, sitePath } from '../../routing/paths';
+import { ABOUT_DEPARTMENTS_ID, SECTION_PATHS, sitePath } from '../../routing/paths';
 import { ABOUT } from '../strings';
 
 function UnitGroup(props: { id: string; title: Copy; text: Copy; units: { name: LocalizedText; text: LocalizedText }[] }) {
@@ -39,8 +39,8 @@ function UnitGroup(props: { id: string; title: Copy; text: Copy; units: { name: 
 
 /**
  * The structure of Article 4 at a glance: the four Presidium offices with their duties and the five Departments
- * with their remits. Who holds each office is on the Our People page.
- * 一览章程第四条规定的结构：四个主席团职位及其职责、五个部门及其职能。各职位的担任者见 "我们的团队" 页面。
+ * with their remits. Who holds each office is on the Our People page, which links back to the Departments here.
+ * 一览章程第四条规定的结构：四个主席团职位及其职责、五个部门及其职能。各职位的担任者见 "我们的团队" 页面，该页面链接回这里的五个部门。
  */
 export function OrganisationSection({ ctx }: { ctx: PageContext }) {
   const { locale } = ctx;
@@ -61,7 +61,7 @@ export function OrganisationSection({ ctx }: { ctx: PageContext }) {
           units={PRESIDIUM_POSITIONS.map((position) => ({ name: PRESIDIUM_POSITION_LABELS[position], text: PRESIDIUM_POSITION_DUTIES[position] }))}
         />
         <UnitGroup
-          id="about-departments"
+          id={ABOUT_DEPARTMENTS_ID}
           title={ABOUT.departmentsTitle}
           text={ABOUT.departmentsText}
           units={DEPARTMENTS.map((department) => ({ name: DEPARTMENT_LABELS[department], text: DEPARTMENT_DESCRIPTIONS[department] }))}

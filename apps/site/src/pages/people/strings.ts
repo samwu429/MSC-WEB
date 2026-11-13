@@ -8,17 +8,15 @@ export const PEOPLE = {
     zh: '联盟由荣誉顾问、主席团与五个部门的部长团组成，均依照章程第四条设立。',
     en: 'The Group is made up of its Honorary Advisors, the Presidium and the leads of its five Departments, as set out in Article 4 of the constitution.',
   },
-  presidiumEyebrow: { zh: '章程第 4.1 条', en: 'Article 4.1' },
   presidiumLead: {
     zh: '主席团由四位干部组成，共同统筹联盟的运作。',
     en: 'Four officers who lead the Group together.',
   },
-  departmentsEyebrow: { zh: '章程第 4.2 条', en: 'Article 4.2' },
   departmentsLead: {
     zh: '五个部门各由一位部长领导，并可设副部长。每位成员最多可以加入两个部门。',
     en: 'Each of the five Departments is led by a Head, with Vice Heads where needed. Every member may join up to two Departments.',
   },
-  advisorsEyebrow: { zh: '章程第 4.3 条', en: 'Article 4.3' },
+  departmentsMore: { zh: '各部门职能', en: 'What each Department does' },
   advisorsLead: {
     zh: '荣誉顾问由杰出校友、教师与业界人士担任，通过讲座与指导支持成员成长。荣誉顾问不享有表决权。',
     en: 'Honorary Advisors are distinguished alumni, faculty and practitioners who support members through talks and mentorship. They hold no voting rights.',

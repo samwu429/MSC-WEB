@@ -8,6 +8,12 @@ import { sqlite } from '../../../../infrastructure/d1/testing/sqlite-d1';
 const AT = '2026-09-01T00:00:00.000Z';
 const PHOTO_KEY = 'img/2026/0123456789abcdef0123456789abcdef.jpg';
 const SCRIPT_NAME = '<script>alert(1)</script>';
+const TILE = '<li class="person">';
+const ADVISORS_LIST = '<ul class="people-grid people-grid--advisors" role="list">';
+const OFFICERS_LIST = '<ul class="people-grid" role="list">';
+const DEPARTMENTS_LINK = '<p class="section-more"><a class="link-arrow" href="/about#about-departments">What each Department does<svg';
+const PRESIDIUM_OFFICES = ['President', 'Secretary-General', 'Vice-President Finance', 'Vice-President Supervision &amp; Audit'];
+const HEADS = ['Head of Technology', 'Head of Academic', 'Head of Publicity', 'Head of Sponsorship', 'Head of Events'];
 
 function occurrences(html: string, text: string): number {
   return html.split(text).length - 1;
@@ -17,6 +23,20 @@ function occurrences(html: string, text: string): number {
 /** 页眉与页脚之间的页面内容，页眉中的链接因此不会被计入。 */
 function mainOf(html: string): string {
   return html.slice(html.indexOf('<main'), html.indexOf('</main>'));
+}
+
+/** One vacant office as its quiet line: the office, a pause for screen readers, then "To be announced". */
+/** 一个空缺职位的那一行安静的文字：职位名称、供读屏软件停顿的冒号，然后是 "To be announced"。 */
+function vacancy(office: string): string {
+  return `<li><span class="vacancies__office">${office}</span><span class="sr-only">: </span><span class="vacancies__status">To be announced</span></li>`;
+}
+
+/** Every text is in the html, in the given order. */
+/** 每段文字都出现在 html 中，并且按给定的顺序排列。 */
+function expectInOrder(html: string, texts: string[]) {
+  const positions = texts.map((text) => html.indexOf(text));
+  expect(positions.every((position) => position >= 0), texts.filter((text) => !html.includes(text)).join(', ')).toBe(true);
+  expect([...positions].sort((a, b) => a - b)).toEqual(positions);
 }
 
 describe.skipIf(!sqlite)('Our People pages', () => {
@@ -67,11 +87,19 @@ describe.skipIf(!sqlite)('Our People pages', () => {
     `);
   }
 
-
   /** Our People is English only, so its page content carries no Chinese characters. */
   /** "我们的团队" 只显示英文，因此其页面内容不含任何中文字符。 */
   function expectNoChinese(main: string) {
     expect(main).not.toMatch(/[一-鿿]/);
+  }
+
+  /** Nobody is drawn as an empty photo frame or a tile: neither people nor photos nor monograms are on the page. */
+  /** 没有任何内容显示为空白照片框或方块：页面上既没有成员，也没有照片或姓名首字。 */
+  function expectNoTiles(main: string) {
+    expect(main).not.toContain('people-grid');
+    expect(main).not.toContain(TILE);
+    expect(main).not.toContain('class="person__photo"');
+    expect(main).not.toContain('class="person__monogram"');
   }
 
   describe('everyone', () => {
@@ -79,14 +107,14 @@ describe.skipIf(!sqlite)('Our People pages', () => {
       await seedPeople();
       const main = mainOf(await render('/people'));
       expect(main).toContain('<h1 class="page-hero__title" id="people-title">Our People</h1>');
-      const headings = ['people-advisors">Honorary Advisors', 'people-presidium">Presidium', 'people-departments">Department Leads'].map((heading) =>
-        main.indexOf(`<h2 class="section-title" id="${heading}</h2>`),
+      expectInOrder(
+        main,
+        ['people-advisors">Honorary Advisors', 'people-presidium">Presidium', 'people-departments">Department Leads'].map((heading) => `<h2 class="section-title" id="${heading}</h2>`),
       );
-      expect(headings.every((position) => position > 0)).toBe(true);
-      expect([...headings].sort((a, b) => a - b)).toEqual(headings);
-      const people = ['Prof. Chen', 'Wang Hui', 'Li Head', 'Qian Vice'].map((name) => main.indexOf(`>${name}</a>`));
-      expect(people.every((position) => position > 0)).toBe(true);
-      expect([...people].sort((a, b) => a - b)).toEqual(people);
+      expectInOrder(
+        main,
+        ['Prof. Chen', 'Wang Hui', 'Li Head', 'Qian Vice'].map((name) => `>${name}</a>`),
+      );
       // Everyone listed links to their own page exactly once.
       // 每位列出的成员都恰好有一个指向其个人页面的链接。
       for (const id of ['advisor', 'president', 'finance', 'head-academic', 'vice-early', 'vice-late']) {
@@ -96,17 +124,20 @@ describe.skipIf(!sqlite)('Our People pages', () => {
       expectNoChinese(main);
     });
 
-    it('nests headings under each group: people under h2, department names under h2 as h3', async () => {
+    it("nests every name under its group's h2 as an h3, with no Department headings in between", async () => {
       await seedPeople();
       const main = mainOf(await render('/people'));
       expect(main).toContain('<h3 class="person__name"><a class="person__link" href="/people/advisor">Prof. Chen</a></h3>');
       expect(main).toContain('<h3 class="person__name"><a class="person__link" href="/people/president">Wang Hui</a></h3>');
-      expect(main).toContain('<h3 class="department__name" id="dept-academic">Academic Department</h3>');
-      expect(main).toContain('<h4 class="person__name"><a class="person__link" href="/people/head-academic">Li Head</a></h4>');
-      expect(occurrences(main, 'class="department"')).toBe(5);
+      expect(main).toContain('<h3 class="person__name"><a class="person__link" href="/people/head-academic">Li Head</a></h3>');
+      expect(main).toContain('<h3 class="person__name"><a class="person__link" href="/people/vice-early">Qian Vice</a></h3>');
+      expect(occurrences(main, '<h3 class="person__name"')).toBe(6);
+      expect(main).not.toContain('<h4');
+      expect(main).not.toContain('department__name');
+      expect(main).not.toContain('id="dept-');
     });
 
-    it('lays the groups out as a roster: titles without eyebrows, advisor portraits, office seats, department blocks', async () => {
+    it('draws everyone as the same tile, in one list per group, under titles without eyebrows', async () => {
       await seedPeople();
       const main = mainOf(await render('/people'));
       expect(occurrences(main, 'people-tier"')).toBe(3);
@@ -114,71 +145,135 @@ describe.skipIf(!sqlite)('Our People pages', () => {
       // 只有页首保留眉标；各团体不再有 "Article 4.x" 标签。
       expect(occurrences(main, 'class="eyebrow"')).toBe(1);
       expect(main).not.toContain('Article 4.');
-      expect(occurrences(main, 'class="person person--portrait person--link"')).toBe(1);
-      expect(occurrences(main, 'class="person person--seat ')).toBe(4);
-      expect(occurrences(main, 'class="person person--row ')).toBe(7);
-      const order = ['class="portraits"', 'class="offices"', 'class="departments"'].map((list) => main.indexOf(list));
-      expect(order.every((index) => index > 0)).toBe(true);
-      expect([...order].sort((a, b) => a - b)).toEqual(order);
+      expect(occurrences(main, TILE)).toBe(6);
+      expect(occurrences(main, '<li class="person')).toBe(6);
+      expect(occurrences(main, ADVISORS_LIST)).toBe(1);
+      expect(occurrences(main, OFFICERS_LIST)).toBe(2);
+      expectInOrder(main, [ADVISORS_LIST, 'id="people-presidium"', OFFICERS_LIST, 'id="people-departments"']);
+      expect(main.indexOf(OFFICERS_LIST, main.indexOf('id="people-departments"'))).toBeGreaterThan(0);
+      // The president has a photo, which still loads lazily; everyone else has a monogram in the same frame.
+      // 主席有照片，照片仍然延迟加载；其他人在同样的框中显示姓名首字。
+      expect(main).toContain(`<img class="person__photo" src="${mediaUrl(PHOTO_KEY)}" alt="" loading="lazy" decoding="async"/>`);
+      expect(occurrences(main, '<div class="person__monogram" aria-hidden="true">')).toBe(5);
+      for (const gone of ['person--', 'portraits', 'class="offices"', 'class="departments"', 'class="department', 'person__duties']) {
+        expect(main, gone).not.toContain(gone);
+      }
     });
 
-    it('shows every vacancy and the advisors note from an empty database', async () => {
+    it('shows each vacant office as one quiet line under its group, never as a tile or a heading', async () => {
+      await seedPeople();
+      const main = mainOf(await render('/people'));
+      const presidium = main.slice(main.indexOf('id="people-presidium"'), main.indexOf('id="people-departments"'));
+      const departments = main.slice(main.indexOf('id="people-departments"'));
+      // The Secretary-General is hidden and nobody holds the VP Audit office; they follow the holders in office order.
+      // 秘书长已隐藏，监督审计副主席无人担任；两者按职位顺序排在担任者之后。
+      expectInOrder(presidium, ['Wang Hui', '&lt;script&gt;', '<ul class="vacancies" role="list">', vacancy('Secretary-General'), vacancy('Vice-President Supervision &amp; Audit')]);
+      expect(occurrences(presidium, '<li><span class="vacancies__office">')).toBe(2);
+      // The Technology Head is hidden; the other three Departments have nobody shown.
+      // 科技部部长已隐藏；另外三个部门没有人显示。
+      expectInOrder(departments, ['Zhao Vice', '<ul class="vacancies" role="list">', ...['Head of Technology', 'Head of Publicity', 'Head of Sponsorship', 'Head of Events'].map(vacancy)]);
+      expect(occurrences(departments, '<li><span class="vacancies__office">')).toBe(4);
+      // "To be announced" appears only in those lines.
+      // "To be announced" 只出现在这些行中。
+      expect(occurrences(main, 'To be announced')).toBe(6);
+      expect(occurrences(main, '<span class="vacancies__status">To be announced</span></li>')).toBe(6);
+    });
+
+    it('shows four Presidium lines, five Head lines and the advisors note from an empty database', async () => {
       const main = mainOf(await render('/people'));
       expect(main).toContain('Our Honorary Advisors will be announced soon');
-      expect(occurrences(main, 'class="person person--seat person--vacant"')).toBe(4);
-      expect(occurrences(main, 'class="person person--row person--vacant"')).toBe(5);
+      expectInOrder(main, ['id="people-presidium"', ...PRESIDIUM_OFFICES.map(vacancy), 'id="people-departments"', ...HEADS.map(vacancy)]);
+      expect(occurrences(main, '<ul class="vacancies" role="list">')).toBe(2);
+      expect(occurrences(main, '<li><span class="vacancies__office">')).toBe(9);
+      expectNoTiles(main);
+      expectNoChinese(main);
+    });
+
+    it("links from the Department Leads' lead to what each Department does on the About page, which has that anchor", async () => {
+      const main = mainOf(await render('/people'));
+      expect(occurrences(main, DEPARTMENTS_LINK)).toBe(1);
+      expectInOrder(main, ['id="people-departments"', '<p class="section-lead">Each of the five Departments', DEPARTMENTS_LINK, vacancy('Head of Technology')]);
+      // The remits themselves are only on the About page now.
+      // 各部门的职能现在只在关于页面上。
+      expect(main).not.toContain('GitHub organization');
+      expect(main).not.toContain('department__remit');
+
+      const about = mainOf(await render('/about'));
+      expect(about).toContain('<div class="dept" role="group" aria-labelledby="about-departments"><div class="dept__head"><h3 class="dept__name" id="about-departments">');
+      expect(about).toContain('Manages the Group&#39;s GitHub organization');
     });
 
     it('describes what the Group is made up of, in the lead and the description', async () => {
       const lead = 'The Group is made up of its Honorary Advisors, the Presidium and the leads of its five Departments, as set out in Article 4 of the constitution.';
       const html = await render('/people');
+      expect(html).toContain('<div class="eyebrow">The UTMMSC team</div>');
       expect(html).toContain(`<p class="page-hero__lead">${lead}</p>`);
       expect(html).toContain(`<meta name="description" content="${lead}"/>`);
     });
   });
 
+  describe("a group's own page", () => {
+    const GROUPS = { '/people/advisors': 'Honorary Advisors', '/people/presidium': 'Presidium', '/people/departments': 'Department Leads' };
+
+    it('says it is part of Our People in its eyebrow, without Article labels, and has room for larger tiles', async () => {
+      await seedPeople();
+      for (const [path, title] of Object.entries(GROUPS)) {
+        const main = mainOf(await render(path));
+        expect(main, path).toContain(`<div class="eyebrow">Our People</div><h1 class="page-hero__title" id="people-title">${title}</h1>`);
+        expect(main, path).not.toContain('Article 4.');
+        expect(main, path).toContain('<section class="section people-page" aria-labelledby="people-title">');
+        expect(main, path).not.toContain('people-tier');
+        expect(occurrences(main, '<h2 class="person__name">'), path).toBeGreaterThan(0);
+        expect(main, path).not.toContain('<h3');
+      }
+    });
+
+    it('links to what each Department does only from the Department Leads, in the hero', async () => {
+      const departments = mainOf(await render('/people/departments'));
+      const hero = departments.slice(0, departments.indexOf('</header>'));
+      expect(occurrences(departments, DEPARTMENTS_LINK)).toBe(1);
+      expect(hero).toContain(`Every member may join up to two Departments.</p>${DEPARTMENTS_LINK}`);
+      for (const path of ['/people/advisors', '/people/presidium']) {
+        expect(mainOf(await render(path)), path).not.toContain('about-departments');
+      }
+    });
+  });
+
   describe('Presidium', () => {
-    it('shows all four offices as vacant from an empty database, without empty photo frames', async () => {
+    it('shows all four offices as vacant lines from an empty database, without tiles, frames or duties', async () => {
       const main = mainOf(await render('/people/presidium'));
       expect(main).toContain('<h1 class="page-hero__title" id="people-title">Presidium</h1>');
-      expect(occurrences(main, 'class="person person--seat person--vacant"')).toBe(4);
-      expect(main).not.toContain('class="person__photo"');
-      expect(main).not.toContain('class="person__monogram"');
-      expect(main).toContain('To be announced');
-      expect(main).toContain('<p class="person__duties">Oversees the Group');
-      expect(main).not.toContain('class="department"');
+      expect(main).toContain(`<ul class="vacancies" role="list">${PRESIDIUM_OFFICES.map(vacancy).join('')}</ul>`);
+      expectNoTiles(main);
+      // A vacancy is not a heading, and the office duties stay on the About page.
+      // 空缺不是标题，各职位的职责留在关于页面上。
+      expect(main).not.toContain('<h2');
+      expect(main).not.toContain('Oversees the Group');
+      expect(main).not.toContain('class="department');
       expectNoChinese(main);
     });
 
-    it('names each vacant office in its heading and hides the repeated title line', async () => {
-      const main = mainOf(await render('/people/presidium'));
-      expect(main).toContain('<h2 class="person__name"><span class="sr-only">President: </span>To be announced</h2><p class="person__title" aria-hidden="true">President</p>');
-      expect(occurrences(main, '<span class="sr-only">')).toBe(4);
-    });
-
-    it('shows visible holders in office order with their details and nothing from other groups', async () => {
+    it('shows visible holders in office order with their details, then a line for each vacant office, and nothing from other groups', async () => {
       await seedPeople();
       const main = mainOf(await render('/people/presidium'));
       expect(main).not.toContain('Hidden');
       expect(main).not.toContain('Li Head');
       expect(main).not.toContain('Prof. Chen');
-      // The Secretary-General is hidden and nobody holds the VP Audit office; each vacancy keeps its office's place.
-      // 秘书长已隐藏，监督审计副主席无人担任；每个空缺都保留在其职位的位置上。
-      expect(occurrences(main, 'class="person person--seat person--vacant"')).toBe(2);
-      const order = ['Wang Hui', 'Secretary-General: ', '&lt;script&gt;', 'Vice-President Supervision &amp; Audit: '].map((text) => main.indexOf(text));
-      expect(order.every((index) => index > 0)).toBe(true);
-      expect([...order].sort((a, b) => a - b)).toEqual(order);
+      expectInOrder(main, ['Wang Hui', '&lt;script&gt;', vacancy('Secretary-General'), vacancy('Vice-President Supervision &amp; Audit')]);
+      expect(occurrences(main, '<li><span class="vacancies__office">')).toBe(2);
       // The photo's alt is empty because the name follows it as the heading.
       // 照片的 alt 为空，因为紧接着的标题就是姓名。
-      expect(main).toContain(`<img class="person__photo" src="${mediaUrl(PHOTO_KEY)}" alt=""`);
+      expect(main).toContain(`<img class="person__photo" src="${mediaUrl(PHOTO_KEY)}" alt="" loading="lazy" decoding="async"/>`);
       expect(main).toContain('<h2 class="person__name"><a class="person__link" href="/people/president">Wang Hui</a></h2><p class="person__title">President</p>');
+      expect(main).toContain('<p class="person__title">Vice-President Finance</p>');
       expect(main).toContain('<p class="person__affiliation">Computer Science, Year 3</p>');
-      // The bio and contact links are on the person's own page, not in the list; each holder's seat links there once.
-      // 简介与联系方式在个人页面上，不在列表中；每位担任者的职位席只链接一次到该页面。
+      // The bio and contact links are on the person's own page, not in the list; each holder's tile links there once.
+      // 简介与联系方式在个人页面上，不在列表中；每位担任者的方块只链接一次到该页面。
       expect(main).not.toContain('First paragraph');
       expect(main).not.toContain('mailto:');
       expect(main).not.toContain('https://example.com/wang');
-      expect(occurrences(main, 'class="person person--seat person--link"')).toBe(2);
+      expect(occurrences(main, OFFICERS_LIST)).toBe(1);
+      expect(occurrences(main, TILE)).toBe(2);
       expect(occurrences(main, 'href="/people/president"')).toBe(1);
       expect(occurrences(main, 'href="/people/finance"')).toBe(1);
       expectNoChinese(main);
@@ -215,46 +310,48 @@ describe.skipIf(!sqlite)('Our People pages', () => {
   });
 
   describe('Department Leads', () => {
-    it('lists the five departments with a quiet vacant Head line where nobody is shown', async () => {
+    it('lists a quiet Head line for each of the five Departments from an empty database, without their remits', async () => {
       const main = mainOf(await render('/people/departments'));
-      expect(occurrences(main, 'class="department"')).toBe(5);
-      expect(occurrences(main, 'class="person person--row person--vacant"')).toBe(5);
-      expect(main).toContain('<h2 class="department__name" id="dept-technology">Technology Department</h2>');
-      // The heading names the whole office for screen readers; the visible line only says "Head" inside the block.
-      // 标题为读屏软件写明完整职位；区块内可见的一行只写 "Head"。
-      expect(main).toContain('<h3 class="person__name"><span class="sr-only">Head of Technology: </span>To be announced</h3><p class="person__title" aria-hidden="true">Head</p>');
-      expect(main).not.toContain('class="person__photo"');
-      expect(main).not.toContain('class="person__monogram"');
+      expect(main).toContain(`<ul class="vacancies" role="list">${HEADS.map(vacancy).join('')}</ul>`);
+      expectNoTiles(main);
+      expect(main).not.toContain('<h2');
+      expect(main).not.toContain('class="department');
+      expect(main).not.toContain('No ghostwriting');
       expectNoChinese(main);
     });
 
-    it('puts the Head before Vice Heads in sort order and keeps hidden heads out', async () => {
+    it("puts each Department's Head before its Vice Heads in sort order, titled with their Department, and keeps hidden heads out", async () => {
       await seedPeople();
       const main = mainOf(await render('/people/departments'));
       expect(main).not.toContain('Hidden Head');
       expect(main).not.toContain('Wang Hui');
-      const order = ['Li Head', 'Qian Vice', 'Zhao Vice'].map((name) => main.indexOf(name));
-      expect(order.every((index) => index > 0)).toBe(true);
-      expect([...order].sort((a, b) => a - b)).toEqual(order);
-      // A lead's own title is kept; otherwise the block, which already names the Department, says "Vice Head".
-      // 负责人的自定义头衔保留；否则区块（已写明部门）只写 "Vice Head"。
-      expect(main).toContain('<p class="person__title">Head of Academic and Reviews</p>');
-      expect(occurrences(main, '<p class="person__title">Vice Head</p>')).toBe(2);
-      expect(main).not.toContain('Vice Head of Academic');
-      expect(main).toContain('<h3 class="person__name"><a class="person__link" href="/people/head-academic">Li Head</a></h3>');
-      expect(occurrences(main, 'class="person person--row person--link"')).toBe(3);
-      expect(occurrences(main, 'class="person person--row person--vacant"')).toBe(4);
+      expectInOrder(main, ['Li Head', 'Qian Vice', 'Zhao Vice']);
+      // A lead's own title is kept; otherwise the title names the office and its Department.
+      // 负责人的自定义头衔保留；否则头衔写明职位及其所属部门。
+      expect(main).toContain('<h2 class="person__name"><a class="person__link" href="/people/head-academic">Li Head</a></h2><p class="person__title">Head of Academic and Reviews</p>');
+      expect(occurrences(main, '<p class="person__title">Vice Head of Academic</p>')).toBe(2);
+      expect(occurrences(main, OFFICERS_LIST)).toBe(1);
+      expect(occurrences(main, TILE)).toBe(3);
+      expectInOrder(main, ['Zhao Vice', ...['Head of Technology', 'Head of Publicity', 'Head of Sponsorship', 'Head of Events'].map(vacancy)]);
+      expect(occurrences(main, '<li><span class="vacancies__office">')).toBe(4);
       expectNoChinese(main);
     });
 
-    it('puts a vacant Head line before the Vice Heads of a Department without a Head', async () => {
+    it('lists the Departments in constitution order and keeps the Vice Heads of a Department whose Head is not shown', async () => {
       await seedPeople();
-      test.d1.exec("UPDATE people SET visible = 0 WHERE id = 'head-academic'");
+      test.d1.exec(`
+        UPDATE people SET visible = 0 WHERE id = 'head-academic';
+        INSERT INTO people (id, section, position, department, name_zh, name_en, sort_order, visible, created_at, updated_at) VALUES
+          ('head-events', 'department', 'head', 'events', '周部长', 'Zhou Head', 0, 1, '${AT}', '${AT}'),
+          ('vice-technology', 'department', 'vice_head', 'technology', '孙副部长', 'Sun Vice', 0, 1, '${AT}', '${AT}');
+      `);
       const main = mainOf(await render('/people/departments'));
-      const order = ['<span class="sr-only">Head of Academic: </span>', 'Qian Vice', 'Zhao Vice'].map((text) => main.indexOf(text));
-      expect(order.every((index) => index > 0)).toBe(true);
-      expect([...order].sort((a, b) => a - b)).toEqual(order);
-      expect(occurrences(main, 'class="person person--row person--vacant"')).toBe(5);
+      expectInOrder(main, ['Sun Vice', 'Qian Vice', 'Zhao Vice', 'Zhou Head']);
+      expect(main).toContain('<p class="person__title">Vice Head of Technology</p>');
+      expect(main).toContain('<p class="person__title">Head of Events</p>');
+      expectInOrder(main, ['Zhou Head', ...['Head of Technology', 'Head of Academic', 'Head of Publicity', 'Head of Sponsorship'].map(vacancy)]);
+      expect(occurrences(main, '<li><span class="vacancies__office">')).toBe(4);
+      expect(occurrences(main, TILE)).toBe(4);
     });
   });
 
@@ -262,18 +359,37 @@ describe.skipIf(!sqlite)('Our People pages', () => {
     it('says the list is coming when there is nobody to show', async () => {
       const main = mainOf(await render('/people/advisors'));
       expect(main).toContain('Our Honorary Advisors will be announced soon');
+      expectNoTiles(main);
       expectNoChinese(main);
     });
 
-    it('shows visible advisors only', async () => {
+    it("shows visible advisors only, as tiles in the advisors' own list", async () => {
       await seedPeople();
       const main = mainOf(await render('/people/advisors'));
-      expect(main).toContain('<li class="person person--portrait person--link">');
-      expect(main).toContain('<h2 class="person__name"><a class="person__link" href="/people/advisor">Prof. Chen</a></h2>');
-      expect(main).toContain('<p class="person__affiliation">University of Toronto</p>');
+      expect(occurrences(main, ADVISORS_LIST)).toBe(1);
+      expect(occurrences(main, TILE)).toBe(1);
+      // Without a title of their own an advisor's title is the office itself.
+      // 顾问没有自定义头衔时，头衔就是职位名称本身。
+      expect(main).toContain(
+        '<h2 class="person__name"><a class="person__link" href="/people/advisor">Prof. Chen</a></h2><p class="person__title">Honorary Advisor</p><p class="person__affiliation">University of Toronto</p>',
+      );
       expect(main).not.toContain('Hidden Advisor');
       expect(main).not.toContain('Our Honorary Advisors will be announced soon');
       expectNoChinese(main);
+    });
+
+    it("shows an advisor's own title in the advisors' list, which reads it as a credential, with no office line added, on every page that lists them", async () => {
+      await seedPeople();
+      test.d1.exec("UPDATE people SET title_en = 'PhD in Computer Science at University of Toronto' WHERE id = 'advisor'");
+      const credential = '<p class="person__title">PhD in Computer Science at University of Toronto</p><p class="person__affiliation">University of Toronto</p>';
+      for (const path of ['/people', '/people/advisors', '/']) {
+        const main = mainOf(await render(path));
+        const start = main.indexOf('<ul class="people-grid people-grid--advisors');
+        expect(start, path).toBeGreaterThan(0);
+        const list = main.slice(start, main.indexOf('</ul>', start));
+        expect(list, path).toContain(credential);
+        expect(list, path).not.toContain('Honorary Advisor');
+      }
     });
   });
 
@@ -304,12 +420,13 @@ describe.skipIf(!sqlite)('Our People pages', () => {
       expect(html).toContain(`<meta property="og:image" content="https://utmmsc.com${mediaUrl(PHOTO_KEY)}"/>`);
     });
 
-    it('leads back to the page that lists each group', async () => {
+    it('leads back to the page that lists each group, and draws a missing photo as the large monogram', async () => {
       await seedPeople();
       const advisor = mainOf(await render('/people/advisor'));
       expect(advisor).toContain('<a class="backlink" href="/people/advisors">');
       expect(advisor).toContain('<p class="profile__affiliation">University of Toronto</p>');
       expect(advisor).toContain('<div class="profile__photo person__monogram" aria-hidden="true">PC</div>');
+      expect(advisor).not.toContain('class="person"');
       expectNoChinese(advisor);
 
       const head = mainOf(await render('/people/head-academic'));

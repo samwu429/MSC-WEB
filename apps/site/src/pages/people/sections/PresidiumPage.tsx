@@ -3,13 +3,13 @@ import { PEOPLE_TITLE_ID, PeopleSectionHero } from '../layout/PeopleSectionHero'
 import { PresidiumCards } from '../PresidiumCards';
 import type { PeopleRoster } from '../roster';
 
-/** /people/presidium: the four Presidium offices, each with its holder or its duties while vacant. */
-/** /people/presidium：四个主席团职位，每个职位显示担任者；空缺时显示其职责。 */
+/** /people/presidium: the holders of the four Presidium offices as tiles a size larger than on /people, and a line for each vacant office. */
+/** /people/presidium：四个主席团职位的担任者，方块比 /people 上大一号；每个空缺的职位占一行文字。 */
 export function PresidiumPage({ ctx, roster }: { ctx: PageContext; roster: PeopleRoster }) {
   return (
     <>
       <PeopleSectionHero ctx={ctx} view="presidium" />
-      <section class="section" aria-labelledby={PEOPLE_TITLE_ID}>
+      <section class="section people-page" aria-labelledby={PEOPLE_TITLE_ID}>
         <div class="container">
           <PresidiumCards presidium={roster.presidium} locale={ctx.locale} headingLevel={2} />
         </div>

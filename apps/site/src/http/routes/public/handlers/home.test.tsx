@@ -170,7 +170,13 @@ describe.skipIf(!sqlite)('home page', () => {
     expect(html).not.toContain('Hidden Advisor');
     expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
     expect(html).not.toContain('Wang Hui');
-    expect(html).not.toContain('person--vacant');
+    // The same tiles as Our People, in the advisors' list, starting at the left under the left-aligned heading;
+    // the names sit under the section's h2, and no office is listed as vacant here.
+    // 与 "我们的团队" 相同的方块，位于荣誉顾问的列表中，从左对齐的标题下方左侧开始；姓名位于板块的 h2 之下，这里不列出空缺职位。
+    expect(occurrences(advisors, '<ul class="people-grid people-grid--advisors people-grid--start" role="list">')).toBe(1);
+    expect(occurrences(advisors, '<li class="person">')).toBe(2);
+    expect(advisors).toContain('<h3 class="person__name"><a class="person__link" href="/people/advisor">Prof. Chen</a></h3><p class="person__title">Honorary Advisor</p>');
+    expect(html).not.toContain('class="vacancies"');
     expect(html).toContain('<a class="section-link link-arrow" href="/people/advisors">');
     expect(html).toContain('href="/reviews"');
     expect(html).toContain('href="/people"');

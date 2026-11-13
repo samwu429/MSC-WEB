@@ -5,16 +5,18 @@ import type { PeoplePageKey } from '../../routing/paths';
 import { PeopleSectionHero, peoplePageLead } from '../layout/PeopleSectionHero';
 import { PresidiumCards } from '../PresidiumCards';
 import type { PeopleRoster } from '../roster';
-import { AdvisorCards, DepartmentBlocks } from '../sections/groups';
+import { AdvisorCards, DepartmentLeads, DepartmentsMoreLink } from '../sections/groups';
 
-/** One tier of the roster on /people: its h2 over a short gold rule and its lead, then its people. */
-/** /people 名单中的一层：h2 及其下方的金色短线与导语，然后是该团体的成员。 */
-function GroupSection(props: { ctx: PageContext; page: PeoplePageKey; alt?: boolean; children: unknown }) {
+/** One tier of the roster on /people: its h2 over a short gold rule, its lead and anything under the lead, then its people. */
+/** /people 名单中的一层：h2 及其下方的金色短线、导语以及导语之下的内容，然后是该团体的成员。 */
+function GroupSection(props: { ctx: PageContext; page: PeoplePageKey; alt?: boolean; more?: unknown; children: unknown }) {
   const id = `people-${props.page}`;
   return (
     <section class={props.alt ? 'section section--tight section--alt people-tier' : 'section section--tight people-tier'} aria-labelledby={id}>
       <div class="container">
-        <SectionHeading id={id} title={txt(peoplePageLabel(props.page), props.ctx.locale)} lead={peoplePageLead(props.page, props.ctx)} />
+        <SectionHeading id={id} title={txt(peoplePageLabel(props.page), props.ctx.locale)} lead={peoplePageLead(props.page, props.ctx)}>
+          {props.more}
+        </SectionHeading>
         {props.children}
       </div>
     </section>
@@ -22,11 +24,11 @@ function GroupSection(props: { ctx: PageContext; page: PeoplePageKey; alt?: bool
 }
 
 /**
- * /people: everyone at once, as a roster read from the top down: the Honorary Advisors as portraits, the four
- * Presidium offices as seats of equal size, then the five Departments with their leads. A single group is reached
- * from the Our People dropdown in the site header.
- * /people：一次显示所有人，自上而下排成名单：荣誉顾问为肖像，主席团四个职位为大小相同的席位，然后是五个部门及其负责人。
- * 单个团体从网站页眉的 "我们的团队" 下拉菜单进入。
+ * /people: everyone at once, read from the top down: the Honorary Advisors, the Presidium, then the Department Leads,
+ * every person as a tile of the same size, so no group outweighs another by its photos. Vacant offices are quiet lines
+ * under their group. A single group is reached from the Our People dropdown in the site header.
+ * /people：一次显示所有人，自上而下依次为荣誉顾问、主席团与部长团。每位成员都是同样大小的方块，任何团体都不会因照片更大而显得更重。
+ * 空缺的职位是其团体下方安静的一行文字。单个团体从网站页眉的 "我们的团队" 下拉菜单进入。
  */
 export function AllPeoplePage({ ctx, roster }: { ctx: PageContext; roster: PeopleRoster }) {
   const { locale } = ctx;
@@ -39,8 +41,8 @@ export function AllPeoplePage({ ctx, roster }: { ctx: PageContext; roster: Peopl
       <GroupSection ctx={ctx} page="presidium" alt>
         <PresidiumCards presidium={roster.presidium} locale={locale} headingLevel={3} />
       </GroupSection>
-      <GroupSection ctx={ctx} page="departments">
-        <DepartmentBlocks departments={roster.departments} locale={locale} nameLevel={3} />
+      <GroupSection ctx={ctx} page="departments" more={<DepartmentsMoreLink locale={locale} />}>
+        <DepartmentLeads departments={roster.departments} locale={locale} headingLevel={3} />
       </GroupSection>
     </>
   );

@@ -12,7 +12,7 @@
  *   Shell       .skip-link .announcement .topbar .topbar__inner .topbar__links .site-header .site-header__inner .brand .brand__mark .brand__text .brand__name .brand__sub .header-actions .lang-switch
  *   Navigation  .site-nav .site-nav__item .site-nav__link .site-nav__link--parent .site-nav__menu .site-nav__panel .site-nav__menu-link .mobile-nav .mobile-nav__panel .mobile-nav__sub
  *   Layout      .container .section .section--alt .section--tight .grid .grid--2 .grid--3 .split
- *   Headings    .section-head .eyebrow .section-title .section-lead .section-link .page-hero .page-hero__title .page-hero__lead
+ *   Headings    .section-head .eyebrow .section-title .section-lead .section-link .section-more (a quiet link under a lead) .page-hero .page-hero__title .page-hero__lead
  *               (.meta, .notice, .tabs and .backlink inside the purple .page-hero get their own colours)
  *   Text        .lead .muted .prose .small .sr-only
  *   Chinese     .zh (a Chinese line under English in a heading or label) .zh-text (a Chinese paragraph under the English one)
@@ -25,9 +25,12 @@
  *   Stats       .stats__title .stats .stat .stat__icon .stat__value .stat__label
  *   Pillars     .pillars .pillar .pillar__icon .pillar__title .pillar__text
  *   Partners    .partner-group .partner-group__title .partner-grid .partner .partner__logo .partner__mark .partner__name
- *   People      .people-tier (one group on /people, under a centred title) .portraits .offices .departments .department .department__name .department__body .department__leads .department__remit
- *               .person .person--portrait .person--seat .person--row .person--link .person--vacant .person__photo .person__monogram .person__name .person__link .person__title .person__affiliation .person__duties
+ *   People      .people-tier (one group on /people, under a centred title) .people-page (a group's own page, with larger tiles)
+ *               .people-grid (a centred row of tiles) .people-grid--advisors (titles read as credentials) .people-grid--start (the row starts at the left)
+ *               .person (one tile) .person__photo .person__monogram .person__name .person__link .person__title .person__affiliation
+ *               .vacancies .vacancies__office .vacancies__status (one quiet line for each office nobody holds yet)
  *   Profile     .profile .profile__photo .profile__body .profile__affiliation .profile__bio .profile__contact .profile__contact-title
+ *               (a missing photo is a .profile__photo.person__monogram)
  *   Department  .dept .dept__head .dept__name .dept__text .dept__people (the About page's outline of Article 4)
  *   Reviews     .course .course__head .course__code .course__title .course__text .course__sessions .session-row .session-row__main .session-row__label .session-row__when .session-row__actions .materials .material
  *   Tabs        .tabs .tab (aria-current="page" marks the active tab)
@@ -39,6 +42,19 @@
  *   Ended       .past-list .past-list__date .past-list__title .past-list__tag .ended-title .ended-lead .ended-list .ended-list__code .ended-list__name
  *   Docs        .doc-link (a small link to a PDF, such as the Code of Behaviour, or to the University's listing of UTMMSC)
  *   Misc        .notice .notice--integrity .notice__links (a row of links under a notice's text) .empty .cta-band .cta-band__inner .pager
+ *
+ * Our People lists everyone as the same tile, one size per page set by --tile and --gap on .people-grid: 176px on
+ * /people and the home page, 160px on tablets (a little less below 753px, so that four always fit on a line), two to
+ * a row on phones, and up to 208px on a group's own page, where five fill the 1152px container (on narrower laptops
+ * they shrink so that five still fit). From 641px, a group of up to sixteen that does not fit on one line breaks into
+ * even rows through :has() counts instead of leaving one tile alone; only thirteen below 929px, where four fit on a
+ * line, still ends with one. Those breakpoints leave room for a 17px scrollbar. The base .person__monogram rule also
+ * draws the missing photo on a person's own page, so tile-only monogram rules are scoped under .person.
+ * "我们的团队" 将每个人显示为相同的方块，每个页面只用一种大小，由 .people-grid 上的 --tile 与 --gap 决定：/people 与首页为 176px，
+ * 平板为 160px（窄于 753px 时略小，保证一行总能放下四个），手机上每行两个；团体自己的页面最大为 208px，五个方块正好排满 1152px 的容器
+ * （较窄的笔记本上会略微缩小，五个仍排在一行）。从 641px 起，一行放不下、不超过十六人的团体通过 :has() 计数换成整齐的几行，
+ * 不会让一个方块单独留在最后一行；只有十三人在 929px 以下（每行放得下四个）时最后一行仍剩一个。这些断点为 17px 的滚动条留出了余地。
+ * 基础的 .person__monogram 规则也用于个人页面上缺少照片时的显示，因此只属于方块的姓名首字规则都限定在 .person 之下。
  */
 export const SITE_CSS = `
 :root {
@@ -316,73 +332,73 @@ a.partner:hover { border-color: var(--purple-700); color: var(--purple-700); }
 .partner__name { padding: 10px 14px; border-top: 1px solid var(--line); font-size: 0.9rem; font-weight: 600; text-align: center; }
 
 .people-tier .section-title::after { content: ""; display: block; width: 44px; height: 4px; margin-top: 14px; background: var(--gold-500); }
+.section-more { margin-top: 12px; }
 @media (min-width: 641px) {
   .people-tier .section-head { justify-content: center; text-align: center; }
   .people-tier .section-title::after { margin-left: auto; margin-right: auto; }
 }
 
-.person { position: relative; min-width: 0; overflow-wrap: break-word; }
-.person__photo { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 20%; background: var(--purple-100); }
 .person__monogram { display: grid; place-items: center; width: 100%; aspect-ratio: 4 / 5; background: var(--purple-100); color: var(--purple-700); font-size: 3.2rem; font-weight: 800; letter-spacing: 0.04em; }
-.person :is(.person__photo, .person__monogram) { border-bottom: 4px solid var(--purple-700); transition: border-color 0.15s ease; }
-.person--link:is(:hover, :focus-within) :is(.person__photo, .person__monogram) { border-bottom-color: var(--gold-500); }
-.person__name { font-size: 1.05rem; line-height: 1.3; }
+
+.people-grid { --tile: 176px; --gap: 18px; display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: 40px var(--gap); margin-inline: auto; list-style: none; }
+.person { position: relative; display: flex; flex: 0 0 var(--tile); flex-direction: column; min-width: 0; max-width: var(--tile); overflow-wrap: break-word; }
+.person :is(.person__photo, .person__monogram) { width: 100%; aspect-ratio: 4 / 5; margin-bottom: 14px; background: var(--purple-100); border-bottom: 4px solid var(--purple-700); transition: border-color 0.15s ease; }
+.person .person__photo { object-fit: cover; object-position: 50% 35%; }
+.person .person__monogram { font-size: 2.6rem; line-height: 1; text-indent: 0.04em; }
+.person:is(:hover, :focus-within) :is(.person__photo, .person__monogram) { border-bottom-color: var(--gold-500); }
+.person__name { font-size: 1.05rem; line-height: 1.3; text-wrap: balance; }
 .person__link { color: inherit; text-decoration: none; }
 .person__link::after { content: ""; position: absolute; inset: 0; }
-.person--link:hover .person__link { color: var(--purple-700); text-decoration: underline; }
-.person__title { color: var(--ink-soft); font-size: 0.86rem; line-height: 1.45; }
-.person__affiliation { color: var(--muted); font-size: 0.86rem; line-height: 1.45; }
-.person__duties { color: var(--muted); font-size: 0.84rem; line-height: 1.5; }
-.person--vacant .person__name { color: var(--muted); font-weight: 600; }
+.person__link:focus-visible { outline: none; }
+.person__link:focus-visible::after { outline: 3px solid var(--gold-500); outline-offset: 4px; }
+.person:hover .person__link { color: var(--purple-700); text-decoration: underline; }
+.person__title { margin-top: 5px; color: var(--purple-700); font-size: 0.85rem; font-weight: 700; line-height: 1.4; text-wrap: balance; }
+.people-grid--advisors .person__title { color: var(--muted); font-weight: 400; line-height: 1.45; }
+.person__affiliation { display: -webkit-box; margin-top: 3px; overflow: hidden; color: var(--muted); font-size: 0.85rem; line-height: 1.45; text-wrap: balance; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.people-grid--advisors .person__affiliation { margin-top: 6px; }
 
-.portraits { display: flex; flex-wrap: wrap; justify-content: center; gap: 28px 16px; list-style: none; }
-.person--portrait { display: flex; flex: 0 1 calc(50% - 8px); flex-direction: column; gap: 4px; max-width: 216px; }
-.person--portrait :is(.person__photo, .person__monogram) { margin-bottom: 12px; }
-.person--portrait .person__name { font-size: 1.1rem; }
+.vacancies { display: grid; grid-template-columns: auto auto; justify-content: center; row-gap: 6px; list-style: none; color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+.people-grid + .vacancies { margin-top: 36px; }
+.vacancies li { display: grid; grid-column: 1 / -1; grid-template-columns: auto auto; grid-template-columns: subgrid; }
+.vacancies__office { padding-right: 12px; border-right: 1px solid var(--line-strong); color: var(--ink-soft); font-weight: 700; text-align: right; }
+.vacancies__status { padding-left: 12px; white-space: nowrap; }
 
-.offices { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); list-style: none; }
-.person--seat { display: grid; grid-template-columns: 64px minmax(0, 1fr); grid-template-rows: auto auto 1fr; column-gap: 14px; padding: 12px 14px 14px; background: var(--white); border: 1px solid var(--line); border-top: 4px solid var(--purple-700); }
-.section--alt .person--seat { border-color: transparent; border-top-color: var(--purple-700); }
-.person--seat :is(.person__photo, .person__monogram) { grid-column: 1; grid-row: 1 / -1; width: 64px; font-size: 1.4rem; }
-.person--seat .person__title { grid-column: 2; grid-row: 1; color: var(--purple-700); font-size: 0.8rem; font-weight: 700; line-height: 1.35; }
-.person--seat .person__name { grid-column: 2; grid-row: 2; margin-top: 2px; font-size: 1rem; }
-.person--seat .person__affiliation { grid-column: 2; grid-row: 3; align-self: start; margin-top: 2px; }
-.person--seat .person__duties { grid-column: 1 / -1; grid-row: 3; align-self: start; margin-top: 4px; }
-.person--seat.person--vacant { background: var(--grey); border-color: transparent; border-top-color: var(--line-strong); }
-.section--alt .person--seat.person--vacant { background: var(--white); }
-.person--seat.person--vacant :is(.person__title, .person__name) { grid-column: 1 / -1; }
-.person--seat.person--vacant .person__title { color: var(--muted); }
-
-.person--row { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 12px; }
-.person--row :is(.person__photo, .person__monogram) { grid-column: 1; grid-row: 1 / span 2; width: 44px; border-bottom-width: 3px; font-size: 0.9rem; letter-spacing: 0.02em; }
-.person--row .person__title { grid-column: 2; grid-row: 1; align-self: end; color: var(--muted); font-size: 0.78rem; font-weight: 600; line-height: 1.35; }
-.person--row .person__name { grid-column: 2; grid-row: 2; align-self: start; font-size: 0.95rem; }
-.person--row.person--vacant { grid-template-columns: minmax(0, 1fr); }
-.person--row.person--vacant :is(.person__title, .person__name) { grid-column: 1; }
-
-.departments { display: grid; gap: 24px 16px; grid-template-columns: minmax(0, 1fr); }
-.department { display: grid; grid-row: span 2; grid-template-rows: subgrid; row-gap: 0; padding-top: 14px; border-top: 4px solid var(--purple-700); }
-.department__name { padding-bottom: 10px; border-bottom: 1px solid var(--line-strong); font-size: 1.05rem; line-height: 1.3; }
-.department__leads { display: grid; gap: 14px 16px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr)); align-items: start; margin-top: 14px; list-style: none; }
-.department__remit { margin-top: 12px; color: var(--muted); font-size: 0.84rem; line-height: 1.5; }
-
-@media (min-width: 520px) {
-  .offices, .departments { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .department:last-child:nth-child(odd) { grid-column: 1 / -1; }
-}
 @media (min-width: 641px) {
-  .portraits { gap: 36px 24px; }
-  .person--portrait { flex-basis: 216px; }
-  .offices { gap: 16px; }
+  .people-grid:has(> :nth-child(7)) { max-width: calc(4 * var(--tile) + 3 * var(--gap)); }
+  .people-grid:has(> :nth-child(9)) { max-width: calc(5 * var(--tile) + 4 * var(--gap)); }
+  .people-grid:has(> :nth-child(11)) { max-width: none; }
+  .people-grid:has(> :nth-child(13)):not(:has(> :nth-child(14))) { max-width: calc(5 * var(--tile) + 4 * var(--gap)); }
+  .people-grid--start { justify-content: flex-start; margin-inline: 0; }
 }
-@media (min-width: 1024px) {
-  .offices { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .person--seat { padding: 14px 16px 18px; }
-  .person--seat :is(.person__photo, .person__monogram) { grid-row: 2 / -1; }
-  .person--seat .person__title { grid-column: 1 / -1; min-height: calc(2.7em + 11px); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--line); font-size: 0.92rem; }
-  .person--seat .person__name { margin-top: 0; }
-  .departments { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-  .department:last-child:nth-child(odd) { grid-column: auto; }
+@media (min-width: 641px) and (max-width: 1079px) {
+  .people-grid { --tile: 160px; --gap: 16px; }
+}
+@media (min-width: 641px) and (max-width: 752px) {
+  .people-grid { --tile: min(160px, calc((100vw - 65px - 3 * var(--gap)) / 4)); }
+}
+@media (min-width: 641px) and (max-width: 1210px) {
+  .people-grid:has(> :nth-child(6)):not(:has(> :nth-child(7))) { max-width: calc(3 * var(--tile) + 2 * var(--gap)); }
+  .people-grid:has(> :nth-child(11)):not(:has(> :nth-child(13))),
+  .people-grid:has(> :nth-child(16)):not(:has(> :nth-child(17))) { max-width: calc(4 * var(--tile) + 3 * var(--gap)); }
+}
+@media (min-width: 641px) and (max-width: 928px) {
+  .people-grid:has(> :nth-child(5)):not(:has(> :nth-child(6))),
+  .people-grid:has(> :nth-child(9)):not(:has(> :nth-child(10))) { max-width: calc(3 * var(--tile) + 2 * var(--gap)); }
+}
+@media (min-width: 1080px) {
+  .people-page .people-grid { --tile: min(208px, calc(20vw - 36px)); --gap: 28px; }
+  .people-page .people-grid:has(> :nth-child(6)):not(:has(> :nth-child(7))) { max-width: calc(3 * var(--tile) + 2 * var(--gap)); }
+  .people-page .people-grid:has(> :nth-child(11)):not(:has(> :nth-child(13))),
+  .people-page .people-grid:has(> :nth-child(16)):not(:has(> :nth-child(17))) { max-width: calc(4 * var(--tile) + 3 * var(--gap)); }
+  .people-page .person__name { font-size: 1.12rem; }
+}
+@media (max-width: 640px) {
+  .people-grid { --tile: calc(50% - 8px); justify-content: flex-start; gap: 32px 16px; }
+  .people-grid + .vacancies { margin-top: 28px; }
+  .vacancies { grid-template-columns: minmax(0, 1fr); justify-content: stretch; row-gap: 12px; }
+  .vacancies li { grid-template-columns: minmax(0, 1fr); }
+  .vacancies__office { padding-right: 0; border-right: 0; text-align: left; }
+  .vacancies__status { padding-left: 0; }
 }
 
 .profile { display: grid; gap: 32px 48px; grid-template-columns: minmax(0, 1fr); align-items: start; }

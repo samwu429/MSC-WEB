@@ -121,7 +121,12 @@ export function MobileOnlyNote() {
   );
 }
 
-export function SectionHeading(props: { eyebrow?: string; title: Copy; lead?: Copy; link?: { href: string; label: string }; id?: string }) {
+/**
+ * A section's heading: eyebrow, h2 and lead, with an optional link at the side. Anything else that belongs under the
+ * lead, such as a quiet link, comes as children.
+ * 板块标题：眉标、h2 与导语，旁边可带一个链接。其他应位于导语之下的内容（例如一个低调的链接）以 children 传入。
+ */
+export function SectionHeading(props: { eyebrow?: string; title: Copy; lead?: Copy; link?: { href: string; label: string }; id?: string; children?: unknown }) {
   return (
     <div class="section-head">
       <div>
@@ -130,6 +135,7 @@ export function SectionHeading(props: { eyebrow?: string; title: Copy; lead?: Co
           <Bi text={props.title} />
         </h2>
         {props.lead && <BiText text={props.lead} class="section-lead" />}
+        {props.children}
       </div>
       {props.link && (
         <a class="section-link link-arrow" href={props.link.href}>

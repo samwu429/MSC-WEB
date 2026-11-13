@@ -46,6 +46,15 @@ export const SECTION_PATHS: Record<NavSection, string> = {
 };
 
 /**
+ * The part of the About page that says what each Department does. Our People links there instead of repeating the
+ * remits beside the Department Leads.
+ * 关于页面中说明各部门职能的部分。"我们的团队" 链接到这里，而不是在部长团旁重复列出各部门的职能。
+ */
+export const ABOUT_DEPARTMENTS_ID = 'about-departments';
+
+export const ABOUT_DEPARTMENTS_PATH = `${SECTION_PATHS.about}#${ABOUT_DEPARTMENTS_ID}`;
+
+/**
  * Academic Activities at /academics shows test reviews, then interest classes. Each also has a page of its own,
  * reached from the Academic Activities dropdown in the site header, in the same order. Test reviews keep the address
  * they have always had, so links to /reviews keep working.

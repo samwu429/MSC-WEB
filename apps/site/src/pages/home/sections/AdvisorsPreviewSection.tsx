@@ -8,10 +8,12 @@ import { PEOPLE } from '../../people/strings';
 import { HOME } from '../strings';
 
 /**
- * The Honorary Advisors on the home page, in the order the backend sets, as the same centred portraits the Our People
- * pages use; the full list is on /people/advisors. Until any advisor is shown the section says they will be announced.
- * 首页上的荣誉顾问，按后台设定的顺序显示，与 "我们的团队" 页面相同的居中肖像；完整名单在 /people/advisors。
- * 在有荣誉顾问显示之前，板块说明名单即将公布。
+ * The Honorary Advisors on the home page, in the order the backend sets, as the same tiles the Our People pages use;
+ * the full list is on /people/advisors. The heading is left-aligned with its link at the side, so the row starts at
+ * the left edge under it rather than in the middle. Until any advisor is shown the section says they will be
+ * announced.
+ * 首页上的荣誉顾问，按后台设定的顺序显示，与 "我们的团队" 页面相同的方块；完整名单在 /people/advisors。标题左对齐、链接在旁边，
+ * 因此这一行从标题下方的左边缘开始，而不是居中。在有荣誉顾问显示之前，板块说明名单即将公布。
  */
 export function AdvisorsPreviewSection({ ctx, advisors }: { ctx: PageContext; advisors: Person[] }) {
   const { locale } = ctx;
@@ -25,7 +27,7 @@ export function AdvisorsPreviewSection({ ctx, advisors }: { ctx: PageContext; ad
           lead={t(PEOPLE, 'advisorsLead', locale)}
           link={{ href: sitePath(PEOPLE_PAGE_PATHS.advisors), label: t(HOME, 'advisorsLink', locale) }}
         />
-        <AdvisorCards advisors={advisors} locale={locale} headingLevel={3} />
+        <AdvisorCards advisors={advisors} locale={locale} headingLevel={3} alignStart />
       </div>
     </section>
   );
